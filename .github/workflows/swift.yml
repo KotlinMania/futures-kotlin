@@ -9,7 +9,18 @@ permissions:
 jobs:
   build:
     name: Build and Test (Swift)
-    runs-on: macos-latest
+    # macos-latest currently resolves to macos-15 (Xcode 16 / macOS 15 SDK)
+    # but the Kotlin/Native 2.3.x distribution's prebuilt platform caches
+    # reference macOS 26 / iOS 26 SDK symbols (NSCalendarIdentifier{Vikram,
+    # Bangla,...}, _NSURLUbiquitousItem*Key, _xpc_session_set_peer_requirement,
+    # etc). Linking the swift-test harness on macos-15 therefore fails with
+    # "Undefined symbols for architecture arm64" on every cache-referenced
+    # symbol. Pin macos-26 so the SDK matches the platform-cache. The image
+    # default Xcode (currently 26.4.1) is in the 26.x line and carries the
+    # expected SDK stubs; per SWIFT_EXPORT_ROLLOUT.md gap #7 do NOT add a
+    # maxim-lobanov/setup-xcode pin (third-party action, not on the
+    # KotlinMania allowlist — causes startup_failure at dispatch).
+    runs-on: macos-26
     permissions:
       contents: read
     steps:
