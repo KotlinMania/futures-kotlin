@@ -58,8 +58,10 @@ proven end-to-end with a working `swift test` invocation against the
      All input frameworks must be either static or dynamic
    ```
 
-   The other Apple targets (`iosArm64`, `tvosArm64`,
-   `tvosSimulatorArm64`, `watchos*`, `macosArm64`) stay dynamic.
+   The iOS device target (`iosArm64`) must also be static so the
+   generated iOS fat-framework tasks do not mix dynamic and static
+   slices. The non-iOS Apple targets (`tvosArm64`, `tvosSimulatorArm64`,
+   `watchos*`, `macosArm64`) stay dynamic.
 
    > **Note**: earlier versions of this recipe and of `apply.sh` flipped
    > only `iosSimulatorArm64`. Repos that landed the rollout before this
