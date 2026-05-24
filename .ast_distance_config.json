@@ -1,6 +1,5 @@
 {
   "type": "port",
-  "parity_mode": false,
   "name": "futures-kotlin",
   "source": {
     "path": "tmp/futures/src",
