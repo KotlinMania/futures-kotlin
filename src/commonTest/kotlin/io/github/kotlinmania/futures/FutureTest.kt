@@ -1,4 +1,3 @@
-// port-lint: ignore common tests for futures-core task and future primitives
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test
