@@ -10,6 +10,7 @@ import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -413,6 +414,96 @@ mavenPublishing {
             developerConnection.set("scm:git:ssh://github.com/KotlinMania/futures-kotlin.git")
         }
     }
+}
+
+val codeqlJvmCompileClasspath by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+val codeqlKotlinCompilerClasspath by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+dependencies {
+    add(codeqlJvmCompileClasspath.name, kotlin("stdlib"))
+    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
+    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
+    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+
+    add(codeqlKotlinCompilerClasspath.name, "org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
+}
+
+val codeqlCommonMainSourceDir = layout.projectDirectory.dir("src/commonMain/kotlin").asFile
+val codeqlPreparedCommonMainSourceDir = layout.buildDirectory.dir("codeql/commonMain-stripped").get().asFile
+val codeqlJvmOutputDir = layout.buildDirectory.dir("codeql/jvm-classes").get().asFile
+
+val prepareCodeqlCommonMainSources = tasks.register("prepareCodeqlCommonMainSources") {
+    group = "codeql"
+    description = "Copies commonMain Kotlin sources and strips Kotlin/Native-only Swift Export annotations for CodeQL."
+
+    inputs.dir(codeqlCommonMainSourceDir)
+    outputs.dir(codeqlPreparedCommonMainSourceDir)
+
+    doLast {
+        codeqlPreparedCommonMainSourceDir.deleteRecursively()
+        codeqlPreparedCommonMainSourceDir.mkdirs()
+
+        codeqlCommonMainSourceDir.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .forEach { sourceFile ->
+                val relativePath = sourceFile.relativeTo(codeqlCommonMainSourceDir)
+                val targetFile = codeqlPreparedCommonMainSourceDir.resolve(relativePath)
+                targetFile.parentFile.mkdirs()
+
+                val strippedLines = sourceFile.readLines().filterNot { line ->
+                    val trimmed = line.trim()
+                    (trimmed.startsWith("@file:OptIn(") && trimmed.contains("ExperimentalObjCRefinement")) ||
+                        trimmed == "import kotlin.native.HiddenFromObjC" ||
+                        trimmed == "import kotlin.experimental.ExperimentalObjCRefinement" ||
+                        trimmed.startsWith("@HiddenFromObjC")
+                }
+                targetFile.writeText(strippedLines.joinToString(separator = "\n", postfix = "\n"))
+            }
+    }
+}
+
+tasks.register<JavaExec>("codeqlCompileJvm") {
+    group = "codeql"
+    description = "Runs a single-target JVM Kotlin compile of stripped commonMain sources for CodeQL extraction."
+
+    dependsOn(prepareCodeqlCommonMainSources)
+
+    mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
+    classpath = codeqlKotlinCompilerClasspath
+
+    inputs.dir(codeqlPreparedCommonMainSourceDir)
+    outputs.dir(codeqlJvmOutputDir)
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+
+    argumentProviders.add(
+        CommandLineArgumentProvider {
+            val sources = fileTree(codeqlPreparedCommonMainSourceDir) { include("**/*.kt") }
+                .files
+                .sortedBy { it.absolutePath }
+
+            listOf(
+                "-d",
+                codeqlJvmOutputDir.absolutePath,
+                "-module-name",
+                "futures-kotlin-codeql",
+                "-classpath",
+                codeqlJvmCompileClasspath.asPath,
+                "-no-stdlib",
+                "-no-reflect",
+                "-Xexpect-actual-classes",
+            ) + sources.map { it.absolutePath }
+        },
+    )
 }
 
 tasks.register("setupAndroidSdk") {
