@@ -434,7 +434,7 @@ dependencies {
     add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
     add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
 
-    add(codeqlKotlinCompilerClasspath.name, "org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
+    add(codeqlKotlinCompilerClasspath.name, "org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.0")
 }
 
 val codeqlCommonMainSourceDir = layout.projectDirectory.dir("src/commonMain/kotlin").asFile
