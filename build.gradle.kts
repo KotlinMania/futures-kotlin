@@ -289,7 +289,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.5.0")
             }
         }
         val commonTest by getting {
@@ -432,7 +432,7 @@ dependencies {
     add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
     add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
-    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+    add(codeqlJvmCompileClasspath.name, "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.5.0")
 
     add(codeqlKotlinCompilerClasspath.name, "org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
 }
