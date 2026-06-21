@@ -10,10 +10,11 @@ class FutureTest {
     @Test
     fun readyFutureProducesValue() {
         var polls = 0
-        val future = Future<Int> {
-            polls += 1
-            Poll.ready(42)
-        }
+        val future =
+            Future<Int> {
+                polls += 1
+                Poll.ready(42)
+            }
 
         assertEquals(Poll.Ready(42), future.poll(TaskContext()))
         assertEquals(1, polls)
@@ -23,10 +24,11 @@ class FutureTest {
     fun pendingFutureCanWakeContext() {
         var woke = false
         val context = TaskContext(Waker { woke = true })
-        val future = Future<Int> {
-            it.wakeByRef()
-            Poll.pending()
-        }
+        val future =
+            Future<Int> {
+                it.wakeByRef()
+                Poll.pending()
+            }
 
         assertEquals(Poll.Pending, future.poll(context))
         assertTrue(woke)

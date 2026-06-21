@@ -54,10 +54,14 @@ public interface FusedFuture<out T> : Future<T> {
 @HiddenFromObjC
 public sealed interface Try<out T, out E> {
     @HiddenFromObjC
-    public data class Ok<out T>(public val value: T) : Try<T, Nothing>
+    public data class Ok<out T>(
+        public val value: T,
+    ) : Try<T, Nothing>
 
     @HiddenFromObjC
-    public data class Err<out E>(public val error: E) : Try<Nothing, E>
+    public data class Err<out E>(
+        public val error: E,
+    ) : Try<Nothing, E>
 
     public companion object {
         @HiddenFromObjC
@@ -91,4 +95,3 @@ public fun <T, E> Future<Try<T, E>>.asTryFuture(): TryFuture<T, E> {
             delegate.poll(context)
     }
 }
-

@@ -109,7 +109,9 @@ public sealed interface SinkOutcome<out E> {
      * The operation failed; [error] carries the sink's error payload.
      */
     @HiddenFromObjC
-    public data class Err<out E>(public val error: E) : SinkOutcome<E>
+    public data class Err<out E>(
+        public val error: E,
+    ) : SinkOutcome<E>
 
     public companion object {
         @HiddenFromObjC

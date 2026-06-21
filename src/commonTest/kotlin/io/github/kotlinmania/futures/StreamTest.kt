@@ -8,7 +8,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class StreamTest {
-    private class ListStream(private val items: List<Int>) : Stream<Int> {
+    private class ListStream(
+        private val items: List<Int>,
+    ) : Stream<Int> {
         private var index = 0
 
         override fun pollNext(context: TaskContext): Poll<Yield<Int>> =
@@ -39,12 +41,13 @@ class StreamTest {
     fun pendingStreamWakesContext() {
         var woke = false
         val context = TaskContext(Waker { woke = true })
-        val stream = object : Stream<Int> {
-            override fun pollNext(context: TaskContext): Poll<Yield<Int>> {
-                context.wakeByRef()
-                return Poll.pending()
+        val stream =
+            object : Stream<Int> {
+                override fun pollNext(context: TaskContext): Poll<Yield<Int>> {
+                    context.wakeByRef()
+                    return Poll.pending()
+                }
             }
-        }
 
         assertEquals(Poll.Pending, stream.pollNext(context))
         assertTrue(woke)
@@ -52,10 +55,11 @@ class StreamTest {
 
     @Test
     fun defaultSizeHintIsZeroAndUnbounded() {
-        val stream = object : Stream<Int> {
-            override fun pollNext(context: TaskContext): Poll<Yield<Int>> =
-                Poll.ready(Yield.end())
-        }
+        val stream =
+            object : Stream<Int> {
+                override fun pollNext(context: TaskContext): Poll<Yield<Int>> =
+                    Poll.ready(Yield.end())
+            }
 
         val hint = stream.sizeHint()
         assertEquals(0, hint.lower)
@@ -107,14 +111,15 @@ class StreamTest {
     fun tryStreamViewDelegatesToUnderlyingStream() {
         val items = listOf<Try<Int, String>>(Try.Ok(1), Try.Err("boom"))
         var idx = 0
-        val source: Stream<Try<Int, String>> = object : Stream<Try<Int, String>> {
-            override fun pollNext(context: TaskContext): Poll<Yield<Try<Int, String>>> =
-                if (idx < items.size) {
-                    Poll.ready(Yield.value(items[idx++]))
-                } else {
-                    Poll.ready(Yield.end())
-                }
-        }
+        val source: Stream<Try<Int, String>> =
+            object : Stream<Try<Int, String>> {
+                override fun pollNext(context: TaskContext): Poll<Yield<Try<Int, String>>> =
+                    if (idx < items.size) {
+                        Poll.ready(Yield.value(items[idx++]))
+                    } else {
+                        Poll.ready(Yield.end())
+                    }
+            }
 
         val tryStream = source.asTryStream()
         assertEquals(

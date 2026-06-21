@@ -12,7 +12,9 @@ class SinkTest {
      * full poll/send/flush/close lifecycle including back-pressure and
      * error surfaces.
      */
-    private class BoundedSink(private val capacity: Int) : Sink<Int, String> {
+    private class BoundedSink(
+        private val capacity: Int,
+    ) : Sink<Int, String> {
         val received: MutableList<Int> = mutableListOf()
         var pendingFlush: Boolean = false
         var closed: Boolean = false

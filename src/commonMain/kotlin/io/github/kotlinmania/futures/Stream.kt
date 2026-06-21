@@ -60,7 +60,9 @@ public interface Stream<out T> {
 @HiddenFromObjC
 public sealed interface Yield<out T> {
     @HiddenFromObjC
-    public data class Value<out T>(public val value: T) : Yield<T>
+    public data class Value<out T>(
+        public val value: T,
+    ) : Yield<T>
 
     @HiddenFromObjC
     public data object End : Yield<Nothing>
@@ -83,7 +85,10 @@ public sealed interface Yield<out T> {
  * strongly typed across the Swift Export boundary (see project goal in
  * `AGENTS.md` §4).
  */
-public data class SizeHint(public val lower: Int, public val upper: Int?)
+public data class SizeHint(
+    public val lower: Int,
+    public val upper: Int?,
+)
 
 /**
  * A stream which tracks whether or not it should no longer be polled.

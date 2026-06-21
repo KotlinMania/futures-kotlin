@@ -19,7 +19,9 @@ public sealed interface Poll<out T> {
      * The computation produced a value.
      */
     @HiddenFromObjC
-    public data class Ready<out T>(public val value: T) : Poll<T>
+    public data class Ready<out T>(
+        public val value: T,
+    ) : Poll<T>
 
     /**
      * The computation is not ready yet.
@@ -46,7 +48,9 @@ public fun interface Waker {
 /**
  * Polling context passed to futures, streams, and sinks.
  */
-public class TaskContext(public val waker: Waker = Waker {}) {
+public class TaskContext(
+    public val waker: Waker = Waker {},
+) {
     public fun wakeByRef() {
         waker.wakeByRef()
     }
@@ -65,4 +69,3 @@ public fun <T> Poll<T>.readyOrNull(): T? =
         is Poll.Ready -> value
         Poll.Pending -> null
     }
-
