@@ -1,13 +1,11 @@
-// port-lint: source futures-macro/src/stream_select.rs
 package io.github.kotlinmania.futures
-
 import io.github.kotlinmania.procmacro2.Delimiter
 import io.github.kotlinmania.procmacro2.Group
 import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.procmacro2.Literal
 import io.github.kotlinmania.procmacro2.Punct
-import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.Spacing
+import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.append
@@ -15,10 +13,11 @@ import io.github.kotlinmania.quote.toTokens
 import io.github.kotlinmania.syn.CommaParse
 import io.github.kotlinmania.syn.Expr
 import io.github.kotlinmania.syn.ExprList
-import io.github.kotlinmania.syn.SynError
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.parseExpr
+
+// port-lint: source futures-macro/src/stream_select.rs
 
 internal fun streamSelect(input: TokenStream): SynResult<TokenStream> {
     val args =
@@ -140,7 +139,9 @@ private fun appendSeparatedBoxed(tokens: TokenStream, items: List<BoxedTokens>) 
     }
 }
 
-private class BoxedTokens(private val stream: TokenStream) : ToTokens {
+private class BoxedTokens(
+    private val stream: TokenStream,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         tokens.extendTokenStreams(listOf(stream))
     }
