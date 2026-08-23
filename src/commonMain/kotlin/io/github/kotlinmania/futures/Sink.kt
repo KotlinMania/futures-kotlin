@@ -197,10 +197,7 @@ public fun <T> ArrayDeque<T>.asSink(): Sink<T, Nothing> {
     }
 }
 
-// Upstream additionally provides `impl<S: Sink<Item> + Unpin, Item> Sink<Item>
-// for &mut S`, `impl<P: DerefMut + Unpin, Item> Sink<Item> for Pin<P>`, and
-// `impl<S: Sink<Item> + Unpin, Item> Sink<Item> for Box<S>`. These re-establish
-// the sink behaviour through Rust's pinning / borrowing machinery, which has
-// no Kotlin analogue: Kotlin objects are already heap-allocated and freely
-// re-referenceable, so a `Sink<Item, E>` instance is itself the equivalent of
-// `&mut S` / `Pin<Box<S>>`. No port is required.
+// Upstream additionally provides adapter implementations for mutable references,
+// pinned dereferences, and boxed sinks. In Kotlin, objects are already reference-
+// counted and freely re-referenceable, so a Sink instance is directly reusable
+// without additional wrappers.
