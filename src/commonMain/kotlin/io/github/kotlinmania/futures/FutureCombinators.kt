@@ -168,11 +168,10 @@ public fun <T> joinAll(futures: List<Future<T>>): Future<List<T>> {
 public fun <T, R> Future<T>.map(transform: (T) -> R): Future<R> {
     val source = this
     return object : Future<R> {
-        override fun poll(context: TaskContext): Poll<R> {
-            return when (val p = source.poll(context)) {
+        override fun poll(context: TaskContext): Poll<R> =
+            when (val p = source.poll(context)) {
                 is Poll.Ready -> Poll.Ready(transform(p.value))
                 is Poll.Pending -> Poll.Pending
             }
-        }
     }
 }

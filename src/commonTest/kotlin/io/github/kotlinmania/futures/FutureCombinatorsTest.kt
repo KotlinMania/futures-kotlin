@@ -21,10 +21,11 @@ class FutureCombinatorsTest {
     @Test
     fun testPollFn() {
         var count = 0
-        val fut = pollFn {
-            count++
-            if (count >= 2) Poll.Ready("done") else Poll.Pending
-        }
+        val fut =
+            pollFn {
+                count++
+                if (count >= 2) Poll.Ready("done") else Poll.Pending
+            }
 
         assertTrue(fut.poll(TaskContext()) is Poll.Pending)
         val second = fut.poll(TaskContext())
