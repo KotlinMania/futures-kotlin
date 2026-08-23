@@ -1,9 +1,11 @@
-// port-lint: source futures-util/src/abortable.rs
+// port-lint: tests futures-util/src/abortable.rs
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.channel.mpsc.unbounded
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class AbortableTest {
@@ -12,9 +14,9 @@ class AbortableTest {
         val (fut, handle) = abortable(ready(42))
         assertFalse(handle.isAborted())
         val res = fut.poll(TaskContext())
-        assertTrue(res is Poll.Ready)
+        assertIs<Poll.Ready<Try<Int, Aborted>>>(res)
         val v = res.value
-        assertTrue(v is Try.Ok)
+        assertIs<Try.Ok<Int>>(v)
         assertEquals(42, v.value)
         assertFalse(handle.isAborted())
     }
@@ -31,9 +33,49 @@ class AbortableTest {
         assertTrue(handle.isAborted())
 
         val p2 = fut.poll(TaskContext())
-        assertTrue(p2 is Poll.Ready)
+        assertIs<Poll.Ready<Try<Int, Aborted>>>(p2)
         val v = p2.value
-        assertTrue(v is Try.Err)
+        assertIs<Try.Err<Aborted>>(v)
         assertEquals(Aborted, v.error)
+    }
+
+    @Test
+    fun testAbortableStreamCompletesWithoutAbort() {
+        val (tx, rx) = unbounded<Int>()
+        val (stream, handle) = abortable(rx)
+        val cx = TaskContext()
+
+        tx.unboundedSend(1)
+        tx.unboundedSend(2)
+        tx.disconnect()
+
+        val p1 = stream.pollNext(cx)
+        assertTrue(p1 is Poll.Ready && p1.value is Yield.Value && p1.value.value == 1)
+
+        val p2 = stream.pollNext(cx)
+        assertTrue(p2 is Poll.Ready && p2.value is Yield.Value && p2.value.value == 2)
+
+        val p3 = stream.pollNext(cx)
+        assertTrue(p3 is Poll.Ready && p3.value is Yield.End)
+        assertFalse(handle.isAborted())
+    }
+
+    @Test
+    fun testAbortableStreamAborts() {
+        val (tx, rx) = unbounded<Int>()
+        val (stream, handle) = abortable(rx)
+        val cx = TaskContext()
+
+        tx.unboundedSend(1)
+        val p1 = stream.pollNext(cx)
+        assertTrue(p1 is Poll.Ready && p1.value is Yield.Value && p1.value.value == 1)
+
+        handle.abort()
+        assertTrue(handle.isAborted())
+
+        val p2 = stream.pollNext(cx)
+        assertIs<Poll.Ready<Yield<Int>>>(p2)
+        assertEquals(Yield.end(), p2.value)
+        assertTrue(stream.isTerminated())
     }
 }

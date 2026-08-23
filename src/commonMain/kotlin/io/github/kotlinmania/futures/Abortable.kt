@@ -68,7 +68,7 @@ public class AbortHandle internal constructor(
 }
 
 /**
- * A future/stream which can be remotely short-circuited using an [AbortHandle].
+ * A future which can be remotely short-circuited using an [AbortHandle].
  */
 @HiddenFromObjC
 public class Abortable<T>(
@@ -103,6 +103,51 @@ public class Abortable<T>(
 }
 
 /**
+ * A stream which can be remotely short-circuited using an [AbortHandle].
+ */
+@HiddenFromObjC
+public class AbortableStream<T>(
+    private val stream: Stream<T>,
+    private val registration: AbortRegistration,
+) : Stream<T>,
+    FusedStream<T> {
+    public fun isAborted(): Boolean = registration.inner.aborted.load()
+
+    override fun pollNext(context: TaskContext): Poll<Yield<T>> {
+        if (isAborted()) {
+            return Poll.ready(Yield.end())
+        }
+
+        when (val res = stream.pollNext(context)) {
+            is Poll.Ready -> return res
+            is Poll.Pending -> {}
+        }
+
+        registration.inner.waker.register(context.waker)
+
+        if (isAborted()) {
+            return Poll.ready(Yield.end())
+        }
+
+        return Poll.pending()
+    }
+
+    override fun isTerminated(): Boolean =
+        isAborted() || (stream as? FusedStream<*>)?.isTerminated() == true
+
+    override fun sizeHint(): SizeHint {
+        if (isAborted()) return SizeHint(0, 0)
+        return stream.sizeHint()
+    }
+
+    public companion object {
+        @HiddenFromObjC
+        public fun <T> of(stream: Stream<T>, reg: AbortRegistration): AbortableStream<T> =
+            AbortableStream(stream, reg)
+    }
+}
+
+/**
  * Creates a new [Abortable] future and an [AbortHandle] which can be used to stop it.
  */
 @HiddenFromObjC
@@ -111,3 +156,20 @@ public fun <Fut> abortable(future: Future<Fut>): Pair<Abortable<Fut>, AbortHandl
     val ab = Abortable(future, reg)
     return Pair(ab, handle)
 }
+
+/**
+ * Creates a new [AbortableStream] and an [AbortHandle] which can be used to stop it.
+ */
+@HiddenFromObjC
+public fun <T> abortable(stream: Stream<T>): Pair<AbortableStream<T>, AbortHandle> {
+    val (handle, reg) = AbortHandle.newPair()
+    val ab = AbortableStream(stream, reg)
+    return Pair(ab, handle)
+}
+
+/**
+ * Wraps this stream in an [AbortableStream] using the given [registration].
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.abortable(registration: AbortRegistration): AbortableStream<T> =
+    AbortableStream(this, registration)

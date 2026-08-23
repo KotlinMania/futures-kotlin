@@ -5,12 +5,12 @@ Based on AST analysis, here are the concrete next steps.
 ## Summary
 
 - **Files Present:** 36/305 (11.8%)
-- **Function parity:** 98/1848 matched (target 247) — 5.3%
-- **Class/type parity:** 36/543 matched (target 86) — 6.6%
-- **Combined symbol parity:** 134/2391 matched (target 333) — 5.6%
-- **Average inline-code cosine:** 0.32 (function body across 32 matched files)
-- **Average documentation cosine:** 0.53 (doc text across 32 matched files)
-- **Cheat-zeroed Files:** 5
+- **Function parity:** 123/1888 matched (target 358) — 6.5%
+- **Class/type parity:** 45/558 matched (target 100) — 8.1%
+- **Combined symbol parity:** 168/2446 matched (target 458) — 6.9%
+- **Average inline-code cosine:** 0.34 (function body across 31 matched files)
+- **Average documentation cosine:** 0.54 (doc text across 31 matched files)
+- **Cheat-zeroed Files:** 6
 - **Critical Issues:** 33 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
@@ -139,27 +139,15 @@ Every matched file is listed below with function and type symbol parity.
 ### 7. futures-util.abortable
 
 - **Target:** `futures.Abortable`
-- **Similarity:** 0.47
+- **Similarity:** 0.49
 - **Dependents:** 2
-- **Priority Score:** 2061505.4
-- **Functions:** 5/9 matched
-- **Missing functions:** `new`, `fmt`, `try_poll`, `poll_next`
-- **Types:** 4/6 matched (target 5)
+- **Priority Score:** 2051505.0
+- **Functions:** 6/9 matched (target 20)
+- **Missing functions:** `new`, `fmt`, `try_poll`
+- **Types:** 4/6 matched (target 7)
 - **Missing types:** `Output`, `Item`
 
-### 8. futures-channel.lock
-
-- **Target:** `futures.Lock`
-- **Similarity:** 0.17
-- **Dependents:** 2
-- **Priority Score:** 2050908.2
-- **Functions:** 2/6 matched (target 8)
-- **Missing functions:** `deref`, `deref_mut`, `drop`, `smoke`
-- **Types:** 2/3 matched (target 2)
-- **Missing types:** `Target`
-- **Tests:** 0/1 matched
-
-### 9. stream.poll_fn
+### 8. stream.poll_fn
 
 - **Target:** `futures.PollFnTest [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
@@ -173,14 +161,26 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: source stream/poll_fn.rs` (current: `// port-lint: source futures-util/src/future/poll_fn.rs`)
 - **Lint issues:** 1
 
+### 9. futures-channel.lock
+
+- **Target:** `futures.Lock`
+- **Similarity:** 0.28
+- **Dependents:** 2
+- **Priority Score:** 2040907.2
+- **Functions:** 3/6 matched (target 9)
+- **Missing functions:** `deref`, `deref_mut`, `drop`
+- **Types:** 2/3 matched
+- **Missing types:** `Target`
+- **Tests:** 1/1 matched
+
 ### 10. futures-util.unfold_state
 
 - **Target:** `futures.UnfoldState`
-- **Similarity:** 0.00
+- **Similarity:** 0.19
 - **Dependents:** 2
-- **Priority Score:** 2020210.0
-- **Functions:** 0/2 matched
-- **Missing functions:** `project_future`, `take_value`
+- **Priority Score:** 2000208.1
+- **Functions:** 2/2 matched (target 4)
+- **Missing functions:** _none_
 - **Types:** 0/0 matched (target 4)
 - **Missing types:** _none_
 
@@ -209,7 +209,18 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 0/0 matched (target 1)
 - **Missing types:** _none_
 
-### 13. stream.select_all
+### 13. mpsc.mod
+
+- **Target:** `mpsc.Mpsc [STUB]`
+- **Similarity:** 0.00
+- **Dependents:** 0
+- **Priority Score:** 295910.0
+- **Functions:** 21/43 matched (target 51)
+- **Missing functions:** `fmt`, `new`, `notify`, `poll_ready_nb`, `queue_push_and_signal`, `inc_num_messages`, `is_connected_to`, `ptr`, `do_send_b`, `park`, `poll_unparked`, `hash_receiver`, `do_send_nb`, `len`, `drop`, `next_message`, `unpark_one`, `dec_num_messages`, `set_closed`, `max_senders`, `decode_state`, `encode_state`
+- **Types:** 9/16 matched (target 9)
+- **Missing types:** `UnboundedSenderInner`, `BoundedSenderInner`, `AssertKinds`, `SendErrorKind`, `State`, `SenderTask`, `Item`
+
+### 14. stream.select_all
 
 - **Target:** `futures.SelectAllTest [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
@@ -223,7 +234,7 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: source stream/select_all.rs` (current: `// port-lint: source futures-util/src/future/select_all.rs`)
 - **Lint issues:** 1
 
-### 14. futures-core.stream
+### 15. futures-core.stream
 
 - **Target:** `futures.Stream`
 - **Similarity:** 0.15
@@ -234,9 +245,9 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 3/9 matched (target 7)
 - **Missing types:** `BoxStream`, `LocalBoxStream`, `Item`, `Sealed`, `Ok`, `Error`
 
-### 15. futures-channel.oneshot
+### 16. futures-channel.oneshot
 
-- **Target:** `futures.Oneshot [PROVENANCE-FALLBACK]`
+- **Target:** `oneshot.Oneshot [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.51
 - **Dependents:** 0
 - **Priority Score:** 52304.9
@@ -248,7 +259,7 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: tests oneshot.rs` (current: `// port-lint: tests futures-channel/tests/oneshot.rs`)
 - **Lint issues:** 1
 
-### 16. futures-macro.join
+### 17. futures-macro.join
 
 - **Target:** `futures.JoinTest [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
@@ -260,20 +271,6 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing types:** `Join`
 - **Provenance warning:** port-lint provenance header matched only by basename: `futures-util/src/future/join.rs` vs expected `join.rs`
 - **Proposed provenance header:** `// port-lint: source join.rs` (current: `// port-lint: source futures-util/src/future/join.rs`)
-- **Lint issues:** 1
-
-### 17. future.mod
-
-- **Target:** `futures.FutureCombinatorsTest [STUB] [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.00
-- **Dependents:** 0
-- **Priority Score:** 50510.0
-- **Functions:** 0/4 matched (target 5)
-- **Missing functions:** `assert_unmoved`, `pending_once`, `run_in_background`, `interleave_pending`
-- **Types:** 0/1 matched
-- **Missing types:** `FutureTestExt`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/mod.rs` vs expected `future/mod.rs`
-- **Proposed provenance header:** `// port-lint: source future/mod.rs` (current: `// port-lint: source futures-util/src/future/mod.rs`)
 - **Lint issues:** 1
 
 ### 18. future.join_all
@@ -453,30 +450,27 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
 
-### 33. futures-util.future.mod
+### 33. futures-util.stream.mod
+
+- **Target:** `futures.StreamCombinators [STUB]`
+- **Similarity:** 0.00
+- **Dependents:** 0
+- **Priority Score:** 10110.0
+- **Functions:** 0/1 matched (target 18)
+- **Missing functions:** `assert_stream`
+- **Types:** 0/0 matched (target 2)
+- **Missing types:** _none_
+
+### 34. futures-util.future.mod
 
 - **Target:** `futures.FutureCombinators [STUB]`
 - **Similarity:** 0.00
 - **Dependents:** 0
 - **Priority Score:** 10110.0
-- **Functions:** 0/1 matched (target 2)
+- **Functions:** 0/1 matched (target 37)
 - **Missing functions:** `assert_future`
-- **Types:** 0/0 matched
+- **Types:** 0/0 matched (target 2)
 - **Missing types:** _none_
-
-### 34. stream.abortable
-
-- **Target:** `futures.AbortableTest [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.00
-- **Dependents:** 0
-- **Priority Score:** 10110.0
-- **Functions:** 0/1 matched (target 2)
-- **Missing functions:** `abortable`
-- **Types:** 0/0 matched (target 1)
-- **Missing types:** _none_
-- **Provenance warning:** port-lint provenance header matched only by basename: `futures-util/src/abortable.rs` vs expected `stream/abortable.rs`
-- **Proposed provenance header:** `// port-lint: source stream/abortable.rs` (current: `// port-lint: source futures-util/src/abortable.rs`)
-- **Lint issues:** 1
 
 ### 35. future.join
 
@@ -521,13 +515,13 @@ do not treat them as the next implementation target by default.
 | Source | Expected target | Deps | Source path | Expected path |
 |--------|-----------------|------|-------------|---------------|
 | `futures-channel.lib` | `futureschannel.src.Lib` | 0 | `futures-channel/src/lib.rs` | `futureschannel/src/Lib.kt` |
-| `mpsc.mod` | `futureschannel.src.mpsc.Mod` | 0 | `futures-channel/src/mpsc/mod.rs` | `futureschannel/src/mpsc/Mod.kt` |
 | `futures-core.lib` | `futurescore.src.Lib` | 0 | `futures-core/src/lib.rs` | `futurescore/src/Lib.kt` |
 | `__internal.mod` | `futurescore.src.task.internal.Mod` | 0 | `futures-core/src/task/__internal/mod.rs` | `futurescore/src/task/internal/Mod.kt` |
 | `futures-executor.lib` | `futuresexecutor.src.Lib` | 0 | `futures-executor/src/lib.rs` | `futuresexecutor/src/Lib.kt` |
 | `futures-io.lib` | `futuresio.src.Lib` | 0 | `futures-io/src/lib.rs` | `futuresio/src/Lib.kt` |
 | `futures-macro.lib` | `futuresmacro.src.Lib` | 0 | `futures-macro/src/lib.rs` | `futuresmacro/src/Lib.kt` |
 | `futures-task.lib` | `futurestask.src.Lib` | 0 | `futures-task/src/lib.rs` | `futurestask/src/Lib.kt` |
+| `future.mod` | `futurestest.src.future.Mod` | 0 | `futures-test/src/future/mod.rs` | `futurestest/src/future/Mod.kt` |
 | `io.mod` | `futurestest.src.io.Mod` | 0 | `futures-test/src/io/mod.rs` | `futurestest/src/io/Mod.kt` |
 | `read.mod` | `futurestest.src.io.read.Mod` | 0 | `futures-test/src/io/read/mod.rs` | `futurestest/src/io/read/Mod.kt` |
 | `write.mod` | `futurestest.src.io.write.Mod` | 0 | `futures-test/src/io/write/mod.rs` | `futurestest/src/io/write/Mod.kt` |
@@ -544,7 +538,6 @@ do not treat them as the next implementation target by default.
 | `lock.mod` | `futuresutil.src.lock.Mod` | 0 | `futures-util/src/lock/mod.rs` | `futuresutil/src/lock/Mod.kt` |
 | `futures-util.sink.mod` | `futuresutil.src.sink.Mod` | 0 | `futures-util/src/sink/mod.rs` | `futuresutil/src/sink/Mod.kt` |
 | `futures_unordered.mod` | `futuresutil.src.stream.futuresunordered.Mod` | 0 | `futures-util/src/stream/futures_unordered/mod.rs` | `futuresutil/src/stream/futuresunordered/Mod.kt` |
-| `futures-util.stream.mod` | `futuresutil.src.stream.Mod` | 0 | `futures-util/src/stream/mod.rs` | `futuresutil/src/stream/Mod.kt` |
 | `futures-util.stream.stream.mod` | `futuresutil.src.stream.stream.Mod` | 0 | `futures-util/src/stream/stream/mod.rs` | `futuresutil/src/stream/stream/Mod.kt` |
 | `try_stream.mod` | `futuresutil.src.stream.trystream.Mod` | 0 | `futures-util/src/stream/try_stream/mod.rs` | `futuresutil/src/stream/trystream/Mod.kt` |
 | `futures-util.task.mod` | `futuresutil.src.task.Mod` | 0 | `futures-util/src/task/mod.rs` | `futuresutil/src/task/Mod.kt` |
