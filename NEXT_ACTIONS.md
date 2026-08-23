@@ -4,21 +4,21 @@ Based on AST analysis, here are the concrete next steps.
 
 ## Summary
 
-- **Files Present:** 36/305 (11.8%)
-- **Function parity:** 123/1888 matched (target 358) — 6.5%
-- **Class/type parity:** 45/558 matched (target 100) — 8.1%
-- **Combined symbol parity:** 168/2446 matched (target 458) — 6.9%
-- **Average inline-code cosine:** 0.34 (function body across 31 matched files)
-- **Average documentation cosine:** 0.54 (doc text across 31 matched files)
-- **Cheat-zeroed Files:** 6
-- **Critical Issues:** 33 files with <0.60 function similarity
+- **Files Present:** 28/181 (15.5%)
+- **Function parity:** 70/1030 matched (target 285) — 6.8%
+- **Class/type parity:** 20/357 matched (target 74) — 5.6%
+- **Combined symbol parity:** 90/1387 matched (target 359) — 6.5%
+- **Average inline-code cosine:** 0.38 (function body across 23 matched files)
+- **Average documentation cosine:** 0.57 (doc text across 23 matched files)
+- **Cheat-zeroed Files:** 5
+- **Critical Issues:** 25 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
 
 ### 1. future.ready
 - **Similarity:** 0.43 (needs 42% improvement)
-- **Dependencies:** 84
-- **Priority Score:** 84010808.0
+- **Dependencies:** 82
+- **Priority Score:** 82010808.0
 - **Functions:** 6/6 matched (target 10)
 - **Missing functions:** _none_
 - **Types:** 1/2 matched
@@ -26,40 +26,13 @@ Based on AST analysis, here are the concrete next steps.
 - **Symbol Deficit:** 1 (functions: 0, types: 1)
 - **Action:** Deep review - likely missing major functionality
 
-### 2. futures-core.future
-- **Similarity:** 0.10 (needs 75% improvement)
-- **Dependencies:** 65
-- **Priority Score:** 65030908.0
-- **Functions:** 1/2 matched (target 5)
-- **Missing functions:** `is_terminated`
-- **Types:** 5/7 matched
-- **Missing types:** `Sealed`, `Error`
-- **Symbol Deficit:** 3 (functions: 1, types: 2)
-- **Action:** Deep review - likely missing major functionality
-
 ## Priority 2: Port Missing High-Value Files
 
 Critical missing files (>10 dependencies):
 
-1. **tests.sink** (62 deps)
-   - Path: `futures/tests/sink.rs`
-   - Essential for 62 other files
-
-2. **tests.stream** (25 deps)
-   - Path: `futures/tests/stream.rs`
-   - Essential for 25 other files
-
-3. **tests.mpsc** (17 deps)
-   - Path: `futures-channel/tests/mpsc.rs`
-   - Essential for 17 other files
-
-4. **task.poll** (16 deps)
-   - Path: `futures-core/src/task/poll.rs`
-   - Essential for 16 other files
-
-5. **tests.oneshot** (11 deps)
-   - Path: `futures/tests/oneshot.rs`
-   - Essential for 11 other files
+1. **io.sink** (54 deps)
+   - Path: `io/sink.rs`
+   - Essential for 54 other files
 
 ## Detailed Work Items
 
@@ -67,62 +40,21 @@ Every matched file is listed below with function and type symbol parity.
 
 ### 1. future.ready
 
-- **Target:** `futures.Ready`
+- **Target:** `futures.Ready [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.43
-- **Dependents:** 84
-- **Priority Score:** 84010808.0
+- **Dependents:** 82
+- **Priority Score:** 82010808.0
 - **Functions:** 6/6 matched (target 10)
 - **Missing functions:** _none_
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
-- **Lint issues:** 1
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/ready.rs` vs expected `future/ready.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/ready.rs` vs expected `future/ready.rs`
+- **Proposed provenance header:** `// port-lint: source future/ready.rs` (current: `// port-lint: source futures-util/src/future/ready.rs`)
+- **Proposed provenance header:** `// port-lint: source future/ready.rs` (current: `// port-lint: source futures-util/src/future/ready.rs`)
+- **Lint issues:** 3
 
-### 2. futures-core.future
-
-- **Target:** `futures.Future`
-- **Similarity:** 0.10
-- **Dependents:** 65
-- **Priority Score:** 65030908.0
-- **Functions:** 1/2 matched (target 5)
-- **Missing functions:** `is_terminated`
-- **Types:** 5/7 matched
-- **Missing types:** `Sealed`, `Error`
-
-### 3. __internal.atomic_waker
-
-- **Target:** `futures.AtomicWaker`
-- **Similarity:** 0.34
-- **Dependents:** 6
-- **Priority Score:** 6030806.5
-- **Functions:** 4/6 matched (target 4)
-- **Missing functions:** `default`, `fmt`
-- **Types:** 1/2 matched (target 1)
-- **Missing types:** `AssertSync`
-
-### 4. futures-task.noop_waker
-
-- **Target:** `futures.NoopWaker [ZERO]`
-- **Similarity:** 0.00
-- **Dependents:** 4
-- **Priority Score:** 4050710.0
-- **Functions:** 2/6 matched (target 5)
-- **Missing functions:** `noop_clone`, `noop`, `noop_raw_waker`, `issue_2091_cross_thread_segfault`
-- **Types:** 0/1 matched
-- **Missing types:** `SyncRawWaker`
-- **Tests:** 0/1 matched
-
-### 5. futures-util.never
-
-- **Target:** `futures.Never`
-- **Similarity:** 1.00
-- **Dependents:** 3
-- **Priority Score:** 3000100.0
-- **Functions:** 0/0 matched
-- **Missing functions:** _none_
-- **Types:** 1/1 matched
-- **Missing types:** _none_
-
-### 6. future.either
+### 2. future.either
 
 - **Target:** `futures.Either [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.31
@@ -132,13 +64,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `as_pin_ref`, `as_pin_mut`, `poll_read`, `poll_read_vectored`, `poll_write`, `poll_write_vectored`, `poll_seek`, `poll_fill_buf`, `consume`
 - **Types:** 1/4 matched
 - **Missing types:** `Output`, `Item`, `Error`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/either.rs` vs expected `future/either.rs`
 - **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/either.rs` vs expected `future/either.rs`
+- **Proposed provenance header:** `// port-lint: source future/either.rs` (current: `// port-lint: source futures-util/src/future/either.rs`)
 - **Proposed provenance header:** `// port-lint: tests future/either.rs` (current: `// port-lint: tests futures-util/tests/either.rs`)
-- **Lint issues:** 1
+- **Lint issues:** 2
 
-### 7. futures-util.abortable
+### 3. abortable
 
-- **Target:** `futures.Abortable`
+- **Target:** `futures.Abortable [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.49
 - **Dependents:** 2
 - **Priority Score:** 2051505.0
@@ -146,36 +80,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `new`, `fmt`, `try_poll`
 - **Types:** 4/6 matched (target 7)
 - **Missing types:** `Output`, `Item`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/abortable.rs` vs expected `abortable.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:futures-util/src/abortable.rs` vs expected `abortable.rs`
+- **Proposed provenance header:** `// port-lint: source abortable.rs` (current: `// port-lint: source futures-util/src/abortable.rs`)
+- **Proposed provenance header:** `// port-lint: tests abortable.rs` (current: `// port-lint: tests futures-util/src/abortable.rs`)
+- **Lint issues:** 2
 
-### 8. stream.poll_fn
+### 4. unfold_state
 
-- **Target:** `futures.PollFnTest [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.00
-- **Dependents:** 2
-- **Priority Score:** 2050510.0
-- **Functions:** 0/3 matched (target 1)
-- **Missing functions:** `fmt`, `poll_fn`, `poll_next`
-- **Types:** 0/2 matched (target 1)
-- **Missing types:** `PollFn`, `Item`
-- **Provenance warning:** port-lint provenance header matched only by basename: `futures-util/src/future/poll_fn.rs` vs expected `stream/poll_fn.rs`
-- **Proposed provenance header:** `// port-lint: source stream/poll_fn.rs` (current: `// port-lint: source futures-util/src/future/poll_fn.rs`)
-- **Lint issues:** 1
-
-### 9. futures-channel.lock
-
-- **Target:** `futures.Lock`
-- **Similarity:** 0.28
-- **Dependents:** 2
-- **Priority Score:** 2040907.2
-- **Functions:** 3/6 matched (target 9)
-- **Missing functions:** `deref`, `deref_mut`, `drop`
-- **Types:** 2/3 matched
-- **Missing types:** `Target`
-- **Tests:** 1/1 matched
-
-### 10. futures-util.unfold_state
-
-- **Target:** `futures.UnfoldState`
+- **Target:** `futures.UnfoldState [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.19
 - **Dependents:** 2
 - **Priority Score:** 2000208.1
@@ -183,44 +96,25 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** _none_
 - **Types:** 0/0 matched (target 4)
 - **Missing types:** _none_
-
-### 11. future.lazy
-
-- **Target:** `futures.LazyFuture [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.23
-- **Dependents:** 1
-- **Priority Score:** 1020507.7
-- **Functions:** 2/3 matched (target 4)
-- **Missing functions:** `lazy`
-- **Types:** 1/2 matched
-- **Missing types:** `Output`
-- **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/lazy.rs` vs expected `future/lazy.rs`
-- **Proposed provenance header:** `// port-lint: tests future/lazy.rs` (current: `// port-lint: tests futures-util/tests/lazy.rs`)
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/unfold_state.rs` vs expected `unfold_state.rs`
+- **Proposed provenance header:** `// port-lint: source unfold_state.rs` (current: `// port-lint: source futures-util/src/unfold_state.rs`)
 - **Lint issues:** 1
 
-### 12. futures-macro.stream_select
+### 5. never
 
-- **Target:** `futures.StreamSelect`
-- **Similarity:** 0.29
-- **Dependents:** 1
-- **Priority Score:** 1000107.1
-- **Functions:** 1/1 matched (target 10)
+- **Target:** `futures.Never [PROVENANCE-FALLBACK]`
+- **Similarity:** 1.00
+- **Dependents:** 2
+- **Priority Score:** 2000100.0
+- **Functions:** 0/0 matched
 - **Missing functions:** _none_
-- **Types:** 0/0 matched (target 1)
+- **Types:** 1/1 matched
 - **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/never.rs` vs expected `never.rs`
+- **Proposed provenance header:** `// port-lint: source never.rs` (current: `// port-lint: source futures-util/src/never.rs`)
+- **Lint issues:** 1
 
-### 13. mpsc.mod
-
-- **Target:** `mpsc.Mpsc [STUB]`
-- **Similarity:** 0.00
-- **Dependents:** 0
-- **Priority Score:** 295910.0
-- **Functions:** 21/43 matched (target 51)
-- **Missing functions:** `fmt`, `new`, `notify`, `poll_ready_nb`, `queue_push_and_signal`, `inc_num_messages`, `is_connected_to`, `ptr`, `do_send_b`, `park`, `poll_unparked`, `hash_receiver`, `do_send_nb`, `len`, `drop`, `next_message`, `unpark_one`, `dec_num_messages`, `set_closed`, `max_senders`, `decode_state`, `encode_state`
-- **Types:** 9/16 matched (target 9)
-- **Missing types:** `UnboundedSenderInner`, `BoundedSenderInner`, `AssertKinds`, `SendErrorKind`, `State`, `SenderTask`, `Item`
-
-### 14. stream.select_all
+### 6. stream.select_all
 
 - **Target:** `futures.SelectAllTest [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
@@ -234,48 +128,23 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: source stream/select_all.rs` (current: `// port-lint: source futures-util/src/future/select_all.rs`)
 - **Lint issues:** 1
 
-### 15. futures-core.stream
+### 7. stream.poll_fn
 
-- **Target:** `futures.Stream`
-- **Similarity:** 0.15
-- **Dependents:** 0
-- **Priority Score:** 71308.5
-- **Functions:** 3/4 matched (target 9)
-- **Missing functions:** `is_terminated`
-- **Types:** 3/9 matched (target 7)
-- **Missing types:** `BoxStream`, `LocalBoxStream`, `Item`, `Sealed`, `Ok`, `Error`
-
-### 16. futures-channel.oneshot
-
-- **Target:** `oneshot.Oneshot [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.51
-- **Dependents:** 0
-- **Priority Score:** 52304.9
-- **Functions:** 14/17 matched (target 31)
-- **Missing functions:** `new`, `drop`, `fmt`
-- **Types:** 4/6 matched
-- **Missing types:** `Inner`, `Output`
-- **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-channel/tests/oneshot.rs` vs expected `oneshot.rs`
-- **Proposed provenance header:** `// port-lint: tests oneshot.rs` (current: `// port-lint: tests futures-channel/tests/oneshot.rs`)
-- **Lint issues:** 1
-
-### 17. futures-macro.join
-
-- **Target:** `futures.JoinTest [PROVENANCE-FALLBACK]`
+- **Target:** `futures.PollFnTest [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
 - **Dependents:** 0
 - **Priority Score:** 50510.0
-- **Functions:** 0/4 matched
-- **Missing functions:** `parse`, `bind_futures`, `join`, `try_join`
-- **Types:** 0/1 matched
-- **Missing types:** `Join`
-- **Provenance warning:** port-lint provenance header matched only by basename: `futures-util/src/future/join.rs` vs expected `join.rs`
-- **Proposed provenance header:** `// port-lint: source join.rs` (current: `// port-lint: source futures-util/src/future/join.rs`)
+- **Functions:** 0/3 matched (target 1)
+- **Missing functions:** `fmt`, `poll_fn`, `poll_next`
+- **Types:** 0/2 matched (target 1)
+- **Missing types:** `PollFn`, `Item`
+- **Provenance warning:** port-lint provenance header matched only by basename: `futures-util/src/future/poll_fn.rs` vs expected `stream/poll_fn.rs`
+- **Proposed provenance header:** `// port-lint: source stream/poll_fn.rs` (current: `// port-lint: source futures-util/src/future/poll_fn.rs`)
 - **Lint issues:** 1
 
-### 18. future.join_all
+### 8. future.join_all
 
-- **Target:** `futures.JoinAll`
+- **Target:** `futures.JoinAll [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.37
 - **Dependents:** 0
 - **Priority Score:** 40806.3
@@ -283,10 +152,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `iter_pin_mut`, `fmt`
 - **Types:** 1/3 matched (target 2)
 - **Missing types:** `JoinAllKind`, `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/join_all.rs` vs expected `future/join_all.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/join_all.rs` vs expected `future/join_all.rs`
+- **Proposed provenance header:** `// port-lint: source future/join_all.rs` (current: `// port-lint: source futures-util/src/future/join_all.rs`)
+- **Proposed provenance header:** `// port-lint: source future/join_all.rs` (current: `// port-lint: source futures-util/src/future/join_all.rs`)
+- **Lint issues:** 2
 
-### 19. future.try_join_all
+### 9. future.try_join_all
 
-- **Target:** `futures.TryJoinAll`
+- **Target:** `futures.TryJoinAll [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.42
 - **Dependents:** 0
 - **Priority Score:** 40805.8
@@ -294,8 +168,13 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `fmt`
 - **Types:** 1/4 matched (target 2)
 - **Missing types:** `FinalState`, `TryJoinAllKind`, `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_join_all.rs` vs expected `future/try_join_all.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_join_all.rs` vs expected `future/try_join_all.rs`
+- **Proposed provenance header:** `// port-lint: source future/try_join_all.rs` (current: `// port-lint: source futures-util/src/future/try_join_all.rs`)
+- **Proposed provenance header:** `// port-lint: source future/try_join_all.rs` (current: `// port-lint: source futures-util/src/future/try_join_all.rs`)
+- **Lint issues:** 2
 
-### 20. future.select
+### 10. future.select
 
 - **Target:** `futures.Select [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.24
@@ -305,11 +184,13 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `unwrap_option`, `is_terminated`
 - **Types:** 0/2 matched (target 1)
 - **Missing types:** `Select`, `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/select.rs` vs expected `future/select.rs`
 - **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/select.rs` vs expected `future/select.rs`
+- **Proposed provenance header:** `// port-lint: source future/select.rs` (current: `// port-lint: source futures-util/src/future/select.rs`)
 - **Proposed provenance header:** `// port-lint: tests future/select.rs` (current: `// port-lint: tests futures-util/tests/select.rs`)
-- **Lint issues:** 1
+- **Lint issues:** 2
 
-### 21. future.poll_immediate
+### 11. future.poll_immediate
 
 - **Target:** `futures.PollImmediate [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.25
@@ -319,13 +200,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `is_terminated`, `poll_next`
 - **Types:** 0/2 matched (target 1)
 - **Missing types:** `Output`, `Item`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/poll_immediate.rs` vs expected `future/poll_immediate.rs`
 - **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/poll_immediate.rs` vs expected `future/poll_immediate.rs`
+- **Proposed provenance header:** `// port-lint: source future/poll_immediate.rs` (current: `// port-lint: source futures-util/src/future/poll_immediate.rs`)
 - **Proposed provenance header:** `// port-lint: tests future/poll_immediate.rs` (current: `// port-lint: tests futures-util/tests/poll_immediate.rs`)
-- **Lint issues:** 1
+- **Lint issues:** 2
 
-### 22. future.always_ready
+### 12. future.always_ready
 
-- **Target:** `futures.AlwaysReady`
+- **Target:** `futures.AlwaysReady [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.37
 - **Dependents:** 0
 - **Priority Score:** 30706.3
@@ -333,8 +216,13 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `fmt`, `clone`
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/always_ready.rs` vs expected `future/always_ready.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/always_ready.rs` vs expected `future/always_ready.rs`
+- **Proposed provenance header:** `// port-lint: source future/always_ready.rs` (current: `// port-lint: source futures-util/src/future/always_ready.rs`)
+- **Proposed provenance header:** `// port-lint: source future/always_ready.rs` (current: `// port-lint: source futures-util/src/future/always_ready.rs`)
+- **Lint issues:** 2
 
-### 23. future.option
+### 13. future.option
 
 - **Target:** `futures.OptionFuture [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.28
@@ -344,13 +232,29 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `default`, `from`
 - **Types:** 0/1 matched (target 2)
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/option.rs` vs expected `future/option.rs`
 - **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/option.rs` vs expected `future/option.rs`
+- **Proposed provenance header:** `// port-lint: source future/option.rs` (current: `// port-lint: source futures-util/src/future/option.rs`)
 - **Proposed provenance header:** `// port-lint: tests future/option.rs` (current: `// port-lint: tests futures-util/tests/option.rs`)
+- **Lint issues:** 2
+
+### 14. async_await.mod
+
+- **Target:** `mpsc.Mpsc [STUB] [PROVENANCE-FALLBACK]`
+- **Similarity:** 0.00
+- **Dependents:** 0
+- **Priority Score:** 30310.0
+- **Functions:** 0/3 matched (target 51)
+- **Missing functions:** `assert_unpin`, `assert_fused_future`, `assert_fused_stream`
+- **Types:** 0/0 matched (target 9)
+- **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only by basename: `futures-channel/src/mpsc/mod.rs` vs expected `async_await/mod.rs`
+- **Proposed provenance header:** `// port-lint: source async_await/mod.rs` (current: `// port-lint: source futures-channel/src/mpsc/mod.rs`)
 - **Lint issues:** 1
 
-### 24. future.try_maybe_done
+### 15. future.try_maybe_done
 
-- **Target:** `futures.TryMaybeDone`
+- **Target:** `futures.TryMaybeDone [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.39
 - **Dependents:** 0
 - **Priority Score:** 20706.1
@@ -358,10 +262,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `output_mut`
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_maybe_done.rs` vs expected `future/try_maybe_done.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_maybe_done.rs` vs expected `future/try_maybe_done.rs`
+- **Proposed provenance header:** `// port-lint: source future/try_maybe_done.rs` (current: `// port-lint: source futures-util/src/future/try_maybe_done.rs`)
+- **Proposed provenance header:** `// port-lint: source future/try_maybe_done.rs` (current: `// port-lint: source futures-util/src/future/try_maybe_done.rs`)
+- **Lint issues:** 2
 
-### 25. future.maybe_done
+### 16. future.maybe_done
 
-- **Target:** `futures.MaybeDone`
+- **Target:** `futures.MaybeDone [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.41
 - **Dependents:** 0
 - **Priority Score:** 20705.9
@@ -369,10 +278,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `output_mut`
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/maybe_done.rs` vs expected `future/maybe_done.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/maybe_done.rs` vs expected `future/maybe_done.rs`
+- **Proposed provenance header:** `// port-lint: source future/maybe_done.rs` (current: `// port-lint: source futures-util/src/future/maybe_done.rs`)
+- **Proposed provenance header:** `// port-lint: source future/maybe_done.rs` (current: `// port-lint: source futures-util/src/future/maybe_done.rs`)
+- **Lint issues:** 2
 
-### 26. future.pending
+### 17. future.pending
 
-- **Target:** `futures.Pending`
+- **Target:** `futures.Pending [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.52
 - **Dependents:** 0
 - **Priority Score:** 20604.8
@@ -380,10 +294,29 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `clone`
 - **Types:** 1/2 matched (target 1)
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/pending.rs` vs expected `future/pending.rs`
+- **Proposed provenance header:** `// port-lint: source future/pending.rs` (current: `// port-lint: source futures-util/src/future/pending.rs`)
+- **Lint issues:** 1
 
-### 27. future.poll_fn
+### 18. future.lazy
 
-- **Target:** `futures.PollFn`
+- **Target:** `futures.LazyFuture [PROVENANCE-FALLBACK]`
+- **Similarity:** 0.23
+- **Dependents:** 0
+- **Priority Score:** 20507.7
+- **Functions:** 2/3 matched (target 4)
+- **Missing functions:** `lazy`
+- **Types:** 1/2 matched
+- **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/lazy.rs` vs expected `future/lazy.rs`
+- **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/lazy.rs` vs expected `future/lazy.rs`
+- **Proposed provenance header:** `// port-lint: source future/lazy.rs` (current: `// port-lint: source futures-util/src/future/lazy.rs`)
+- **Proposed provenance header:** `// port-lint: tests future/lazy.rs` (current: `// port-lint: tests futures-util/tests/lazy.rs`)
+- **Lint issues:** 2
+
+### 19. future.poll_fn
+
+- **Target:** `futures.PollFn [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.28
 - **Dependents:** 0
 - **Priority Score:** 20507.2
@@ -391,8 +324,11 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `fmt`
 - **Types:** 1/2 matched (target 1)
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/poll_fn.rs` vs expected `future/poll_fn.rs`
+- **Proposed provenance header:** `// port-lint: source future/poll_fn.rs` (current: `// port-lint: source futures-util/src/future/poll_fn.rs`)
+- **Lint issues:** 1
 
-### 28. future.try_join
+### 20. future.try_join
 
 - **Target:** `futures.TryJoin [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.14
@@ -402,24 +338,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `try_join4`, `try_join5`
 - **Types:** 0/0 matched (target 1)
 - **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_join.rs` vs expected `future/try_join.rs`
 - **Provenance warning:** port-lint provenance header matched only by basename: `tests:futures-util/tests/try_join.rs` vs expected `future/try_join.rs`
+- **Proposed provenance header:** `// port-lint: source future/try_join.rs` (current: `// port-lint: source futures-util/src/future/try_join.rs`)
 - **Proposed provenance header:** `// port-lint: tests future/try_join.rs` (current: `// port-lint: tests futures-util/tests/try_join.rs`)
-- **Lint issues:** 1
+- **Lint issues:** 2
 
-### 29. futures-sink.lib
+### 21. future.select_all
 
-- **Target:** `futures.Sink [STUB]`
-- **Similarity:** 0.00
-- **Dependents:** 0
-- **Priority Score:** 10610.0
-- **Functions:** 4/4 matched (target 14)
-- **Missing functions:** _none_
-- **Types:** 1/2 matched (target 4)
-- **Missing types:** `Error`
-
-### 30. future.select_all
-
-- **Target:** `futures.SelectAll`
+- **Target:** `futures.SelectAll [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.64
 - **Dependents:** 0
 - **Priority Score:** 10603.6
@@ -427,10 +354,13 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** _none_
 - **Types:** 1/2 matched (target 1)
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/select_all.rs` vs expected `future/select_all.rs`
+- **Proposed provenance header:** `// port-lint: source future/select_all.rs` (current: `// port-lint: source futures-util/src/future/select_all.rs`)
+- **Lint issues:** 1
 
-### 31. future.try_select
+### 22. future.try_select
 
-- **Target:** `futures.TrySelect`
+- **Target:** `futures.TrySelect [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.73
 - **Dependents:** 0
 - **Priority Score:** 10602.7
@@ -438,10 +368,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** _none_
 - **Types:** 3/4 matched
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_select.rs` vs expected `future/try_select.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/try_select.rs` vs expected `future/try_select.rs`
+- **Proposed provenance header:** `// port-lint: source future/try_select.rs` (current: `// port-lint: source futures-util/src/future/try_select.rs`)
+- **Proposed provenance header:** `// port-lint: source future/try_select.rs` (current: `// port-lint: source futures-util/src/future/try_select.rs`)
+- **Lint issues:** 2
 
-### 32. future.select_ok
+### 23. future.select_ok
 
-- **Target:** `futures.SelectOk`
+- **Target:** `futures.SelectOk [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.59
 - **Dependents:** 0
 - **Priority Score:** 10504.1
@@ -449,10 +384,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** _none_
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/select_ok.rs` vs expected `future/select_ok.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/select_ok.rs` vs expected `future/select_ok.rs`
+- **Proposed provenance header:** `// port-lint: source future/select_ok.rs` (current: `// port-lint: source futures-util/src/future/select_ok.rs`)
+- **Proposed provenance header:** `// port-lint: source future/select_ok.rs` (current: `// port-lint: source futures-util/src/future/select_ok.rs`)
+- **Lint issues:** 2
 
-### 33. futures-util.stream.mod
+### 24. stream.mod
 
-- **Target:** `futures.StreamCombinators [STUB]`
+- **Target:** `futures.StreamCombinators [STUB] [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
 - **Dependents:** 0
 - **Priority Score:** 10110.0
@@ -460,10 +400,15 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `assert_stream`
 - **Types:** 0/0 matched (target 2)
 - **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/stream/mod.rs` vs expected `stream/mod.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:futures-util/src/stream/mod.rs` vs expected `stream/mod.rs`
+- **Proposed provenance header:** `// port-lint: source stream/mod.rs` (current: `// port-lint: source futures-util/src/stream/mod.rs`)
+- **Proposed provenance header:** `// port-lint: tests stream/mod.rs` (current: `// port-lint: tests futures-util/src/stream/mod.rs`)
+- **Lint issues:** 2
 
-### 34. futures-util.future.mod
+### 25. future.mod
 
-- **Target:** `futures.FutureCombinators [STUB]`
+- **Target:** `futures.FutureCombinators [STUB] [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
 - **Dependents:** 0
 - **Priority Score:** 10110.0
@@ -471,21 +416,45 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** `assert_future`
 - **Types:** 0/0 matched (target 2)
 - **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/mod.rs` vs expected `future/mod.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:futures-util/src/future/mod.rs` vs expected `future/mod.rs`
+- **Proposed provenance header:** `// port-lint: source future/mod.rs` (current: `// port-lint: source futures-util/src/future/mod.rs`)
+- **Proposed provenance header:** `// port-lint: tests future/mod.rs` (current: `// port-lint: tests futures-util/src/future/mod.rs`)
+- **Lint issues:** 2
 
-### 35. future.join
+### 26. future.join
 
-- **Target:** `futures.Join`
+- **Target:** `futures.Join [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.57
 - **Dependents:** 0
 - **Priority Score:** 404.3
-- **Functions:** 4/4 matched (target 12)
+- **Functions:** 4/4 matched (target 16)
 - **Missing functions:** _none_
-- **Types:** 0/0 matched (target 6)
+- **Types:** 0/0 matched (target 7)
 - **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/join.rs` vs expected `future/join.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-util/src/future/join.rs` vs expected `future/join.rs`
+- **Proposed provenance header:** `// port-lint: source future/join.rs` (current: `// port-lint: source futures-util/src/future/join.rs`)
+- **Proposed provenance header:** `// port-lint: source future/join.rs` (current: `// port-lint: source futures-util/src/future/join.rs`)
+- **Lint issues:** 2
 
-### 36. futures-core.task.mod
+### 27. lib
 
-- **Target:** `futures.Task [STUB]`
+- **Target:** `futures.Sink [STUB] [PROVENANCE-FALLBACK]`
+- **Similarity:** 0.00
+- **Dependents:** 0
+- **Priority Score:** 10.0
+- **Functions:** 0/0 matched (target 14)
+- **Missing functions:** _none_
+- **Types:** 0/0 matched (target 4)
+- **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-sink/src/lib.rs` vs expected `lib.rs`
+- **Proposed provenance header:** `// port-lint: source lib.rs` (current: `// port-lint: source futures-sink/src/lib.rs`)
+- **Lint issues:** 1
+
+### 28. task.mod
+
+- **Target:** `futures.Task [STUB] [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
 - **Dependents:** 0
 - **Priority Score:** 10.0
@@ -493,6 +462,9 @@ Every matched file is listed below with function and type symbol parity.
 - **Missing functions:** _none_
 - **Types:** 0/0 matched (target 4)
 - **Missing types:** _none_
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-core/src/task/mod.rs` vs expected `task/mod.rs`
+- **Proposed provenance header:** `// port-lint: source task/mod.rs` (current: `// port-lint: source futures-core/src/task/mod.rs`)
+- **Lint issues:** 1
 
 ## Success Criteria
 
@@ -514,32 +486,13 @@ do not treat them as the next implementation target by default.
 
 | Source | Expected target | Deps | Source path | Expected path |
 |--------|-----------------|------|-------------|---------------|
-| `futures-channel.lib` | `futureschannel.src.Lib` | 0 | `futures-channel/src/lib.rs` | `futureschannel/src/Lib.kt` |
-| `futures-core.lib` | `futurescore.src.Lib` | 0 | `futures-core/src/lib.rs` | `futurescore/src/Lib.kt` |
-| `__internal.mod` | `futurescore.src.task.internal.Mod` | 0 | `futures-core/src/task/__internal/mod.rs` | `futurescore/src/task/internal/Mod.kt` |
-| `futures-executor.lib` | `futuresexecutor.src.Lib` | 0 | `futures-executor/src/lib.rs` | `futuresexecutor/src/Lib.kt` |
-| `futures-io.lib` | `futuresio.src.Lib` | 0 | `futures-io/src/lib.rs` | `futuresio/src/Lib.kt` |
-| `futures-macro.lib` | `futuresmacro.src.Lib` | 0 | `futures-macro/src/lib.rs` | `futuresmacro/src/Lib.kt` |
-| `futures-task.lib` | `futurestask.src.Lib` | 0 | `futures-task/src/lib.rs` | `futurestask/src/Lib.kt` |
-| `future.mod` | `futurestest.src.future.Mod` | 0 | `futures-test/src/future/mod.rs` | `futurestest/src/future/Mod.kt` |
-| `io.mod` | `futurestest.src.io.Mod` | 0 | `futures-test/src/io/mod.rs` | `futurestest/src/io/Mod.kt` |
-| `read.mod` | `futurestest.src.io.read.Mod` | 0 | `futures-test/src/io/read/mod.rs` | `futurestest/src/io/read/Mod.kt` |
-| `write.mod` | `futurestest.src.io.write.Mod` | 0 | `futures-test/src/io/write/mod.rs` | `futurestest/src/io/write/Mod.kt` |
-| `futures-test.lib` | `futurestest.src.Lib` | 0 | `futures-test/src/lib.rs` | `futurestest/src/Lib.kt` |
-| `sink.mod` | `futurestest.src.sink.Mod` | 0 | `futures-test/src/sink/mod.rs` | `futurestest/src/sink/Mod.kt` |
-| `stream.mod` | `futurestest.src.stream.Mod` | 0 | `futures-test/src/stream/mod.rs` | `futurestest/src/stream/Mod.kt` |
-| `task.mod` | `futurestest.src.task.Mod` | 0 | `futures-test/src/task/mod.rs` | `futurestest/src/task/Mod.kt` |
-| `async_await.mod` | `futuresutil.src.asyncawait.Mod` | 0 | `futures-util/src/async_await/mod.rs` | `futuresutil/src/asyncawait/Mod.kt` |
-| `compat.mod` | `futuresutil.src.compat.Mod` | 0 | `futures-util/src/compat/mod.rs` | `futuresutil/src/compat/Mod.kt` |
-| `futures-util.future.future.mod` | `futuresutil.src.future.future.Mod` | 0 | `futures-util/src/future/future/mod.rs` | `futuresutil/src/future/future/Mod.kt` |
-| `try_future.mod` | `futuresutil.src.future.tryfuture.Mod` | 0 | `futures-util/src/future/try_future/mod.rs` | `futuresutil/src/future/tryfuture/Mod.kt` |
-| `futures-util.io.mod` | `futuresutil.src.io.Mod` | 0 | `futures-util/src/io/mod.rs` | `futuresutil/src/io/Mod.kt` |
-| `futures-util.lib` | `futuresutil.src.Lib` | 0 | `futures-util/src/lib.rs` | `futuresutil/src/Lib.kt` |
-| `lock.mod` | `futuresutil.src.lock.Mod` | 0 | `futures-util/src/lock/mod.rs` | `futuresutil/src/lock/Mod.kt` |
-| `futures-util.sink.mod` | `futuresutil.src.sink.Mod` | 0 | `futures-util/src/sink/mod.rs` | `futuresutil/src/sink/Mod.kt` |
-| `futures_unordered.mod` | `futuresutil.src.stream.futuresunordered.Mod` | 0 | `futures-util/src/stream/futures_unordered/mod.rs` | `futuresutil/src/stream/futuresunordered/Mod.kt` |
-| `futures-util.stream.stream.mod` | `futuresutil.src.stream.stream.Mod` | 0 | `futures-util/src/stream/stream/mod.rs` | `futuresutil/src/stream/stream/Mod.kt` |
-| `try_stream.mod` | `futuresutil.src.stream.trystream.Mod` | 0 | `futures-util/src/stream/try_stream/mod.rs` | `futuresutil/src/stream/trystream/Mod.kt` |
-| `futures-util.task.mod` | `futuresutil.src.task.Mod` | 0 | `futures-util/src/task/mod.rs` | `futuresutil/src/task/Mod.kt` |
-| `futures.lib` | `futures.src.Lib` | 0 | `futures/src/lib.rs` | `futures/src/Lib.kt` |
+| `compat.mod` | `compat.Mod` | 0 | `compat/mod.rs` | `compat/Mod.kt` |
+| `future.future.mod` | `future.future.Mod` | 0 | `future/future/mod.rs` | `future/future/Mod.kt` |
+| `try_future.mod` | `future.tryfuture.Mod` | 0 | `future/try_future/mod.rs` | `future/tryfuture/Mod.kt` |
+| `io.mod` | `io.Mod` | 0 | `io/mod.rs` | `io/Mod.kt` |
+| `lock.mod` | `lock.Mod` | 0 | `lock/mod.rs` | `lock/Mod.kt` |
+| `sink.mod` | `sink.Mod` | 0 | `sink/mod.rs` | `sink/Mod.kt` |
+| `futures_unordered.mod` | `stream.futuresunordered.Mod` | 0 | `stream/futures_unordered/mod.rs` | `stream/futuresunordered/Mod.kt` |
+| `stream.stream.mod` | `stream.stream.Mod` | 0 | `stream/stream/mod.rs` | `stream/stream/Mod.kt` |
+| `try_stream.mod` | `stream.trystream.Mod` | 0 | `stream/try_stream/mod.rs` | `stream/trystream/Mod.kt` |
 
