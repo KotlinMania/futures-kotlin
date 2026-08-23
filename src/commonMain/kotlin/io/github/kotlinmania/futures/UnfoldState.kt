@@ -34,4 +34,8 @@ public sealed class UnfoldState<out T, out R> {
             is Value -> value
             else -> null
         }
+
+    public fun projectFuture(): R? = futureOrNull()
+
+    public fun takeValue(): T? = valueOrNull()
 }

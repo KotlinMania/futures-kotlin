@@ -1,8 +1,18 @@
 // port-lint: source futures-channel/src/oneshot.rs
-@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+@file:OptIn(
+    kotlin.experimental.ExperimentalObjCRefinement::class,
+    kotlin.concurrent.atomics.ExperimentalAtomicApi::class,
+)
 
-package io.github.kotlinmania.futures
+package io.github.kotlinmania.futures.channel.oneshot
 
+import io.github.kotlinmania.futures.FusedFuture
+import io.github.kotlinmania.futures.Future
+import io.github.kotlinmania.futures.Lock
+import io.github.kotlinmania.futures.Poll
+import io.github.kotlinmania.futures.TaskContext
+import io.github.kotlinmania.futures.Try
+import io.github.kotlinmania.futures.Waker
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.native.HiddenFromObjC

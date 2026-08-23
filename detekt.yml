@@ -90,6 +90,7 @@ naming:
   FunctionParameterNaming: { active: false }
   MatchingDeclarationName: { active: false }
   ObjectPropertyNaming: { active: false }
+  MemberNameEqualsClassName: { active: false }
 
 exceptions:
   active: true
