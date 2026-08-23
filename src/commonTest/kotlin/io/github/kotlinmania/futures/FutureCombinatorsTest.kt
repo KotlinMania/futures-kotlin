@@ -42,8 +42,7 @@ class FutureCombinatorsTest {
         assertTrue(res is Poll.Ready)
         assertEquals(Pair(10, "hello"), res.value)
 
-        val f3 = ready(true)
-        val joined3 = join3(f1, f2, f3)
+        val joined3 = join3(ready(10), ready("hello"), ready(true))
         val res3 = joined3.poll(TaskContext())
         assertTrue(res3 is Poll.Ready)
         assertEquals(Triple(10, "hello", true), res3.value)
