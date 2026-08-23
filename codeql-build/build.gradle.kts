@@ -171,6 +171,90 @@ fun registerCodeqlCompileTask(
                     .joinToString(File.pathSeparator) { it.absolutePath }
             val commonSourceFiles = commonSources.files.toMutableList()
             val sourceFiles = sources.files.toMutableList()
+            val stubProcMacro = dummySourceDir.get().file("io/github/kotlinmania/procmacro2/ProcMacroStub.kt").asFile
+            stubProcMacro.parentFile.mkdirs()
+            stubProcMacro.writeText(
+                "package io.github.kotlinmania.procmacro2\n\n" +
+                    "enum class Delimiter { Parenthesis, Brace, Bracket, None }\n" +
+                    "enum class Spacing { Alone, Joint }\n" +
+                    "class Span { companion object { fun callSite(): Span = Span() } }\n" +
+                    "open class TokenTree\n" +
+                    "class Group(val delimiter: Delimiter, val stream: TokenStream) : TokenTree()\n" +
+                    "class Ident private constructor() : TokenTree() {\n" +
+                    "    companion object { fun new(string: String, span: Span): Ident = Ident() }\n" +
+                    "}\n" +
+                    "class Literal private constructor() : TokenTree() {\n" +
+                    "    companion object { fun string(string: String): Literal = Literal() }\n" +
+                    "}\n" +
+                    "class Punct(val asChar: Char, val spacing: Spacing) : TokenTree()\n" +
+                    "class TokenStream {\n" +
+                    "    companion object { fun new(): TokenStream = TokenStream() }\n" +
+                    "    fun append(tree: TokenTree) {}\n" +
+                    "    fun extendTokenStreams(streams: Iterable<TokenStream>) {}\n" +
+                    "}\n",
+            )
+            commonSourceFiles.add(stubProcMacro)
+            sourceFiles.add(stubProcMacro)
+
+            val stubQuote = dummySourceDir.get().file("io/github/kotlinmania/quote/QuoteStub.kt").asFile
+            stubQuote.parentFile.mkdirs()
+            stubQuote.writeText(
+                "package io.github.kotlinmania.quote\n\n" +
+                    "import io.github.kotlinmania.procmacro2.TokenStream\n" +
+                    "import io.github.kotlinmania.procmacro2.TokenTree\n\n" +
+                    "interface ToTokens {\n" +
+                    "    fun toTokens(tokens: TokenStream)\n" +
+                    "}\n\n" +
+                    "fun TokenStream.append(token: TokenTree) {}\n",
+            )
+            commonSourceFiles.add(stubQuote)
+            sourceFiles.add(stubQuote)
+
+            val stubSyn = dummySourceDir.get().file("io/github/kotlinmania/syn/SynStub.kt").asFile
+            stubSyn.parentFile.mkdirs()
+            stubSyn.writeText(
+                "package io.github.kotlinmania.syn\n\n" +
+                    "import io.github.kotlinmania.procmacro2.Punct\n" +
+                    "import io.github.kotlinmania.procmacro2.TokenStream\n" +
+                    "import io.github.kotlinmania.quote.ToTokens\n\n" +
+                    "class SynError {\n" +
+                    "    fun intoCompileError(): TokenStream = TokenStream.new()\n" +
+                    "}\n\n" +
+                    "sealed class SynResult<out T> {\n" +
+                    "    companion object {\n" +
+                    "        fun <T> success(value: T): SynResult<T> = Success(value)\n" +
+                    "        fun <T> failure(error: SynError): SynResult<T> = Failure(error)\n" +
+                    "    }\n" +
+                    "    class Success<out T>(val value: T) : SynResult<T>()\n" +
+                    "    class Failure<out T>(val error: SynError) : SynResult<T>()\n" +
+                    "    inline fun getOrElse(onFailure: (SynError) -> @UnsafeVariance T): T =\n" +
+                    "        when (this) {\n" +
+                    "            is Success -> value\n" +
+                    "            is Failure -> onFailure(error)\n" +
+                    "        }\n" +
+                    "}\n\n" +
+                    "interface ParseStream {\n" +
+                    "    fun isEmpty(): Boolean = true\n" +
+                    "}\n\n" +
+                    "interface Expr : ToTokens\n\n" +
+                    "class ExprList : ToTokens {\n" +
+                    "    fun toList(): List<Expr> = emptyList()\n" +
+                    "    fun pushValue(value: Expr) {}\n" +
+                    "    fun pushPunct(punct: Punct) {}\n" +
+                    "    override fun toTokens(tokens: TokenStream) {}\n" +
+                    "}\n\n" +
+                    "fun parseExpr(input: ParseStream): SynResult<Expr> = SynResult.failure(SynError())\n\n" +
+                    "object CommaParse {\n" +
+                    "    fun parse(input: ParseStream): SynResult<Punct> = SynResult.failure(SynError())\n" +
+                    "}\n\n" +
+                    "fun <T> parse2(\n" +
+                    "    parser: (ParseStream) -> SynResult<T>,\n" +
+                    "    tokens: TokenStream,\n" +
+                    "): SynResult<T> = SynResult.failure(SynError())\n",
+            )
+            commonSourceFiles.add(stubSyn)
+            sourceFiles.add(stubSyn)
+
             // If no real sources were found, use the dummy source generated in onlyIf.
             if (commonSourceFiles.isEmpty()) {
                 commonSourceFiles.add(dummySourceFile.get().asFile)
