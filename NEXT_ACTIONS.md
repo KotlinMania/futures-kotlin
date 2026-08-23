@@ -4,14 +4,14 @@ Based on AST analysis, here are the concrete next steps.
 
 ## Summary
 
-- **Files Present:** 5/7 (71.4%)
-- **Function parity:** 8/12 matched (target 37) — 66.7%
-- **Class/type parity:** 9/18 matched (target 23) — 50.0%
-- **Combined symbol parity:** 17/30 matched (target 60) — 56.7%
-- **Average inline-code cosine:** 0.19 (function body across 3 matched files)
-- **Average documentation cosine:** 0.54 (doc text across 3 matched files)
+- **Files Present:** 2/181 (1.1%)
+- **Function parity:** 0/1035 matched (target 19) — 0.0%
+- **Class/type parity:** 0/357 matched (target 8) — 0.0%
+- **Combined symbol parity:** 0/1392 matched (target 27) — 0.0%
+- **Average inline-code cosine:** 0.00 (function body across 0 matched files)
+- **Average documentation cosine:** 0.00 (doc text across 0 matched files)
 - **Cheat-zeroed Files:** 2
-- **Critical Issues:** 5 files with <0.60 function similarity
+- **Critical Issues:** 2 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
 
@@ -21,55 +21,19 @@ No incomplete high-dependency files detected.
 
 Critical missing files (>10 dependencies):
 
-No missing high-value files detected.
+1. **future.ready** (82 deps)
+   - Path: `future/ready.rs`
+   - Essential for 82 other files
+
+2. **io.sink** (54 deps)
+   - Path: `io/sink.rs`
+   - Essential for 54 other files
 
 ## Detailed Work Items
 
 Every matched file is listed below with function and type symbol parity.
 
-### 1. __internal.atomic_waker
-
-- **Target:** `futures.AtomicWaker [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.34
-- **Dependents:** 1
-- **Priority Score:** 1030806.6
-- **Functions:** 4/6 matched (target 4)
-- **Missing functions:** `default`, `fmt`
-- **Types:** 1/2 matched (target 1)
-- **Missing types:** `AssertSync`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-core/src/task/__internal/atomic_waker.rs` vs expected `task/__internal/atomic_waker.rs`
-- **Proposed provenance header:** `// port-lint: source task/__internal/atomic_waker.rs` (current: `// port-lint: source futures-core/src/task/__internal/atomic_waker.rs`)
-- **Lint issues:** 1
-
-### 2. stream
-
-- **Target:** `futures.Stream [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.15
-- **Dependents:** 0
-- **Priority Score:** 71308.5
-- **Functions:** 3/4 matched (target 9)
-- **Missing functions:** `is_terminated`
-- **Types:** 3/9 matched (target 7)
-- **Missing types:** `BoxStream`, `LocalBoxStream`, `Item`, `Sealed`, `Ok`, `Error`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-core/src/stream.rs` vs expected `stream.rs`
-- **Proposed provenance header:** `// port-lint: source stream.rs` (current: `// port-lint: source futures-core/src/stream.rs`)
-- **Lint issues:** 1
-
-### 3. future
-
-- **Target:** `futures.Future [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.10
-- **Dependents:** 0
-- **Priority Score:** 30909.0
-- **Functions:** 1/2 matched (target 5)
-- **Missing functions:** `is_terminated`
-- **Types:** 5/7 matched
-- **Missing types:** `Sealed`, `Error`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `futures-core/src/future.rs` vs expected `future.rs`
-- **Proposed provenance header:** `// port-lint: source future.rs` (current: `// port-lint: source futures-core/src/future.rs`)
-- **Lint issues:** 1
-
-### 4. lib
+### 1. lib
 
 - **Target:** `futures.Sink [STUB] [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
@@ -83,7 +47,7 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: source lib.rs` (current: `// port-lint: source futures-sink/src/lib.rs`)
 - **Lint issues:** 1
 
-### 5. task.mod
+### 2. task.mod
 
 - **Target:** `futures.Task [STUB] [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.00
@@ -117,5 +81,16 @@ do not treat them as the next implementation target by default.
 
 | Source | Expected target | Deps | Source path | Expected path |
 |--------|-----------------|------|-------------|---------------|
-| `__internal.mod` | `task.internal.Mod` | 0 | `task/__internal/mod.rs` | `task/internal/Mod.kt` |
+| `async_await.mod` | `asyncawait.Mod` | 0 | `async_await/mod.rs` | `asyncawait/Mod.kt` |
+| `compat.mod` | `compat.Mod` | 0 | `compat/mod.rs` | `compat/Mod.kt` |
+| `future.future.mod` | `future.future.Mod` | 0 | `future/future/mod.rs` | `future/future/Mod.kt` |
+| `future.mod` | `future.Mod` | 0 | `future/mod.rs` | `future/Mod.kt` |
+| `try_future.mod` | `future.tryfuture.Mod` | 0 | `future/try_future/mod.rs` | `future/tryfuture/Mod.kt` |
+| `io.mod` | `io.Mod` | 0 | `io/mod.rs` | `io/Mod.kt` |
+| `lock.mod` | `lock.Mod` | 0 | `lock/mod.rs` | `lock/Mod.kt` |
+| `sink.mod` | `sink.Mod` | 0 | `sink/mod.rs` | `sink/Mod.kt` |
+| `futures_unordered.mod` | `stream.futuresunordered.Mod` | 0 | `stream/futures_unordered/mod.rs` | `stream/futuresunordered/Mod.kt` |
+| `stream.mod` | `stream.Mod` | 0 | `stream/mod.rs` | `stream/Mod.kt` |
+| `stream.stream.mod` | `stream.stream.Mod` | 0 | `stream/stream/mod.rs` | `stream/stream/Mod.kt` |
+| `try_stream.mod` | `stream.trystream.Mod` | 0 | `stream/try_stream/mod.rs` | `stream/trystream/Mod.kt` |
 
