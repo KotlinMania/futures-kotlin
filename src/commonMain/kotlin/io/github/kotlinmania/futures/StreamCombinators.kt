@@ -681,3 +681,279 @@ public fun <Item, E> Sink<Item, E>.close(): Future<Try<Unit, E>> {
             }
     }
 }
+
+/**
+ * Flattens a stream of streams into a single stream.
+ */
+@HiddenFromObjC
+public fun <T> Stream<Stream<T>>.flatten(): Stream<T> {
+    val outer = this
+    var currentInner: Stream<T>? = null
+    var outerExhausted = false
+
+    return object : Stream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> {
+            while (true) {
+                val inner = currentInner
+                if (inner != null) {
+                    when (val p = inner.pollNext(context)) {
+                        is Poll.Ready -> {
+                            when (val y = p.value) {
+                                is Yield.Value -> return Poll.ready(y)
+                                Yield.End -> currentInner = null
+                            }
+                        }
+                        Poll.Pending -> return Poll.pending()
+                    }
+                } else if (!outerExhausted) {
+                    when (val p = outer.pollNext(context)) {
+                        is Poll.Ready -> {
+                            when (val y = p.value) {
+                                is Yield.Value -> currentInner = y.value
+                                Yield.End -> {
+                                    outerExhausted = true
+                                    return Poll.ready(Yield.end())
+                                }
+                            }
+                        }
+                        Poll.Pending -> return Poll.pending()
+                    }
+                } else {
+                    return Poll.ready(Yield.end())
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Collects a stream of pairs into two separate lists.
+ */
+@HiddenFromObjC
+public fun <A, B> Stream<Pair<A, B>>.unzip(): Future<Pair<List<A>, List<B>>> {
+    val stream = this
+    val first = mutableListOf<A>()
+    val second = mutableListOf<B>()
+
+    return object : Future<Pair<List<A>, List<B>>> {
+        override fun poll(context: TaskContext): Poll<Pair<List<A>, List<B>>> {
+            while (true) {
+                when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                first.add(y.value.first)
+                                second.add(y.value.second)
+                            }
+                            Yield.End -> return Poll.ready(Pair(first.toList(), second.toList()))
+                        }
+                    }
+                    Poll.Pending -> return Poll.pending()
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Calls a closure on each element of the stream, passing the value through unchanged.
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.inspect(action: (T) -> Unit): Stream<T> {
+    val stream = this
+    return object : Stream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> =
+            when (val p = stream.pollNext(context)) {
+                is Poll.Ready -> {
+                    when (val y = p.value) {
+                        is Yield.Value -> {
+                            action(y.value)
+                            Poll.ready(y)
+                        }
+                        Yield.End -> Poll.ready(Yield.end())
+                    }
+                }
+                Poll.Pending -> Poll.pending()
+            }
+
+        override fun sizeHint(): SizeHint = stream.sizeHint()
+    }
+}
+
+/**
+ * An iterator adaptor that applies a stateful function across items in the stream.
+ */
+@HiddenFromObjC
+public fun <T, S, R> Stream<T>.scan(initial: S, transform: (S, T) -> Pair<S, R>?): Stream<R> {
+    val stream = this
+    var state = initial
+    var done = false
+
+    return object : Stream<R> {
+        override fun pollNext(context: TaskContext): Poll<Yield<R>> {
+            if (done) return Poll.ready(Yield.end())
+            while (true) {
+                when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                val result = transform(state, y.value)
+                                if (result != null) {
+                                    state = result.first
+                                    return Poll.ready(Yield.value(result.second))
+                                } else {
+                                    done = true
+                                    return Poll.ready(Yield.end())
+                                }
+                            }
+                            Yield.End -> {
+                                done = true
+                                return Poll.ready(Yield.end())
+                            }
+                        }
+                    }
+                    Poll.Pending -> return Poll.pending()
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Runs the stream to completion, calling the provided closure for each item.
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.forEach(action: (T) -> Unit): Future<Unit> {
+    val stream = this
+    return object : Future<Unit> {
+        override fun poll(context: TaskContext): Poll<Unit> {
+            while (true) {
+                when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> action(y.value)
+                            Yield.End -> return Poll.ready(Unit)
+                        }
+                    }
+                    Poll.Pending -> return Poll.pending()
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Batches elements into fixed-size chunks.
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.chunks(size: Int): Stream<List<T>> {
+    require(size > 0) { "chunk size must be greater than 0" }
+    val stream = this
+    val buffer = mutableListOf<T>()
+    var streamExhausted = false
+
+    return object : Stream<List<T>> {
+        override fun pollNext(context: TaskContext): Poll<Yield<List<T>>> {
+            if (streamExhausted) return Poll.ready(Yield.end())
+            while (buffer.size < size) {
+                when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> buffer.add(y.value)
+                            Yield.End -> {
+                                streamExhausted = true
+                                break
+                            }
+                        }
+                    }
+                    Poll.Pending -> return Poll.pending()
+                }
+            }
+            return if (buffer.isNotEmpty()) {
+                val chunk = buffer.toList()
+                buffer.clear()
+                Poll.ready(Yield.value(chunk))
+            } else {
+                Poll.ready(Yield.end())
+            }
+        }
+
+        override fun sizeHint(): SizeHint {
+            val inner = stream.sizeHint()
+            val lower = inner.lower / size
+            val upper = inner.upper?.let { (it + size - 1) / size }
+            return SizeHint(lower, upper)
+        }
+    }
+}
+
+/**
+ * Yields elements from the stream until [stopFuture] completes.
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.takeUntil(stopFuture: Future<*>): Stream<T> {
+    val stream = this
+    var stopped = false
+
+    return object : Stream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> {
+            if (stopped) return Poll.ready(Yield.end())
+            when (stopFuture.poll(context)) {
+                is Poll.Ready -> {
+                    stopped = true
+                    return Poll.ready(Yield.end())
+                }
+                Poll.Pending -> {}
+            }
+            return when (val p = stream.pollNext(context)) {
+                is Poll.Ready -> {
+                    when (p.value) {
+                        is Yield.Value -> Poll.ready(p.value)
+                        Yield.End -> {
+                            stopped = true
+                            Poll.ready(Yield.end())
+                        }
+                    }
+                }
+                Poll.Pending -> Poll.pending()
+            }
+        }
+    }
+}
+
+/**
+ * Transforms each element into a [Future] and yields the resolved values in order.
+ */
+@HiddenFromObjC
+public fun <T, R> Stream<T>.then(transform: (T) -> Future<R>): Stream<R> {
+    val stream = this
+    var activeFuture: Future<R>? = null
+
+    return object : Stream<R> {
+        override fun pollNext(context: TaskContext): Poll<Yield<R>> {
+            while (true) {
+                val fut = activeFuture
+                if (fut != null) {
+                    when (val p = fut.poll(context)) {
+                        is Poll.Ready -> {
+                            activeFuture = null
+                            return Poll.ready(Yield.value(p.value))
+                        }
+                        Poll.Pending -> return Poll.pending()
+                    }
+                } else {
+                    when (val p = stream.pollNext(context)) {
+                        is Poll.Ready -> {
+                            when (val y = p.value) {
+                                is Yield.Value -> activeFuture = transform(y.value)
+                                Yield.End -> return Poll.ready(Yield.end())
+                            }
+                        }
+                        Poll.Pending -> return Poll.pending()
+                    }
+                }
+            }
+        }
+    }
+}
+

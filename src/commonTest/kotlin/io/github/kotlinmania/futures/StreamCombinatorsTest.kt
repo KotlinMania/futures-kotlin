@@ -195,4 +195,98 @@ class StreamCombinatorsTest {
         assertIs<Poll.Ready<List<Int>>>(repWith)
         assertEquals(listOf(1, 2, 3), repWith.value)
     }
+
+    @Test
+    fun flattenStream() {
+        val cx = TaskContext()
+        val s1 = listOf(1, 2).asStream()
+        val s2 = listOf(3, 4, 5).asStream()
+        val outer = listOf(s1, s2).asStream()
+
+        val flattened = outer.flatten().collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(flattened)
+        assertEquals(listOf(1, 2, 3, 4, 5), flattened.value)
+    }
+
+    @Test
+    fun unzipStream() {
+        val cx = TaskContext()
+        val stream = listOf(Pair("a", 1), Pair("b", 2), Pair("c", 3)).asStream()
+        val unzipped = stream.unzip().poll(cx)
+        assertIs<Poll.Ready<Pair<List<String>, List<Int>>>>(unzipped)
+        assertEquals(listOf("a", "b", "c"), unzipped.value.first)
+        assertEquals(listOf(1, 2, 3), unzipped.value.second)
+    }
+
+    @Test
+    fun inspectStream() {
+        val cx = TaskContext()
+        val seen = mutableListOf<Int>()
+        val stream = listOf(1, 2, 3).asStream().inspect { seen.add(it * 2) }
+
+        val collected = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(collected)
+        assertEquals(listOf(1, 2, 3), collected.value)
+        assertEquals(listOf(2, 4, 6), seen)
+    }
+
+    @Test
+    fun scanStream() {
+        val cx = TaskContext()
+        val stream = listOf(1, 2, 3, 4).asStream().scan(0) { state, item ->
+            val sum = state + item
+            Pair(sum, sum)
+        }
+
+        val res = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(res)
+        assertEquals(listOf(1, 3, 6, 10), res.value)
+    }
+
+    @Test
+    fun forEachStream() {
+        val cx = TaskContext()
+        val accumulated = mutableListOf<Int>()
+        val future = listOf(10, 20, 30).asStream().forEach { accumulated.add(it) }
+
+        val res = future.poll(cx)
+        assertIs<Poll.Ready<Unit>>(res)
+        assertEquals(listOf(10, 20, 30), accumulated)
+    }
+
+    @Test
+    fun chunksStream() {
+        val cx = TaskContext()
+        val stream = listOf(1, 2, 3, 4, 5, 6, 7).asStream().chunks(3)
+
+        val res = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<List<Int>>>>(res)
+        assertEquals(listOf(listOf(1, 2, 3), listOf(4, 5, 6), listOf(7)), res.value)
+    }
+
+    @Test
+    fun takeUntilStream() {
+        val cx = TaskContext()
+        val (tx, rx) = unbounded<Int>()
+        tx.unboundedSend(1)
+        tx.unboundedSend(2)
+        tx.unboundedSend(3)
+
+        val stopFuture = Ready(Unit)
+        val stream = rx.takeUntil(stopFuture)
+
+        val p = stream.pollNext(cx)
+        assertIs<Poll.Ready<Yield<Int>>>(p)
+        assertEquals(Yield.end(), p.value)
+    }
+
+    @Test
+    fun thenStream() {
+        val cx = TaskContext()
+        val stream = listOf(1, 2, 3).asStream().then { Ready(it * 10) }
+
+        val res = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(res)
+        assertEquals(listOf(10, 20, 30), res.value)
+    }
 }
