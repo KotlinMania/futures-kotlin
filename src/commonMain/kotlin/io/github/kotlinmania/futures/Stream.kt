@@ -16,11 +16,19 @@ import kotlin.native.HiddenFromObjC
  * is exhausted when [Yield.End] is returned; calling [pollNext] again after
  * exhaustion is not required to behave sensibly.
  *
- * Hidden from Swift Export: depends on the generic [Poll] and [Yield]
- * carriers whose bridges would emit `KotlinStdlib.kt` unchecked-cast
- * warnings that fail under `allWarningsAsErrors`. See
  * `SWIFT_EXPORT_ROLLOUT.md` gap #3.
  */
+/**
+ * An owned dynamically typed [Stream] for cases where the result cannot be
+ * statically typed or needs an extra level of indirection.
+ */
+public typealias BoxStream<T> = Stream<T>
+
+/**
+ * [BoxStream], but without a cross-thread sending requirement.
+ */
+public typealias LocalBoxStream<T> = Stream<T>
+
 @HiddenFromObjC
 public interface Stream<out T> {
     /**

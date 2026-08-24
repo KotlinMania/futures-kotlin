@@ -1,9 +1,9 @@
-import XCTest
+import Testing
 import Futures
 
-// Smoke test for the Kotlin → Swift Export → SPM → swift test pipeline.
+// Parity tests for the Kotlin → Swift Export → SPM → swift test pipeline.
 //
-// The file's mere existence and successful compilation prove three layers
+// The presence and successful compilation of this file proves three layers
 // of the pipeline:
 //
 //   1. `embedSwiftExportForXcode` produced `Futures.swiftmodule/`
@@ -24,12 +24,10 @@ import Futures
 //      build.gradle.kts produced a module name that's both syntactically
 //      valid as a Swift identifier and reachable from this Package.swift
 //      via the `FuturesLibrary` product.
-//
-// Add more meaningful per-API tests below as the Swift Export surface
-// grows. For now the import + a single passing assertion is the
-// canary that the pipeline is green for this repo.
-final class FuturesExportTests: XCTestCase {
-    func testSwiftModuleLoads() throws {
-        XCTAssertTrue(true, "Futures swift module imported cleanly")
+
+@Suite struct FuturesExportTests {
+    @Test func testSwiftModuleLoads() {
+        let waker = AtomicWaker()
+        #expect(waker.take() == nil)
     }
 }
