@@ -55,6 +55,29 @@ class TryJoinTest {
     }
 
     @Test
+    fun testTryJoin4AndTryJoin5() {
+        val f1 = ready(Try.ok(1))
+        val f2 = ready(Try.ok(2))
+        val f3 = ready(Try.ok(3))
+        val f4 = ready(Try.ok(4))
+        val joined4 = tryJoin4(f1, f2, f3, f4)
+
+        val res4 = joined4.poll(TaskContext())
+        assertTrue(res4 is Poll.Ready<*>)
+        val v4 = (res4 as Poll.Ready<Try<Tuple4<Int, Int, Int, Int>, Nothing>>).value
+        assertTrue(v4 is Try.Ok)
+        assertEquals(Tuple4(1, 2, 3, 4), v4.value)
+
+        val f5 = ready(Try.ok(5))
+        val joined5 = tryJoin5(ready(Try.ok(1)), ready(Try.ok(2)), ready(Try.ok(3)), ready(Try.ok(4)), f5)
+        val res5 = joined5.poll(TaskContext())
+        assertTrue(res5 is Poll.Ready<*>)
+        val v5 = (res5 as Poll.Ready<Try<Tuple5<Int, Int, Int, Int, Int>, Nothing>>).value
+        assertTrue(v5 is Try.Ok)
+        assertEquals(Tuple5(1, 2, 3, 4, 5), v5.value)
+    }
+
+    @Test
     fun tryJoinNeverError() {
         val f1: Future<Try<Unit, Nothing>> = ready(Try.ok(Unit))
         val f2: Future<Try<Unit, Nothing>> = ready(Try.ok(Unit))
