@@ -55,4 +55,11 @@ class AtomicWakerTest {
         assertFalse(woke1)
         assertTrue(woke2)
     }
+
+    @Test
+    fun defaultAndToString() {
+        val waker = AtomicWaker.default()
+        assertEquals("AtomicWaker", waker.toString())
+        assertNull(waker.take())
+    }
 }

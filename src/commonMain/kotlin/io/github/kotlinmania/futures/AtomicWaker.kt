@@ -65,7 +65,11 @@ public class AtomicWaker {
         }
     }
 
+    override fun toString(): String = "AtomicWaker"
+
     public companion object {
         public fun new(): AtomicWaker = AtomicWaker()
+
+        public fun default(): AtomicWaker = AtomicWaker()
     }
 }
