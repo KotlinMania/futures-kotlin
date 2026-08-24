@@ -104,10 +104,11 @@ class BiLockTest {
                 }
 
                 val lockA = a ?: throw IllegalStateException("BiLock missing")
-                val guard = when (val poll = lockA.pollLock(cx)) {
-                    is Poll.Ready -> poll.value
-                    is Poll.Pending -> return Poll.Pending
-                }
+                val guard =
+                    when (val poll = lockA.pollLock(cx)) {
+                        is Poll.Ready -> poll.value
+                        is Poll.Pending -> return Poll.Pending
+                    }
                 guard.set(guard.get() + 1)
                 guard.unlock()
                 remaining -= 1
@@ -150,4 +151,3 @@ class BiLockTest {
         assertEquals(2 * n, reunited.getOrThrow())
     }
 }
-

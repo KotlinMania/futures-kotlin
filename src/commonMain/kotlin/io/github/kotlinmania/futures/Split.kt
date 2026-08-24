@@ -35,8 +35,8 @@ public class SplitStream<S : Stream<Item>, Item> internal constructor(
         }
     }
 
-    override fun pollNext(context: TaskContext): Poll<Yield<Item>> {
-        return when (val lockPoll = lock.pollLock(context)) {
+    override fun pollNext(context: TaskContext): Poll<Yield<Item>> =
+        when (val lockPoll = lock.pollLock(context)) {
             is Poll.Ready -> {
                 val guard = lockPoll.value
                 try {
@@ -47,7 +47,6 @@ public class SplitStream<S : Stream<Item>, Item> internal constructor(
             }
             Poll.Pending -> Poll.pending()
         }
-    }
 }
 
 /**
@@ -116,8 +115,8 @@ public class SplitSink<S : Sink<Item, E>, Item, E> internal constructor(
         return SinkOutcome.ready()
     }
 
-    override fun pollFlush(context: TaskContext): Poll<SinkOutcome<E>> {
-        return when (val lockPoll = lock.pollLock(context)) {
+    override fun pollFlush(context: TaskContext): Poll<SinkOutcome<E>> =
+        when (val lockPoll = lock.pollLock(context)) {
             is Poll.Ready -> {
                 val guard = lockPoll.value
                 try {
@@ -152,10 +151,9 @@ public class SplitSink<S : Sink<Item, E>, Item, E> internal constructor(
             }
             Poll.Pending -> Poll.pending()
         }
-    }
 
-    override fun pollClose(context: TaskContext): Poll<SinkOutcome<E>> {
-        return when (val lockPoll = lock.pollLock(context)) {
+    override fun pollClose(context: TaskContext): Poll<SinkOutcome<E>> =
+        when (val lockPoll = lock.pollLock(context)) {
             is Poll.Ready -> {
                 val guard = lockPoll.value
                 try {
@@ -190,7 +188,6 @@ public class SplitSink<S : Sink<Item, E>, Item, E> internal constructor(
             }
             Poll.Pending -> Poll.pending()
         }
-    }
 }
 
 /**

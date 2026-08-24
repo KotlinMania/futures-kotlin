@@ -8,34 +8,29 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class SplitTest {
-    private class SimpleStreamSink : Stream<Int>, Sink<Int, String> {
+    private class SimpleStreamSink :
+        Stream<Int>,
+        Sink<Int, String> {
         val streamItems = mutableListOf(10, 20, 30)
         val sinkItems = mutableListOf<Int>()
 
-        override fun pollNext(context: TaskContext): Poll<Yield<Int>> {
-            return if (streamItems.isNotEmpty()) {
+        override fun pollNext(context: TaskContext): Poll<Yield<Int>> =
+            if (streamItems.isNotEmpty()) {
                 Poll.ready(Yield.value(streamItems.removeAt(0)))
             } else {
                 Poll.ready(Yield.end())
             }
-        }
 
-        override fun pollReady(context: TaskContext): Poll<SinkOutcome<String>> {
-            return Poll.ready(SinkOutcome.ready())
-        }
+        override fun pollReady(context: TaskContext): Poll<SinkOutcome<String>> = Poll.ready(SinkOutcome.ready())
 
         override fun startSend(item: Int): SinkOutcome<String> {
             sinkItems.add(item)
             return SinkOutcome.ready()
         }
 
-        override fun pollFlush(context: TaskContext): Poll<SinkOutcome<String>> {
-            return Poll.ready(SinkOutcome.ready())
-        }
+        override fun pollFlush(context: TaskContext): Poll<SinkOutcome<String>> = Poll.ready(SinkOutcome.ready())
 
-        override fun pollClose(context: TaskContext): Poll<SinkOutcome<String>> {
-            return Poll.ready(SinkOutcome.ready())
-        }
+        override fun pollClose(context: TaskContext): Poll<SinkOutcome<String>> = Poll.ready(SinkOutcome.ready())
     }
 
     @Test
