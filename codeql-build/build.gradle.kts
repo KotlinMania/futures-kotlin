@@ -205,7 +205,9 @@ fun registerCodeqlCompileTask(
                     "interface ToTokens {\n" +
                     "    fun toTokens(tokens: TokenStream)\n" +
                     "}\n\n" +
-                    "fun TokenStream.append(token: TokenTree) {}\n",
+                    "fun TokenStream.append(token: TokenTree) {}\n" +
+                    "fun ToTokens?.toTokens(tokens: TokenStream) {}\n" +
+                    "fun TokenTree.toTokens(tokens: TokenStream) {}\n",
             )
             commonSourceFiles.add(stubQuote)
             sourceFiles.add(stubQuote)
