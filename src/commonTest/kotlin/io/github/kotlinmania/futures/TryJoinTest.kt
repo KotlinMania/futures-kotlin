@@ -53,4 +53,29 @@ class TryJoinTest {
         assertTrue(vAll is Try.Ok)
         assertEquals(listOf(10, 20), vAll.value)
     }
+
+    @Test
+    fun tryJoinNeverError() {
+        val f1: Future<Try<Unit, Nothing>> = ready(Try.ok(Unit))
+        val f2: Future<Try<Unit, Nothing>> = ready(Try.ok(Unit))
+        val joined = tryJoin(f1, f2)
+        val res = joined.poll(TaskContext())
+        assertTrue(res is Poll.Ready<*>)
+        val v = (res as Poll.Ready<Try<Pair<Unit, Unit>, Nothing>>).value
+        assertTrue(v is Try.Ok)
+        assertEquals(Pair(Unit, Unit), v.value)
+    }
+
+    @Test
+    fun tryJoinNeverOk() {
+        val f1: Future<Try<Nothing, Unit>> = ready(Try.err(Unit))
+        val f2: Future<Try<Nothing, Unit>> = ready(Try.err(Unit))
+        val joined = tryJoin(f1, f2)
+        val res = joined.poll(TaskContext())
+        assertTrue(res is Poll.Ready<*>)
+        val v = (res as Poll.Ready<Try<Pair<Nothing, Nothing>, Unit>>).value
+        assertTrue(v is Try.Err)
+        assertEquals(Unit, v.error)
+    }
 }
+

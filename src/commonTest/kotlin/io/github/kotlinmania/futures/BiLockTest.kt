@@ -90,4 +90,64 @@ class BiLockTest {
         assertTrue(testLock is Poll.Ready)
         testLock.value.unlock()
     }
+
+    private class Increment(
+        var remaining: Int,
+        var a: BiLock<Int>?,
+    ) {
+        fun poll(cx: TaskContext): Poll<BiLock<Int>> {
+            while (true) {
+                if (remaining == 0) {
+                    val result = a ?: throw IllegalStateException("BiLock already taken")
+                    a = null
+                    return Poll.Ready(result)
+                }
+
+                val lockA = a ?: throw IllegalStateException("BiLock missing")
+                val guard = when (val poll = lockA.pollLock(cx)) {
+                    is Poll.Ready -> poll.value
+                    is Poll.Pending -> return Poll.Pending
+                }
+                guard.set(guard.get() + 1)
+                guard.unlock()
+                remaining -= 1
+            }
+        }
+    }
+
+    @Test
+    fun concurrent() {
+        val n = 1000
+        val cx = TaskContext()
+        val (a, b) = BiLock.new(0)
+
+        val incA = Increment(n, a)
+        while (incA.remaining > 0) {
+            val poll = incA.poll(cx)
+            if (poll is Poll.Ready) break
+        }
+
+        for (i in 0 until n) {
+            val lockB = b.pollLock(cx)
+            assertIs<Poll.Ready<BiLockGuard<Int>>>(lockB)
+            val guard = lockB.value
+            guard.set(guard.get() + 1)
+            guard.unlock()
+        }
+
+        val pollFinalA = a.pollLock(cx)
+        assertIs<Poll.Ready<BiLockGuard<Int>>>(pollFinalA)
+        assertEquals(2 * n, pollFinalA.value.get())
+        pollFinalA.value.unlock()
+
+        val pollFinalB = b.pollLock(cx)
+        assertIs<Poll.Ready<BiLockGuard<Int>>>(pollFinalB)
+        assertEquals(2 * n, pollFinalB.value.get())
+        pollFinalB.value.unlock()
+
+        val reunited = a.reunite(b)
+        assertTrue(reunited.isSuccess)
+        assertEquals(2 * n, reunited.getOrThrow())
+    }
 }
+
