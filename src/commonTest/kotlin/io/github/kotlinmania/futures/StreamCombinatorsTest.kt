@@ -89,9 +89,11 @@ class StreamCombinatorsTest {
     @Test
     fun mapAndFilter() {
         val cx = TaskContext()
-        val stream = listOf(1, 2, 3, 4, 5).asStream()
-            .filter { it % 2 != 0 }
-            .map { it * 10 }
+        val stream =
+            listOf(1, 2, 3, 4, 5)
+                .asStream()
+                .filter { it % 2 != 0 }
+                .map { it * 10 }
 
         val collected = stream.collect().poll(cx)
         assertIs<Poll.Ready<List<Int>>>(collected)
@@ -101,8 +103,10 @@ class StreamCombinatorsTest {
     @Test
     fun filterMapAndFold() {
         val cx = TaskContext()
-        val stream = listOf("1", "two", "3", "four", "5").asStream()
-            .filterMap { it.toIntOrNull() }
+        val stream =
+            listOf("1", "two", "3", "four", "5")
+                .asStream()
+                .filterMap { it.toIntOrNull() }
 
         val foldFut = stream.fold(0) { acc, elem -> acc + elem }
         val sum = foldFut.poll(cx)
@@ -130,9 +134,11 @@ class StreamCombinatorsTest {
     @Test
     fun skipAndTakeWhile() {
         val cx = TaskContext()
-        val stream = listOf(1, 2, 3, 4, 5, 6).asStream()
-            .skip(2)
-            .takeWhile { it < 5 }
+        val stream =
+            listOf(1, 2, 3, 4, 5, 6)
+                .asStream()
+                .skip(2)
+                .takeWhile { it < 5 }
 
         val res = stream.collect().poll(cx)
         assertIs<Poll.Ready<List<Int>>>(res)
@@ -142,9 +148,11 @@ class StreamCombinatorsTest {
     @Test
     fun skipWhileAndEnumerate() {
         val cx = TaskContext()
-        val stream = listOf(1, 2, 3, 4, 5).asStream()
-            .skipWhile { it < 4 }
-            .enumerate()
+        val stream =
+            listOf(1, 2, 3, 4, 5)
+                .asStream()
+                .skipWhile { it < 4 }
+                .enumerate()
 
         val res = stream.collect().poll(cx)
         assertIs<Poll.Ready<List<IndexedValue<Int>>>>(res)

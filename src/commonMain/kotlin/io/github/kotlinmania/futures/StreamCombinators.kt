@@ -93,10 +93,11 @@ public fun <T, R> Stream<T>.map(transform: (T) -> R): Stream<R> {
     return object : Stream<R> {
         override fun pollNext(context: TaskContext): Poll<Yield<R>> =
             when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> when (val y = p.value) {
-                    is Yield.Value -> Poll.ready(Yield.value(transform(y.value)))
-                    Yield.End -> Poll.ready(Yield.end())
-                }
+                is Poll.Ready ->
+                    when (val y = p.value) {
+                        is Yield.Value -> Poll.ready(Yield.value(transform(y.value)))
+                        Yield.End -> Poll.ready(Yield.end())
+                    }
                 Poll.Pending -> Poll.pending()
             }
 
@@ -114,14 +115,15 @@ public fun <T> Stream<T>.filter(predicate: (T) -> Boolean): Stream<T> {
         override fun pollNext(context: TaskContext): Poll<Yield<T>> {
             while (true) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            if (predicate(y.value)) {
-                                return Poll.ready(y)
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                if (predicate(y.value)) {
+                                    return Poll.ready(y)
+                                }
                             }
+                            Yield.End -> return Poll.ready(Yield.end())
                         }
-                        Yield.End -> return Poll.ready(Yield.end())
-                    }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -141,15 +143,16 @@ public fun <T, R> Stream<T>.filterMap(transform: (T) -> R?): Stream<R> {
         override fun pollNext(context: TaskContext): Poll<Yield<R>> {
             while (true) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            val mapped = transform(y.value)
-                            if (mapped != null) {
-                                return Poll.ready(Yield.value(mapped))
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                val mapped = transform(y.value)
+                                if (mapped != null) {
+                                    return Poll.ready(Yield.value(mapped))
+                                }
                             }
+                            Yield.End -> return Poll.ready(Yield.end())
                         }
-                        Yield.End -> return Poll.ready(Yield.end())
-                    }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -170,10 +173,11 @@ public fun <T, R> Stream<T>.fold(initial: R, operation: (R, T) -> R): Future<R> 
         override fun poll(context: TaskContext): Poll<R> {
             while (true) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> acc = operation(acc, y.value)
-                        Yield.End -> return Poll.ready(acc)
-                    }
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> acc = operation(acc, y.value)
+                            Yield.End -> return Poll.ready(acc)
+                        }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -192,10 +196,11 @@ public fun <T> Stream<T>.count(): Future<Int> {
         override fun poll(context: TaskContext): Poll<Int> {
             while (true) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (p.value) {
-                        is Yield.Value -> count++
-                        Yield.End -> return Poll.ready(count)
-                    }
+                    is Poll.Ready ->
+                        when (p.value) {
+                            is Yield.Value -> count++
+                            Yield.End -> return Poll.ready(count)
+                        }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -213,14 +218,15 @@ public fun <T> Stream<T>.forAll(predicate: (T) -> Boolean): Future<Boolean> {
         override fun poll(context: TaskContext): Poll<Boolean> {
             while (true) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            if (!predicate(y.value)) {
-                                return Poll.ready(false)
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                if (!predicate(y.value)) {
+                                    return Poll.ready(false)
+                                }
                             }
+                            Yield.End -> return Poll.ready(true)
                         }
-                        Yield.End -> return Poll.ready(true)
-                    }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -238,14 +244,15 @@ public fun <T> Stream<T>.any(predicate: (T) -> Boolean): Future<Boolean> {
         override fun poll(context: TaskContext): Poll<Boolean> {
             while (true) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            if (predicate(y.value)) {
-                                return Poll.ready(true)
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                if (predicate(y.value)) {
+                                    return Poll.ready(true)
+                                }
                             }
+                            Yield.End -> return Poll.ready(false)
                         }
-                        Yield.End -> return Poll.ready(false)
-                    }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -263,10 +270,11 @@ public fun <T> Stream<T>.enumerate(): Stream<IndexedValue<T>> {
     return object : Stream<IndexedValue<T>> {
         override fun pollNext(context: TaskContext): Poll<Yield<IndexedValue<T>>> =
             when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> when (val y = p.value) {
-                    is Yield.Value -> Poll.ready(Yield.value(IndexedValue(index++, y.value)))
-                    Yield.End -> Poll.ready(Yield.end())
-                }
+                is Poll.Ready ->
+                    when (val y = p.value) {
+                        is Yield.Value -> Poll.ready(Yield.value(IndexedValue(index++, y.value)))
+                        Yield.End -> Poll.ready(Yield.end())
+                    }
                 Poll.Pending -> Poll.pending()
             }
 
@@ -285,10 +293,11 @@ public fun <T> Stream<T>.skip(n: Int): Stream<T> {
         override fun pollNext(context: TaskContext): Poll<Yield<T>> {
             while (remaining > 0) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (p.value) {
-                        is Yield.Value -> remaining--
-                        Yield.End -> return Poll.ready(Yield.end())
-                    }
+                    is Poll.Ready ->
+                        when (p.value) {
+                            is Yield.Value -> remaining--
+                            Yield.End -> return Poll.ready(Yield.end())
+                        }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -315,15 +324,16 @@ public fun <T> Stream<T>.skipWhile(predicate: (T) -> Boolean): Stream<T> {
         override fun pollNext(context: TaskContext): Poll<Yield<T>> {
             while (skipping) {
                 when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            if (!predicate(y.value)) {
-                                skipping = false
-                                return Poll.ready(y)
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                if (!predicate(y.value)) {
+                                    skipping = false
+                                    return Poll.ready(y)
+                                }
                             }
+                            Yield.End -> return Poll.ready(Yield.end())
                         }
-                        Yield.End -> return Poll.ready(Yield.end())
-                    }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -345,20 +355,21 @@ public fun <T> Stream<T>.takeWhile(predicate: (T) -> Boolean): Stream<T> {
         override fun pollNext(context: TaskContext): Poll<Yield<T>> {
             if (done) return Poll.ready(Yield.end())
             return when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> when (val y = p.value) {
-                    is Yield.Value -> {
-                        if (predicate(y.value)) {
-                            Poll.ready(y)
-                        } else {
+                is Poll.Ready ->
+                    when (val y = p.value) {
+                        is Yield.Value -> {
+                            if (predicate(y.value)) {
+                                Poll.ready(y)
+                            } else {
+                                done = true
+                                Poll.ready(Yield.end())
+                            }
+                        }
+                        Yield.End -> {
                             done = true
                             Poll.ready(Yield.end())
                         }
                     }
-                    Yield.End -> {
-                        done = true
-                        Poll.ready(Yield.end())
-                    }
-                }
                 Poll.Pending -> Poll.pending()
             }
         }
@@ -379,10 +390,11 @@ public fun <T> Stream<T>.chain(other: Stream<T>): Stream<T> {
         override fun pollNext(context: TaskContext): Poll<Yield<T>> {
             if (!firstExhausted) {
                 when (val p = first.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> return Poll.ready(y)
-                        Yield.End -> firstExhausted = true
-                    }
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> return Poll.ready(y)
+                            Yield.End -> firstExhausted = true
+                        }
                     Poll.Pending -> return Poll.pending()
                 }
             }
@@ -393,7 +405,14 @@ public fun <T> Stream<T>.chain(other: Stream<T>): Stream<T> {
             val a = first.sizeHint()
             val b = second.sizeHint()
             val lower = if (firstExhausted) b.lower else a.lower + b.lower
-            val upper = if (firstExhausted) b.upper else if (a.upper != null && b.upper != null) a.upper + b.upper else null
+            val upper =
+                if (firstExhausted) {
+                    b.upper
+                } else if (a.upper != null && b.upper != null) {
+                    a.upper + b.upper
+                } else {
+                    null
+                }
             return SizeHint(lower, upper)
         }
     }
@@ -418,32 +437,34 @@ public fun <T, U> Stream<T>.zip(other: Stream<U>): Stream<Pair<T, U>> {
 
             if (!hasFirst) {
                 when (val p = first.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            queuedFirst = y.value
-                            hasFirst = true
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                queuedFirst = y.value
+                                hasFirst = true
+                            }
+                            Yield.End -> {
+                                exhausted = true
+                                return Poll.ready(Yield.end())
+                            }
                         }
-                        Yield.End -> {
-                            exhausted = true
-                            return Poll.ready(Yield.end())
-                        }
-                    }
                     Poll.Pending -> {}
                 }
             }
 
             if (!hasSecond) {
                 when (val p = second.pollNext(context)) {
-                    is Poll.Ready -> when (val y = p.value) {
-                        is Yield.Value -> {
-                            queuedSecond = y.value
-                            hasSecond = true
+                    is Poll.Ready ->
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                queuedSecond = y.value
+                                hasSecond = true
+                            }
+                            Yield.End -> {
+                                exhausted = true
+                                return Poll.ready(Yield.end())
+                            }
                         }
-                        Yield.End -> {
-                            exhausted = true
-                            return Poll.ready(Yield.end())
-                        }
-                    }
                     Poll.Pending -> {}
                 }
             }
@@ -465,12 +486,13 @@ public fun <T, U> Stream<T>.zip(other: Stream<U>): Stream<Pair<T, U>> {
             val a = first.sizeHint()
             val b = second.sizeHint()
             val lower = minOf(a.lower, b.lower)
-            val upper = when {
-                a.upper != null && b.upper != null -> minOf(a.upper, b.upper)
-                a.upper != null -> a.upper
-                b.upper != null -> b.upper
-                else -> null
-            }
+            val upper =
+                when {
+                    a.upper != null && b.upper != null -> minOf(a.upper, b.upper)
+                    a.upper != null -> a.upper
+                    b.upper != null -> b.upper
+                    else -> null
+                }
             return SizeHint(lower, upper)
         }
     }
@@ -480,11 +502,14 @@ public fun <T, U> Stream<T>.zip(other: Stream<U>): Stream<Pair<T, U>> {
  * Creates an empty [Stream] that immediately yields [Yield.End].
  */
 @HiddenFromObjC
-public fun <T> emptyStream(): Stream<T> = object : Stream<T>, FusedStream<T> {
-    override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.end())
-    override fun sizeHint(): SizeHint = SizeHint(0, 0)
-    override fun isTerminated(): Boolean = true
-}
+public fun <T> emptyStream(): Stream<T> =
+    object : Stream<T>, FusedStream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.end())
+
+        override fun sizeHint(): SizeHint = SizeHint(0, 0)
+
+        override fun isTerminated(): Boolean = true
+    }
 
 /**
  * Creates a [Stream] that produces a single element from a [Future] and then ends.
@@ -505,6 +530,7 @@ public fun <T> onceStream(future: Future<T>): Stream<T> {
         }
 
         override fun sizeHint(): SizeHint = SizeHint(if (fut != null) 1 else 0, if (fut != null) 1 else 0)
+
         override fun isTerminated(): Boolean = fut == null
     }
 }
@@ -513,21 +539,27 @@ public fun <T> onceStream(future: Future<T>): Stream<T> {
  * Creates a [Stream] that produces the same item repeatedly.
  */
 @HiddenFromObjC
-public fun <T> repeatStream(item: T): Stream<T> = object : Stream<T>, FusedStream<T> {
-    override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.value(item))
-    override fun sizeHint(): SizeHint = SizeHint(Int.MAX_VALUE, null)
-    override fun isTerminated(): Boolean = false
-}
+public fun <T> repeatStream(item: T): Stream<T> =
+    object : Stream<T>, FusedStream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.value(item))
+
+        override fun sizeHint(): SizeHint = SizeHint(Int.MAX_VALUE, null)
+
+        override fun isTerminated(): Boolean = false
+    }
 
 /**
  * Creates a [Stream] that produces items by repeatedly calling the supplier.
  */
 @HiddenFromObjC
-public fun <T> repeatWithStream(supplier: () -> T): Stream<T> = object : Stream<T>, FusedStream<T> {
-    override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.value(supplier()))
-    override fun sizeHint(): SizeHint = SizeHint(Int.MAX_VALUE, null)
-    override fun isTerminated(): Boolean = false
-}
+public fun <T> repeatWithStream(supplier: () -> T): Stream<T> =
+    object : Stream<T>, FusedStream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.value(supplier()))
+
+        override fun sizeHint(): SizeHint = SizeHint(Int.MAX_VALUE, null)
+
+        override fun isTerminated(): Boolean = false
+    }
 
 /**
  * Converts an [Iterable] into a [Stream] that produces all its items.
