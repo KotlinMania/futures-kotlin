@@ -85,4 +85,106 @@ class StreamCombinatorsTest {
         val pc = closeFut.poll(cx)
         assertIs<Poll.Ready<Try<Unit, Nothing>>>(pc)
     }
+
+    @Test
+    fun mapAndFilter() {
+        val cx = TaskContext()
+        val stream = listOf(1, 2, 3, 4, 5).asStream()
+            .filter { it % 2 != 0 }
+            .map { it * 10 }
+
+        val collected = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(collected)
+        assertEquals(listOf(10, 30, 50), collected.value)
+    }
+
+    @Test
+    fun filterMapAndFold() {
+        val cx = TaskContext()
+        val stream = listOf("1", "two", "3", "four", "5").asStream()
+            .filterMap { it.toIntOrNull() }
+
+        val foldFut = stream.fold(0) { acc, elem -> acc + elem }
+        val sum = foldFut.poll(cx)
+        assertIs<Poll.Ready<Int>>(sum)
+        assertEquals(9, sum.value)
+    }
+
+    @Test
+    fun countAndPredicates() {
+        val cx = TaskContext()
+        val stream = listOf(2, 4, 6, 8).asStream()
+        val allEven = stream.forAll { it % 2 == 0 }.poll(cx)
+        assertIs<Poll.Ready<Boolean>>(allEven)
+        assertTrue(allEven.value)
+
+        val anyGreaterThan5 = listOf(2, 4, 6, 8).asStream().any { it > 5 }.poll(cx)
+        assertIs<Poll.Ready<Boolean>>(anyGreaterThan5)
+        assertTrue(anyGreaterThan5.value)
+
+        val cnt = listOf(10, 20, 30).asStream().count().poll(cx)
+        assertIs<Poll.Ready<Int>>(cnt)
+        assertEquals(3, cnt.value)
+    }
+
+    @Test
+    fun skipAndTakeWhile() {
+        val cx = TaskContext()
+        val stream = listOf(1, 2, 3, 4, 5, 6).asStream()
+            .skip(2)
+            .takeWhile { it < 5 }
+
+        val res = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(res)
+        assertEquals(listOf(3, 4), res.value)
+    }
+
+    @Test
+    fun skipWhileAndEnumerate() {
+        val cx = TaskContext()
+        val stream = listOf(1, 2, 3, 4, 5).asStream()
+            .skipWhile { it < 4 }
+            .enumerate()
+
+        val res = stream.collect().poll(cx)
+        assertIs<Poll.Ready<List<IndexedValue<Int>>>>(res)
+        assertEquals(listOf(IndexedValue(0, 4), IndexedValue(1, 5)), res.value)
+    }
+
+    @Test
+    fun chainAndZip() {
+        val cx = TaskContext()
+        val s1 = listOf(1, 2).asStream()
+        val s2 = listOf(3, 4).asStream()
+        val chained = s1.chain(s2).collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(chained)
+        assertEquals(listOf(1, 2, 3, 4), chained.value)
+
+        val letters = listOf("a", "b", "c").asStream()
+        val numbers = listOf(1, 2).asStream()
+        val zipped = letters.zip(numbers).collect().poll(cx)
+        assertIs<Poll.Ready<List<Pair<String, Int>>>>(zipped)
+        assertEquals(listOf(Pair("a", 1), Pair("b", 2)), zipped.value)
+    }
+
+    @Test
+    fun factoryStreams() {
+        val cx = TaskContext()
+        val empty = emptyStream<Int>().collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(empty)
+        assertEquals(emptyList(), empty.value)
+
+        val once = onceStream(Ready(42)).collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(once)
+        assertEquals(listOf(42), once.value)
+
+        val rep = repeatStream("x").take(3).collect().poll(cx)
+        assertIs<Poll.Ready<List<String>>>(rep)
+        assertEquals(listOf("x", "x", "x"), rep.value)
+
+        var counter = 0
+        val repWith = repeatWithStream { ++counter }.take(3).collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(repWith)
+        assertEquals(listOf(1, 2, 3), repWith.value)
+    }
 }
