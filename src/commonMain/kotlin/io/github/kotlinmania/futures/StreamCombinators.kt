@@ -778,3 +778,102 @@ public fun <T, R> Stream<T>.then(transform: (T) -> Future<R>): Stream<R> {
         }
     }
 }
+
+/**
+ * A [Stream] that allows peeking at the next element without consuming it.
+ */
+@HiddenFromObjC
+public class Peekable<T>(
+    private val stream: Stream<T>,
+) : FusedStream<T> {
+    private var peeked: Yield<T>? = null
+
+    override fun isTerminated(): Boolean =
+        when (peeked) {
+            is Yield.End -> true
+            else -> if (stream is FusedStream<*>) stream.isTerminated() else false
+        }
+
+    override fun pollNext(context: TaskContext): Poll<Yield<T>> {
+        val p = peeked
+        if (p != null) {
+            peeked = null
+            return Poll.ready(p)
+        }
+        return stream.pollNext(context)
+    }
+
+    /**
+     * Produces a future that resolves to the next element without consuming it,
+     * or null if the stream is exhausted.
+     */
+    public fun peek(): Future<T?> =
+        object : Future<T?> {
+            override fun poll(context: TaskContext): Poll<T?> {
+                val current = peeked
+                if (current != null) {
+                    return Poll.ready(current.valueOrNull())
+                }
+                return when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        peeked = p.value
+                        Poll.ready(p.value.valueOrNull())
+                    }
+                    Poll.Pending -> Poll.pending()
+                }
+            }
+        }
+
+    /**
+     * Produces a future that consumes and returns the next element if it satisfies [predicate].
+     */
+    public fun nextIf(predicate: (T) -> Boolean): Future<T?> =
+        object : Future<T?> {
+            override fun poll(context: TaskContext): Poll<T?> {
+                val current = peeked
+                if (current != null) {
+                    return when (current) {
+                        is Yield.Value -> {
+                            if (predicate(current.value)) {
+                                peeked = null
+                                Poll.ready(current.value)
+                            } else {
+                                Poll.ready(null)
+                            }
+                        }
+                        Yield.End -> Poll.ready(null)
+                    }
+                }
+                return when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> {
+                                if (predicate(y.value)) {
+                                    Poll.ready(y.value)
+                                } else {
+                                    peeked = y
+                                    Poll.ready(null)
+                                }
+                            }
+                            Yield.End -> {
+                                peeked = Yield.End
+                                Poll.ready(null)
+                            }
+                        }
+                    }
+                    Poll.Pending -> Poll.pending()
+                }
+            }
+        }
+
+    /**
+     * Produces a future that consumes and returns the next element if it equals [expected].
+     */
+    public fun nextIfEq(expected: T): Future<T?> = nextIf { it == expected }
+}
+
+/**
+ * Returns a [Peekable] stream wrapper that permits peeking at the next item without consuming it.
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.peekable(): Peekable<T> = Peekable(this)
