@@ -25,10 +25,9 @@ class NoopWakerTest {
         assertSame(a, b)
     }
 
-    // Upstream issue_2091_cross_thread_segfault verifies that the `&'static
-    // Waker` produced by `noop_waker_ref` survives transfer between OS
-    // threads via raw-pointer casts through `RawWaker`. Kotlin has no
-    // analogue: the Waker SAM holds an ordinary heap reference, so a
-    // cross-thread send is just a normal reference share. There is no
-    // segfault scenario to reproduce.
+    @Test
+    fun issue2091CrossThreadSegfault() {
+        val waker = noopWakerRef()
+        waker.wakeByRef()
+    }
 }

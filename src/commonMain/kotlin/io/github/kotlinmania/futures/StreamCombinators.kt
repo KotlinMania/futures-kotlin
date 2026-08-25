@@ -499,83 +499,11 @@ public fun <T, U> Stream<T>.zip(other: Stream<U>): Stream<Pair<T, U>> {
 }
 
 /**
- * Creates an empty [Stream] that immediately yields [Yield.End].
- */
-@HiddenFromObjC
-public fun <T> emptyStream(): Stream<T> =
-    object : Stream<T>, FusedStream<T> {
-        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.end())
-
-        override fun sizeHint(): SizeHint = SizeHint(0, 0)
-
-        override fun isTerminated(): Boolean = true
-    }
-
-/**
- * Creates a [Stream] that produces a single element from a [Future] and then ends.
- */
-@HiddenFromObjC
-public fun <T> onceStream(future: Future<T>): Stream<T> {
-    var fut: Future<T>? = future
-    return object : Stream<T>, FusedStream<T> {
-        override fun pollNext(context: TaskContext): Poll<Yield<T>> {
-            val current = fut ?: return Poll.ready(Yield.end())
-            return when (val p = current.poll(context)) {
-                is Poll.Ready -> {
-                    fut = null
-                    Poll.ready(Yield.value(p.value))
-                }
-                Poll.Pending -> Poll.pending()
-            }
-        }
-
-        override fun sizeHint(): SizeHint = SizeHint(if (fut != null) 1 else 0, if (fut != null) 1 else 0)
-
-        override fun isTerminated(): Boolean = fut == null
-    }
-}
-
-/**
- * Creates a [Stream] that produces the same item repeatedly.
- */
-@HiddenFromObjC
-public fun <T> repeatStream(item: T): Stream<T> =
-    object : Stream<T>, FusedStream<T> {
-        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.value(item))
-
-        override fun sizeHint(): SizeHint = SizeHint(Int.MAX_VALUE, null)
-
-        override fun isTerminated(): Boolean = false
-    }
-
-/**
- * Creates a [Stream] that produces items by repeatedly calling the supplier.
- */
-@HiddenFromObjC
-public fun <T> repeatWithStream(supplier: () -> T): Stream<T> =
-    object : Stream<T>, FusedStream<T> {
-        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.ready(Yield.value(supplier()))
-
-        override fun sizeHint(): SizeHint = SizeHint(Int.MAX_VALUE, null)
-
-        override fun isTerminated(): Boolean = false
-    }
-
-/**
  * Converts an [Iterable] into a [Stream] that produces all its items.
  */
 @HiddenFromObjC
-public fun <T> Iterable<T>.asStream(): Stream<T> {
-    val iterator = this.iterator()
-    return object : Stream<T> {
-        override fun pollNext(context: TaskContext): Poll<Yield<T>> =
-            if (iterator.hasNext()) {
-                Poll.ready(Yield.value(iterator.next()))
-            } else {
-                Poll.ready(Yield.end())
-            }
-    }
-}
+public fun <T> Iterable<T>.asStream(): Iter<T> = streamIter(this)
+
 
 
 /**

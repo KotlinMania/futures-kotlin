@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/tests/try_join.rs
+// port-lint: tests futures-util/src/future/try_join.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

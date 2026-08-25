@@ -182,16 +182,16 @@ class StreamCombinatorsTest {
         assertIs<Poll.Ready<List<Int>>>(empty)
         assertEquals(emptyList(), empty.value)
 
-        val once = onceStream(Ready(42)).collect().poll(cx)
+        val once = streamOnce(ready(42)).collect().poll(cx)
         assertIs<Poll.Ready<List<Int>>>(once)
         assertEquals(listOf(42), once.value)
 
-        val rep = repeatStream("x").take(3).collect().poll(cx)
+        val rep = streamRepeat("x").take(3).collect().poll(cx)
         assertIs<Poll.Ready<List<String>>>(rep)
         assertEquals(listOf("x", "x", "x"), rep.value)
 
         var counter = 0
-        val repWith = repeatWithStream { ++counter }.take(3).collect().poll(cx)
+        val repWith = streamRepeatWith { ++counter }.take(3).collect().poll(cx)
         assertIs<Poll.Ready<List<Int>>>(repWith)
         assertEquals(listOf(1, 2, 3), repWith.value)
     }
