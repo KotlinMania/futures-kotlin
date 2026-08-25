@@ -76,12 +76,6 @@ public fun <T, R> Future<T>.then(transform: (T) -> Future<R>): Future<R> {
     }
 }
 
-/**
- * Flattens the execution of this future when the successful result is another future.
- */
-@HiddenFromObjC
-public fun <T> Future<Future<T>>.flatten(): Future<T> =
-    this.then { it }
 
 /**
  * Inspects this future's output when it is ready.
