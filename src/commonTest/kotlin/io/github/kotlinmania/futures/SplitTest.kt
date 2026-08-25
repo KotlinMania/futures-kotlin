@@ -84,4 +84,28 @@ class SplitTest {
         assertTrue(failReunite.isFailure)
         assertIs<SplitReuniteError>(failReunite.exceptionOrNull())
     }
+
+    private class NopStream<T> : Stream<T>, Sink<T, Unit> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.pending()
+        override fun pollReady(context: TaskContext): Poll<SinkOutcome<Unit>> = Poll.ready(SinkOutcome.ready())
+        override fun startSend(item: T): SinkOutcome<Unit> = SinkOutcome.ready()
+        override fun pollFlush(context: TaskContext): Poll<SinkOutcome<Unit>> = Poll.ready(SinkOutcome.ready())
+        override fun pollClose(context: TaskContext): Poll<SinkOutcome<Unit>> = Poll.ready(SinkOutcome.ready())
+    }
+
+    @Test
+    fun testPairing() {
+        val s1 = NopStream<Unit>()
+        val (sink1, stream1) = s1.split()
+        assertTrue(sink1.isPairOf(stream1))
+        assertTrue(stream1.isPairOf(sink1))
+
+        val s2 = NopStream<Unit>()
+        val (sink2, stream2) = s2.split()
+        assertTrue(sink2.isPairOf(stream2))
+        assertTrue(stream2.isPairOf(sink2))
+
+        assertFalse(sink1.isPairOf(stream2))
+        assertFalse(stream1.isPairOf(sink2))
+    }
 }
