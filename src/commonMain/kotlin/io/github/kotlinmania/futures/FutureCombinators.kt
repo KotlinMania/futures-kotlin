@@ -110,10 +110,10 @@ public fun <T> Future<T>.neverError(): Future<Try<T, Nothing>> =
     this.map { Try.ok(it) }
 
 /**
- * Maps the `Ok` value of a [TryFuture].
+ * Maps the `Ok` value of a [Future] yielding [Try].
  */
 @HiddenFromObjC
-public fun <T, E, R> TryFuture<T, E>.mapOk(transform: (T) -> R): TryFuture<R, E> {
+public fun <T, E, R> Future<Try<T, E>>.mapOk(transform: (T) -> R): TryFuture<R, E> {
     val source = this
     return object : TryFuture<R, E> {
         override fun poll(context: TaskContext): Poll<Try<R, E>> =
@@ -129,10 +129,10 @@ public fun <T, E, R> TryFuture<T, E>.mapOk(transform: (T) -> R): TryFuture<R, E>
 }
 
 /**
- * Maps the `Err` value of a [TryFuture].
+ * Maps the `Err` value of a [Future] yielding [Try].
  */
 @HiddenFromObjC
-public fun <T, E, R> TryFuture<T, E>.mapErr(transform: (E) -> R): TryFuture<T, R> {
+public fun <T, E, R> Future<Try<T, E>>.mapErr(transform: (E) -> R): TryFuture<T, R> {
     val source = this
     return object : TryFuture<T, R> {
         override fun poll(context: TaskContext): Poll<Try<T, R>> =
@@ -148,12 +148,12 @@ public fun <T, E, R> TryFuture<T, E>.mapErr(transform: (E) -> R): TryFuture<T, R
 }
 
 /**
- * Chains another [TryFuture] when this future resolves to `Ok`.
+ * Chains another [Future] yielding [Try] when this future resolves to `Ok`.
  */
 @HiddenFromObjC
-public fun <T, E, R> TryFuture<T, E>.andThen(transform: (T) -> TryFuture<R, E>): TryFuture<R, E> {
+public fun <T, E, R> Future<Try<T, E>>.andThen(transform: (T) -> Future<Try<R, E>>): TryFuture<R, E> {
     val source = this
-    var second: TryFuture<R, E>? = null
+    var second: Future<Try<R, E>>? = null
     return object : TryFuture<R, E> {
         override fun poll(context: TaskContext): Poll<Try<R, E>> {
             val sec = second
@@ -177,12 +177,12 @@ public fun <T, E, R> TryFuture<T, E>.andThen(transform: (T) -> TryFuture<R, E>):
 }
 
 /**
- * Chains another [TryFuture] when this future resolves to `Err`.
+ * Chains another [Future] yielding [Try] when this future resolves to `Err`.
  */
 @HiddenFromObjC
-public fun <T, E, R> TryFuture<T, E>.orElse(transform: (E) -> TryFuture<T, R>): TryFuture<T, R> {
+public fun <T, E, R> Future<Try<T, E>>.orElse(transform: (E) -> Future<Try<T, R>>): TryFuture<T, R> {
     val source = this
-    var second: TryFuture<T, R>? = null
+    var second: Future<Try<T, R>>? = null
     return object : TryFuture<T, R> {
         override fun poll(context: TaskContext): Poll<Try<T, R>> {
             val sec = second
@@ -209,7 +209,7 @@ public fun <T, E, R> TryFuture<T, E>.orElse(transform: (E) -> TryFuture<T, R>): 
  * Unwraps the `Ok` value or computes a fallback from the `Err` value.
  */
 @HiddenFromObjC
-public fun <T, E> TryFuture<T, E>.unwrapOrElse(fallback: (E) -> T): Future<T> {
+public fun <T, E> Future<Try<T, E>>.unwrapOrElse(fallback: (E) -> T): Future<T> {
     val source = this
     return object : Future<T> {
         override fun poll(context: TaskContext): Poll<T> =
@@ -228,7 +228,7 @@ public fun <T, E> TryFuture<T, E>.unwrapOrElse(fallback: (E) -> T): Future<T> {
  * Inspects the `Ok` value when ready.
  */
 @HiddenFromObjC
-public fun <T, E> TryFuture<T, E>.inspectOk(action: (T) -> Unit): TryFuture<T, E> {
+public fun <T, E> Future<Try<T, E>>.inspectOk(action: (T) -> Unit): TryFuture<T, E> {
     val source = this
     return object : TryFuture<T, E> {
         override fun poll(context: TaskContext): Poll<Try<T, E>> =
@@ -248,7 +248,7 @@ public fun <T, E> TryFuture<T, E>.inspectOk(action: (T) -> Unit): TryFuture<T, E
  * Inspects the `Err` value when ready.
  */
 @HiddenFromObjC
-public fun <T, E> TryFuture<T, E>.inspectErr(action: (E) -> Unit): TryFuture<T, E> {
+public fun <T, E> Future<Try<T, E>>.inspectErr(action: (E) -> Unit): TryFuture<T, E> {
     val source = this
     return object : TryFuture<T, E> {
         override fun poll(context: TaskContext): Poll<Try<T, E>> =
