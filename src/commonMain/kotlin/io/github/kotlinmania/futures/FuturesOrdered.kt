@@ -1,0 +1,322 @@
+// port-lint: source futures-util/src/stream/futures_ordered.rs
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
+package io.github.kotlinmania.futures
+
+import kotlin.native.HiddenFromObjC
+
+private class OrderWrapperOutput<T>(
+    val data: T,
+    val index: Long,
+) : Comparable<OrderWrapperOutput<T>> {
+    override fun compareTo(other: OrderWrapperOutput<T>): Int =
+        index.compareTo(other.index)
+}
+
+private class MinHeap<T : Comparable<T>> {
+    private val heap = ArrayList<T>()
+    val size: Int get() = heap.size
+    val isEmpty: Boolean get() = heap.isEmpty()
+
+    fun peek(): T? = heap.firstOrNull()
+
+    fun push(item: T) {
+        heap.add(item)
+        siftUp(heap.size - 1)
+    }
+
+    fun pop(): T? {
+        if (heap.isEmpty()) return null
+        val top = heap[0]
+        val last = heap.removeAt(heap.size - 1)
+        if (heap.isNotEmpty()) {
+            heap[0] = last
+            siftDown(0)
+        }
+        return top
+    }
+
+    fun clear() {
+        heap.clear()
+    }
+
+    private fun siftUp(index: Int) {
+        var child = index
+        while (child > 0) {
+            val parent = (child - 1) / 2
+            if (heap[child] < heap[parent]) {
+                val temp = heap[child]
+                heap[child] = heap[parent]
+                heap[parent] = temp
+                child = parent
+            } else {
+                break
+            }
+        }
+    }
+
+    private fun siftDown(index: Int) {
+        var parent = index
+        while (true) {
+            val left = 2 * parent + 1
+            val right = 2 * parent + 2
+            var smallest = parent
+
+            if (left < heap.size && heap[left] < heap[smallest]) {
+                smallest = left
+            }
+            if (right < heap.size && heap[right] < heap[smallest]) {
+                smallest = right
+            }
+            if (smallest != parent) {
+                val temp = heap[parent]
+                heap[parent] = heap[smallest]
+                heap[smallest] = temp
+                parent = smallest
+            } else {
+                break
+            }
+        }
+    }
+}
+
+/**
+ * An unbounded queue of futures.
+ *
+ * Imposes a FIFO order on top of the set of futures. While futures in the set will
+ * race to completion in parallel, results will only be returned in the order their
+ * originating futures were added to the queue.
+ */
+@HiddenFromObjC
+public class FuturesOrdered<T> : FusedStream<T>, Iterable<Future<T>> {
+    private val inProgressQueue = FuturesUnordered<OrderWrapperOutput<T>>()
+    private val queuedOutputs = MinHeap<OrderWrapperOutput<T>>()
+    private var nextIncomingIndex: Long = 0L
+    private var nextOutgoingIndex: Long = 0L
+    private val inFlightFutures = mutableListOf<Future<T>>()
+
+    public constructor()
+
+    public constructor(futures: Iterable<Future<T>>) {
+        for (fut in futures) {
+            pushBack(fut)
+        }
+    }
+
+    /**
+     * Pushes a future to the back of the queue.
+     */
+    public fun pushBack(future: Future<T>) {
+        val index = nextIncomingIndex
+        nextIncomingIndex++
+        inFlightFutures.add(future)
+        val wrapped = object : Future<OrderWrapperOutput<T>> {
+            override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
+                when (val p = future.poll(context)) {
+                    is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
+                    Poll.Pending -> Poll.pending()
+                }
+        }
+        inProgressQueue.push(wrapped)
+    }
+
+    /**
+     * Push a future into the queue (alias for [pushBack]).
+     */
+    public fun push(future: Future<T>) {
+        pushBack(future)
+    }
+
+    /**
+     * Pushes a future to the front of the queue.
+     */
+    public fun pushFront(future: Future<T>) {
+        nextOutgoingIndex--
+        val index = nextOutgoingIndex
+        inFlightFutures.add(0, future)
+        val wrapped = object : Future<OrderWrapperOutput<T>> {
+            override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
+                when (val p = future.poll(context)) {
+                    is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
+                    Poll.Pending -> Poll.pending()
+                }
+        }
+        inProgressQueue.push(wrapped)
+    }
+
+    /**
+     * Returns the total number of in-flight futures.
+     */
+    public fun len(): Int = inProgressQueue.len() + queuedOutputs.size
+
+    /**
+     * Returns the total number of in-flight futures.
+     */
+    public val size: Int get() = len()
+
+    /**
+     * Returns true if the queue contains no futures.
+     */
+    public fun isEmpty(): Boolean = inProgressQueue.isEmpty() && queuedOutputs.isEmpty
+
+    /**
+     * Returns true if the queue contains one or more futures.
+     */
+    public fun isNotEmpty(): Boolean = !isEmpty()
+
+    /**
+     * Clears the queue, removing all futures and outputs.
+     */
+    public fun clear() {
+        inProgressQueue.clear()
+        queuedOutputs.clear()
+        inFlightFutures.clear()
+        nextIncomingIndex = 0L
+        nextOutgoingIndex = 0L
+    }
+
+    override fun isTerminated(): Boolean =
+        inProgressQueue.isTerminated() && queuedOutputs.isEmpty
+
+    override fun pollNext(context: TaskContext): Poll<Yield<T>> {
+        val nextOutput = queuedOutputs.peek()
+        if (nextOutput != null && nextOutput.index == nextOutgoingIndex) {
+            nextOutgoingIndex++
+            queuedOutputs.pop()
+            return Poll.ready(Yield.value(nextOutput.data))
+        }
+
+        while (true) {
+            when (val p = inProgressQueue.pollNext(context)) {
+                is Poll.Ready -> {
+                    when (val y = p.value) {
+                        is Yield.Value -> {
+                            val output = y.value
+                            if (output.index == nextOutgoingIndex) {
+                                nextOutgoingIndex++
+                                return Poll.ready(Yield.value(output.data))
+                            } else {
+                                queuedOutputs.push(output)
+                            }
+                        }
+                        Yield.End -> {
+                            val queued = queuedOutputs.peek()
+                            if (queued != null && queued.index == nextOutgoingIndex) {
+                                nextOutgoingIndex++
+                                queuedOutputs.pop()
+                                return Poll.ready(Yield.value(queued.data))
+                            }
+                            return if (queuedOutputs.isEmpty) {
+                                Poll.ready(Yield.end())
+                            } else {
+                                Poll.pending()
+                            }
+                        }
+                    }
+                }
+                Poll.Pending -> {
+                    val queued = queuedOutputs.peek()
+                    if (queued != null && queued.index == nextOutgoingIndex) {
+                        nextOutgoingIndex++
+                        queuedOutputs.pop()
+                        return Poll.ready(Yield.value(queued.data))
+                    }
+                    return Poll.pending()
+                }
+            }
+        }
+    }
+
+    override fun sizeHint(): SizeHint {
+        val count = len()
+        return SizeHint(lower = count, upper = count)
+    }
+
+    override fun iterator(): Iterator<Future<T>> = inFlightFutures.iterator()
+
+    override fun toString(): String = "FuturesOrdered(len=${len()})"
+
+    public companion object {
+        public fun <T> new(): FuturesOrdered<T> = FuturesOrdered()
+
+        public fun <T> default(): FuturesOrdered<T> = FuturesOrdered()
+
+        public fun <T> fromIterable(futures: Iterable<Future<T>>): FuturesOrdered<T> =
+            FuturesOrdered(futures)
+    }
+}
+
+/**
+ * Creates a [FuturesOrdered] from an [Iterable] of futures.
+ */
+@HiddenFromObjC
+public fun <T> futuresOrdered(futures: Iterable<Future<T>>): FuturesOrdered<T> =
+    FuturesOrdered.fromIterable(futures)
+
+/**
+ * Collects an [Iterable] of futures into a [FuturesOrdered].
+ */
+@HiddenFromObjC
+public fun <T> Iterable<Future<T>>.collectFuturesOrdered(): FuturesOrdered<T> =
+    FuturesOrdered.fromIterable(this)
+
+/**
+ * An adapter for [Stream] which yields the outcomes of up to [n] futures in order.
+ */
+@HiddenFromObjC
+public fun <T> Stream<Future<T>>.buffered(n: Int): Stream<T> {
+    require(n > 0) { "limit must be greater than 0" }
+    val upstream = this
+    val queue = FuturesOrdered<T>()
+    var upstreamDone = false
+
+    return object : Stream<T>, FusedStream<T> {
+        override fun pollNext(context: TaskContext): Poll<Yield<T>> {
+            while (!upstreamDone && queue.len() < n) {
+                when (val p = upstream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> queue.pushBack(y.value)
+                            Yield.End -> {
+                                upstreamDone = true
+                                break
+                            }
+                        }
+                    }
+                    Poll.Pending -> break
+                }
+            }
+
+            when (val p = queue.pollNext(context)) {
+                is Poll.Ready -> {
+                    when (val y = p.value) {
+                        is Yield.Value -> return Poll.ready(Yield.value(y.value))
+                        Yield.End -> {
+                            if (upstreamDone) {
+                                return Poll.ready(Yield.end())
+                            }
+                        }
+                    }
+                }
+                Poll.Pending -> return Poll.pending()
+            }
+
+            return if (upstreamDone && queue.isEmpty()) {
+                Poll.ready(Yield.end())
+            } else {
+                Poll.pending()
+            }
+        }
+
+        override fun sizeHint(): SizeHint {
+            val (lower, upper) = upstream.sizeHint()
+            val qLen = queue.len()
+            return SizeHint(
+                lower = lower + qLen,
+                upper = upper?.let { it + qLen },
+            )
+        }
+
+        override fun isTerminated(): Boolean = upstreamDone && queue.isTerminated()
+    }
+}
