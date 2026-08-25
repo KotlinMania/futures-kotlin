@@ -43,4 +43,3 @@ public fun <T> streamIter(iterable: Iterable<T>): Iter<T> = Iter(iterable.iterat
  */
 @HiddenFromObjC
 public fun <T> streamIter(iterator: Iterator<T>): Iter<T> = Iter(iterator)
-
