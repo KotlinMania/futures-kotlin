@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/tests/either.rs
+// port-lint: tests futures-util/src/future/either.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test
