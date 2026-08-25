@@ -2,7 +2,6 @@ package io.github.kotlinmania.futures
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class SinkCombinatorsTest {
     @Test
@@ -84,19 +83,20 @@ class SinkCombinatorsTest {
 
     @Test
     fun testSinkMapErr() {
-        val failingSink = object : Sink<Int, String> {
-            override fun pollReady(context: TaskContext): Poll<SinkOutcome<String>> =
-                Poll.ready(SinkOutcome.err("fail-ready"))
+        val failingSink =
+            object : Sink<Int, String> {
+                override fun pollReady(context: TaskContext): Poll<SinkOutcome<String>> =
+                    Poll.ready(SinkOutcome.err("fail-ready"))
 
-            override fun startSend(item: Int): SinkOutcome<String> =
-                SinkOutcome.err("fail-send")
+                override fun startSend(item: Int): SinkOutcome<String> =
+                    SinkOutcome.err("fail-send")
 
-            override fun pollFlush(context: TaskContext): Poll<SinkOutcome<String>> =
-                Poll.ready(SinkOutcome.err("fail-flush"))
+                override fun pollFlush(context: TaskContext): Poll<SinkOutcome<String>> =
+                    Poll.ready(SinkOutcome.err("fail-flush"))
 
-            override fun pollClose(context: TaskContext): Poll<SinkOutcome<String>> =
-                Poll.ready(SinkOutcome.err("fail-close"))
-        }
+                override fun pollClose(context: TaskContext): Poll<SinkOutcome<String>> =
+                    Poll.ready(SinkOutcome.err("fail-close"))
+            }
 
         val mapped = failingSink.sinkMapErr { "mapped:$it" }
         val ctx = TaskContext()
@@ -110,9 +110,10 @@ class SinkCombinatorsTest {
     @Test
     fun testWithSink() {
         val list = mutableListOf<Int>()
-        val sink = list.asSink().with { str: String ->
-            ready(str.length)
-        }
+        val sink =
+            list.asSink().with { str: String ->
+                ready(str.length)
+            }
         val ctx = TaskContext()
 
         assertEquals(Poll.Ready(SinkOutcome.Ready), sink.pollReady(ctx))

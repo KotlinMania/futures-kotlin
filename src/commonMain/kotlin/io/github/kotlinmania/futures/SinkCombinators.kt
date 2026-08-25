@@ -219,14 +219,13 @@ public class BufferSink<Item, out E>(
         }
     }
 
-    override fun startSend(item: Item): SinkOutcome<E> {
-        return if (capacity <= 0) {
+    override fun startSend(item: Item): SinkOutcome<E> =
+        if (capacity <= 0) {
             sink.startSend(item)
         } else {
             buf.addLast(item)
             SinkOutcome.ready()
         }
-    }
 
     override fun pollFlush(context: TaskContext): Poll<SinkOutcome<E>> {
         when (val drainPoll = tryEmptyBuffer(context)) {

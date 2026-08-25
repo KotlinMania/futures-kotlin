@@ -233,10 +233,11 @@ class StreamCombinatorsTest {
     @Test
     fun scanStream() {
         val cx = TaskContext()
-        val stream = listOf(1, 2, 3, 4).asStream().scan(0) { state, item ->
-            val sum = state + item
-            Pair(sum, sum)
-        }
+        val stream =
+            listOf(1, 2, 3, 4).asStream().scan(0) { state, item ->
+                val sum = state + item
+                Pair(sum, sum)
+            }
 
         val res = stream.collect().poll(cx)
         assertIs<Poll.Ready<List<Int>>>(res)

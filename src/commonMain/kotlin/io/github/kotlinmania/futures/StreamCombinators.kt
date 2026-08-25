@@ -504,8 +504,6 @@ public fun <T, U> Stream<T>.zip(other: Stream<U>): Stream<Pair<T, U>> {
 @HiddenFromObjC
 public fun <T> Iterable<T>.asStream(): Iter<T> = streamIter(this)
 
-
-
 /**
  * Flattens a stream of streams into a single stream.
  */
@@ -780,4 +778,3 @@ public fun <T, R> Stream<T>.then(transform: (T) -> Future<R>): Stream<R> {
         }
     }
 }
-
