@@ -83,13 +83,15 @@ class FuturesUnorderedTest {
         val (bTx, bRx) = oneshot<Int>()
         val (cTx, cRx) = oneshot<Int>()
 
-        val joined = join(bRx, cRx).map { (b, c) ->
-            (b as Try.Ok).value + (c as Try.Ok).value
-        }
+        val joined =
+            join(bRx, cRx).map { (b, c) ->
+                (b as Try.Ok).value + (c as Try.Ok).value
+            }
 
-        val aMapped = aRx.map {
-            (it as Try.Ok).value
-        }
+        val aMapped =
+            aRx.map {
+                (it as Try.Ok).value
+            }
 
         val stream = listOf(aMapped, joined).collectFuturesUnordered()
         val cx = TaskContext()
@@ -128,7 +130,9 @@ class FuturesUnorderedTest {
 
     @Test
     fun bufferUnorderedStream() {
-        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.unbounded<Future<Int>>()
+        val (tx, rx) =
+            io.github.kotlinmania.futures.channel.mpsc
+                .unbounded<Future<Int>>()
         val cx = TaskContext()
 
         tx.unboundedSend(ready(10))

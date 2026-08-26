@@ -11,10 +11,17 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class TryFlattenFuture<out T, out E>(
     future: TryFuture<TryFuture<T, E>, E>,
-) : TryFuture<T, E>, FusedFuture<Try<T, E>> {
+) : TryFuture<T, E>,
+    FusedFuture<Try<T, E>> {
     private sealed interface State<out T, out E> {
-        class First<out T, out E>(val future: TryFuture<TryFuture<T, E>, E>) : State<T, E>
-        class Second<out T, out E>(val future: TryFuture<T, E>) : State<T, E>
+        class First<out T, out E>(
+            val future: TryFuture<TryFuture<T, E>, E>,
+        ) : State<T, E>
+
+        class Second<out T, out E>(
+            val future: TryFuture<T, E>,
+        ) : State<T, E>
+
         data object Empty : State<Nothing, Nothing>
     }
 
@@ -60,10 +67,17 @@ public class TryFlattenFuture<out T, out E>(
 @HiddenFromObjC
 public class TryFlattenStream<out T, out E>(
     future: TryFuture<TryStream<T, E>, E>,
-) : TryStream<T, E>, FusedStream<Try<T, E>> {
+) : TryStream<T, E>,
+    FusedStream<Try<T, E>> {
     private sealed interface State<out T, out E> {
-        class First<out T, out E>(val future: TryFuture<TryStream<T, E>, E>) : State<T, E>
-        class Second<out T, out E>(val stream: TryStream<T, E>) : State<T, E>
+        class First<out T, out E>(
+            val future: TryFuture<TryStream<T, E>, E>,
+        ) : State<T, E>
+
+        class Second<out T, out E>(
+            val stream: TryStream<T, E>,
+        ) : State<T, E>
+
         data object Empty : State<Nothing, Nothing>
     }
 
@@ -120,8 +134,14 @@ public class TryFlattenSink<in Item, out E>(
     future: TryFuture<Sink<Item, E>, E>,
 ) : Sink<Item, E> {
     private sealed interface State<in Item, out E> {
-        class First<Item, E>(val future: TryFuture<Sink<Item, E>, E>) : State<Item, E>
-        class Second<Item, E>(val sink: Sink<Item, E>) : State<Item, E>
+        class First<Item, E>(
+            val future: TryFuture<Sink<Item, E>, E>,
+        ) : State<Item, E>
+
+        class Second<Item, E>(
+            val sink: Sink<Item, E>,
+        ) : State<Item, E>
+
         data object Empty : State<Any?, Nothing>
     }
 

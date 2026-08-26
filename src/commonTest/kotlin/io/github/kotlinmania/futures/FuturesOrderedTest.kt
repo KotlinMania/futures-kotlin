@@ -5,9 +5,7 @@ import io.github.kotlinmania.futures.channel.oneshot.Canceled
 import io.github.kotlinmania.futures.channel.oneshot.oneshot
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
-import kotlin.test.assertTrue
 
 class FuturesOrderedTest {
     @Test
@@ -49,13 +47,15 @@ class FuturesOrderedTest {
         val (bTx, bRx) = oneshot<Int>()
         val (cTx, cRx) = oneshot<Int>()
 
-        val joined = join(bRx, cRx).map { (b, c) ->
-            (b as Try.Ok).value + (c as Try.Ok).value
-        }
+        val joined =
+            join(bRx, cRx).map { (b, c) ->
+                (b as Try.Ok).value + (c as Try.Ok).value
+            }
 
-        val aMapped = aRx.map {
-            (it as Try.Ok).value
-        }
+        val aMapped =
+            aRx.map {
+                (it as Try.Ok).value
+            }
 
         val stream = listOf(aMapped, joined).collectFuturesOrdered()
         val cx = TaskContext()
@@ -196,7 +196,9 @@ class FuturesOrderedTest {
 
     @Test
     fun bufferedStream() {
-        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.unbounded<Future<Int>>()
+        val (tx, rx) =
+            io.github.kotlinmania.futures.channel.mpsc
+                .unbounded<Future<Int>>()
         val cx = TaskContext()
 
         tx.unboundedSend(ready(10))

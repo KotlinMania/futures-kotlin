@@ -85,11 +85,17 @@ class SplitTest {
         assertIs<SplitReuniteError>(failReunite.exceptionOrNull())
     }
 
-    private class NopStream<T> : Stream<T>, Sink<T, Unit> {
+    private class NopStream<T> :
+        Stream<T>,
+        Sink<T, Unit> {
         override fun pollNext(context: TaskContext): Poll<Yield<T>> = Poll.pending()
+
         override fun pollReady(context: TaskContext): Poll<SinkOutcome<Unit>> = Poll.ready(SinkOutcome.ready())
+
         override fun startSend(item: T): SinkOutcome<Unit> = SinkOutcome.ready()
+
         override fun pollFlush(context: TaskContext): Poll<SinkOutcome<Unit>> = Poll.ready(SinkOutcome.ready())
+
         override fun pollClose(context: TaskContext): Poll<SinkOutcome<Unit>> = Poll.ready(SinkOutcome.ready())
     }
 

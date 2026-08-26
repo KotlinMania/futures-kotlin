@@ -88,7 +88,9 @@ private class MinHeap<T : Comparable<T>> {
  * originating futures were added to the queue.
  */
 @HiddenFromObjC
-public class FuturesOrdered<T> : FusedStream<T>, Iterable<Future<T>> {
+public class FuturesOrdered<T> :
+    FusedStream<T>,
+    Iterable<Future<T>> {
     private val inProgressQueue = FuturesUnordered<OrderWrapperOutput<T>>()
     private val queuedOutputs = MinHeap<OrderWrapperOutput<T>>()
     private var nextIncomingIndex: Long = 0L
@@ -110,13 +112,14 @@ public class FuturesOrdered<T> : FusedStream<T>, Iterable<Future<T>> {
         val index = nextIncomingIndex
         nextIncomingIndex++
         inFlightFutures.add(future)
-        val wrapped = object : Future<OrderWrapperOutput<T>> {
-            override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
-                when (val p = future.poll(context)) {
-                    is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
-                    Poll.Pending -> Poll.pending()
-                }
-        }
+        val wrapped =
+            object : Future<OrderWrapperOutput<T>> {
+                override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
+                    when (val p = future.poll(context)) {
+                        is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
+                        Poll.Pending -> Poll.pending()
+                    }
+            }
         inProgressQueue.push(wrapped)
     }
 
@@ -134,13 +137,14 @@ public class FuturesOrdered<T> : FusedStream<T>, Iterable<Future<T>> {
         nextOutgoingIndex--
         val index = nextOutgoingIndex
         inFlightFutures.add(0, future)
-        val wrapped = object : Future<OrderWrapperOutput<T>> {
-            override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
-                when (val p = future.poll(context)) {
-                    is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
-                    Poll.Pending -> Poll.pending()
-                }
-        }
+        val wrapped =
+            object : Future<OrderWrapperOutput<T>> {
+                override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
+                    when (val p = future.poll(context)) {
+                        is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
+                        Poll.Pending -> Poll.pending()
+                    }
+            }
         inProgressQueue.push(wrapped)
     }
 

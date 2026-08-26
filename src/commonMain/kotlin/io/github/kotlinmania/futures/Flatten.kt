@@ -13,8 +13,14 @@ public class FlattenFuture<out T>(
     future: Future<Future<T>>,
 ) : FusedFuture<T> {
     private sealed interface State<out T> {
-        class First<out T>(val future: Future<Future<T>>) : State<T>
-        class Second<out T>(val future: Future<T>) : State<T>
+        class First<out T>(
+            val future: Future<Future<T>>,
+        ) : State<T>
+
+        class Second<out T>(
+            val future: Future<T>,
+        ) : State<T>
+
         data object Empty : State<Nothing>
     }
 
@@ -56,8 +62,14 @@ public class FlattenStream<out T>(
     future: Future<Stream<T>>,
 ) : FusedStream<T> {
     private sealed interface State<out T> {
-        class First<out T>(val future: Future<Stream<T>>) : State<T>
-        class Second<out T>(val stream: Stream<T>) : State<T>
+        class First<out T>(
+            val future: Future<Stream<T>>,
+        ) : State<T>
+
+        class Second<out T>(
+            val stream: Stream<T>,
+        ) : State<T>
+
         data object Empty : State<Nothing>
     }
 
@@ -108,8 +120,14 @@ public class FlattenSink<in Item, out E>(
     future: Future<Sink<Item, E>>,
 ) : Sink<Item, E> {
     private sealed interface State<in Item, out E> {
-        class First<Item, E>(val future: Future<Sink<Item, E>>) : State<Item, E>
-        class Second<Item, E>(val sink: Sink<Item, E>) : State<Item, E>
+        class First<Item, E>(
+            val future: Future<Sink<Item, E>>,
+        ) : State<Item, E>
+
+        class Second<Item, E>(
+            val sink: Sink<Item, E>,
+        ) : State<Item, E>
+
         data object Empty : State<Any?, Nothing>
     }
 
