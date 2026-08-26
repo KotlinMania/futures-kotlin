@@ -293,13 +293,13 @@ public fun <A, B, C, D, E> tryJoin4(
  * if all succeed, or [Try.Err] immediately if any fails.
  */
 @HiddenFromObjC
-public fun <A, B, C, D, E_val, Err> tryJoin5(
+public fun <A, B, C, D, E5, Err> tryJoin5(
     futureA: Future<Try<A, Err>>,
     futureB: Future<Try<B, Err>>,
     futureC: Future<Try<C, Err>>,
     futureD: Future<Try<D, Err>>,
-    futureE: Future<Try<E_val, Err>>,
-): TryJoin5<A, B, C, D, E_val, Err> = TryJoin5(futureA, futureB, futureC, futureD, futureE)
+    futureE: Future<Try<E5, Err>>,
+): TryJoin5<A, B, C, D, E5, Err> = TryJoin5(futureA, futureB, futureC, futureD, futureE)
 
 /**
  * Joins a list of try-futures, returning a future that resolves to [Try.Ok] of the list
