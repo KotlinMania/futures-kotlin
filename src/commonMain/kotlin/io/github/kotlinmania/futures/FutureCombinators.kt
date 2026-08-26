@@ -76,7 +76,6 @@ public fun <T, R> Future<T>.then(transform: (T) -> Future<R>): Future<R> {
     }
 }
 
-
 /**
  * Inspects this future's output when it is ready.
  */

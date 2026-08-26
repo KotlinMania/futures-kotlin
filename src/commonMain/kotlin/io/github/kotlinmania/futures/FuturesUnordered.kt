@@ -17,7 +17,9 @@ import kotlin.native.HiddenFromObjC
  * will only be polled when they generate wake-up notifications.
  */
 @HiddenFromObjC
-public class FuturesUnordered<T> : FusedStream<T>, Iterable<Future<T>> {
+public class FuturesUnordered<T> :
+    FusedStream<T>,
+    Iterable<Future<T>> {
     private val readyToRunQueue = ArrayDeque<Long>()
     private val tasks = mutableMapOf<Long, TaskNode<T>>()
     private val parentWaker = AtomicWaker()
@@ -63,15 +65,16 @@ public class FuturesUnordered<T> : FusedStream<T>, Iterable<Future<T>> {
         val woken = AtomicBoolean(false)
         val node = TaskNode(id, future, queued, woken)
 
-        node.waker = Waker {
-            node.woken.store(true)
-            if (node.queued.compareAndSet(false, true)) {
-                withLock {
-                    readyToRunQueue.add(id)
+        node.waker =
+            Waker {
+                node.woken.store(true)
+                if (node.queued.compareAndSet(false, true)) {
+                    withLock {
+                        readyToRunQueue.add(id)
+                    }
+                    parentWaker.wake()
                 }
-                parentWaker.wake()
             }
-        }
 
         withLock {
             tasks[id] = node
@@ -120,21 +123,22 @@ public class FuturesUnordered<T> : FusedStream<T>, Iterable<Future<T>> {
         val initialLen = len()
 
         while (true) {
-            val taskPair = withLock {
-                if (readyToRunQueue.isEmpty()) {
-                    null
-                } else {
-                    val id = readyToRunQueue.removeFirst()
-                    val node = tasks[id]
-                    if (node != null && node.future != null) {
-                        node.queued.store(false)
-                        node.woken.store(false)
-                        Pair(node, node.future!!)
-                    } else {
+            val taskPair =
+                withLock {
+                    if (readyToRunQueue.isEmpty()) {
                         null
+                    } else {
+                        val id = readyToRunQueue.removeFirst()
+                        val node = tasks[id]
+                        if (node != null && node.future != null) {
+                            node.queued.store(false)
+                            node.woken.store(false)
+                            Pair(node, node.future!!)
+                        } else {
+                            null
+                        }
                     }
                 }
-            }
 
             if (taskPair == null) {
                 break
@@ -180,9 +184,10 @@ public class FuturesUnordered<T> : FusedStream<T>, Iterable<Future<T>> {
     }
 
     override fun iterator(): Iterator<Future<T>> {
-        val snapshot = withLock {
-            tasks.values.mapNotNull { it.future }
-        }
+        val snapshot =
+            withLock {
+                tasks.values.mapNotNull { it.future }
+            }
         return snapshot.iterator()
     }
 
