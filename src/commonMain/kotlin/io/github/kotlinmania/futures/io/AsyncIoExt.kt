@@ -34,6 +34,55 @@ public fun AsyncRead.readToEnd(
 ): ReadToEnd = ReadToEnd(this, outBuf)
 
 /**
+ * Creates a future which will read all bytes until EOF, appending them as UTF-8 string to [outBuf].
+ */
+@HiddenFromObjC
+public fun AsyncRead.readToString(
+    outBuf: StringBuilder,
+): ReadToString = ReadToString(this, outBuf)
+
+/**
+ * Transforms this reader into another reader which will read up to [limit] bytes.
+ */
+@HiddenFromObjC
+public fun <R : AsyncRead> R.take(limit: Long): Take<R> = Take(this, limit)
+
+/**
+ * Chains two readers together, reading from this reader until EOF, then reading from [next].
+ */
+@HiddenFromObjC
+public fun <T : AsyncRead, U : AsyncRead> T.chain(next: U): Chain<T, U> = Chain(this, next)
+
+/**
+ * Creates a future which will read all bytes until the delimiter [byte] is found.
+ */
+@HiddenFromObjC
+public fun AsyncBufRead.readUntil(
+    byte: Byte,
+    outBuf: MutableList<Byte>,
+): ReadUntil = ReadUntil(this, byte, outBuf)
+
+/**
+ * Creates a future which will read all bytes until a newline (0x0A) is reached, appending them to [outBuf].
+ */
+@HiddenFromObjC
+public fun AsyncBufRead.readLine(
+    outBuf: StringBuilder,
+): ReadLine = ReadLine(this, outBuf)
+
+/**
+ * Returns a stream over the lines of this reader.
+ */
+@HiddenFromObjC
+public fun <R : AsyncBufRead> R.lines(): Lines<R> = Lines(this)
+
+/**
+ * Creates a future which will fill the internal buffer of this [AsyncBufRead].
+ */
+@HiddenFromObjC
+public fun AsyncBufRead.fillBuf(): FillBuf = FillBuf(this)
+
+/**
  * Creates a future which will write some bytes from [buf] into this writer.
  */
 @HiddenFromObjC
