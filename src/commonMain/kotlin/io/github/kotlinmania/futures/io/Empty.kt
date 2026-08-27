@@ -23,7 +23,9 @@ public class Empty : AsyncBufRead {
     override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> =
         Poll.Ready(Try.ok(ByteArray(0)))
 
-    override fun consume(amt: Int) {}
+    override fun consume(amt: Int) {
+        require(amt >= 0) { "amt must be non-negative" }
+    }
 
     override fun toString(): String = "Empty"
 }
