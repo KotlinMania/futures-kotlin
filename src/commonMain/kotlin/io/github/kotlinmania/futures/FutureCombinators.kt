@@ -9,47 +9,8 @@ import kotlin.native.HiddenFromObjC
  * Maps this future's output to a different value.
  */
 @HiddenFromObjC
-public fun <T, R> Future<T>.map(transform: (T) -> R): Future<R> {
-    val source = this
-    return object : Future<R> {
-        override fun poll(context: TaskContext): Poll<R> =
-            when (val p = source.poll(context)) {
-                is Poll.Ready -> Poll.Ready(transform(p.value))
-                is Poll.Pending -> Poll.Pending
-            }
-    }
-}
-
-/**
- * Future for the [fuse] combinator.
- */
-@HiddenFromObjC
-public class Fuse<T>(
-    private var inner: Future<T>?,
-) : FusedFuture<T> {
-    override fun isTerminated(): Boolean = inner == null
-
-    override fun poll(context: TaskContext): Poll<T> {
-        val fut = inner ?: return Poll.Pending
-        return when (val res = fut.poll(context)) {
-            is Poll.Ready -> {
-                inner = null
-                res
-            }
-            is Poll.Pending -> Poll.Pending
-        }
-    }
-
-    public companion object {
-        public fun <T> terminated(): Fuse<T> = Fuse(null)
-    }
-}
-
-/**
- * Fuses this future so that it stops yielding `Ready` after the first completion.
- */
-@HiddenFromObjC
-public fun <T> Future<T>.fuse(): Fuse<T> = Fuse(this)
+public fun <T, R> Future<T>.map(transform: (T) -> R): Map<T, R> =
+    Map.new(this, transform)
 
 /**
  * Chains a computation that returns another future.
