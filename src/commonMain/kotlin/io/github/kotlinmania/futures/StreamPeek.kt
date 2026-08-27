@@ -45,27 +45,28 @@ public class Peekable<T>(
         }
     }
 
-    public fun peek(): Future<T?> = object : Future<T?> {
-        override fun poll(context: TaskContext): Poll<T?> = pollPeek(context)
-    }
-
-    public fun nextIf(predicate: (T) -> Boolean): Future<T?> = object : Future<T?> {
-        override fun poll(context: TaskContext): Poll<T?> {
-            return when (val p = pollPeek(context)) {
-                is Poll.Ready -> {
-                    val item = p.value
-                    if (item != null && predicate(item)) {
-                        hasPeeked = false
-                        peeked = null
-                        Poll.Ready(item)
-                    } else {
-                        Poll.Ready(null)
-                    }
-                }
-                Poll.Pending -> Poll.Pending
-            }
+    public fun peek(): Future<T?> =
+        object : Future<T?> {
+            override fun poll(context: TaskContext): Poll<T?> = pollPeek(context)
         }
-    }
+
+    public fun nextIf(predicate: (T) -> Boolean): Future<T?> =
+        object : Future<T?> {
+            override fun poll(context: TaskContext): Poll<T?> =
+                when (val p = pollPeek(context)) {
+                    is Poll.Ready -> {
+                        val item = p.value
+                        if (item != null && predicate(item)) {
+                            hasPeeked = false
+                            peeked = null
+                            Poll.Ready(item)
+                        } else {
+                            Poll.Ready(null)
+                        }
+                    }
+                    Poll.Pending -> Poll.Pending
+                }
+        }
 
     public fun nextIfEq(expected: T): Future<T?> = nextIf { it == expected }
 

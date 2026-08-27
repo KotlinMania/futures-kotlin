@@ -11,7 +11,6 @@ import io.github.kotlinmania.futures.io.IoError
 import io.github.kotlinmania.futures.io.SeekFrom
 import kotlin.native.HiddenFromObjC
 
-
 /**
  * Combines two different types into a single type.
  *
@@ -310,4 +309,3 @@ public fun Either<AsyncBufRead, AsyncBufRead>.asAsyncBufRead(): AsyncBufRead =
             }
         }
     }
-

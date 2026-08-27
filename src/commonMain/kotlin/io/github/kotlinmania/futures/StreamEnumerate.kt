@@ -18,11 +18,21 @@ public class Enumerate<T>(
         internal fun <T> new(stream: Stream<T>): Enumerate<T> = Enumerate(stream)
     }
 
+    /**
+     * Acquires a reference to the underlying stream that this combinator is pulling from.
+     */
+    public fun getRef(): Stream<T> = stream
+
+    /**
+     * Consumes this combinator, returning the underlying stream.
+     */
+    public fun intoInner(): Stream<T> = stream
+
     override fun isTerminated(): Boolean =
         (stream as? FusedStream<*>)?.isTerminated() ?: false
 
-    override fun pollNext(context: TaskContext): Poll<Yield<IndexedValue<T>>> {
-        return when (val p = stream.pollNext(context)) {
+    override fun pollNext(context: TaskContext): Poll<Yield<IndexedValue<T>>> =
+        when (val p = stream.pollNext(context)) {
             is Poll.Ready -> {
                 when (val y = p.value) {
                     is Yield.Value -> {
@@ -35,7 +45,6 @@ public class Enumerate<T>(
             }
             Poll.Pending -> Poll.Pending
         }
-    }
 
     override fun sizeHint(): SizeHint = stream.sizeHint()
 }

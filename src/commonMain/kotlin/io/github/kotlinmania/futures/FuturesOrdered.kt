@@ -131,6 +131,15 @@ public class FuturesOrdered<T> :
     }
 
     /**
+     * Extends this [FuturesOrdered] with the contents of an [Iterable] of futures.
+     */
+    public fun extend(futures: Iterable<Future<T>>) {
+        for (fut in futures) {
+            pushBack(fut)
+        }
+    }
+
+    /**
      * Pushes a future to the front of the queue.
      */
     public fun pushFront(future: Future<T>) {
@@ -263,4 +272,3 @@ public fun <T> futuresOrdered(futures: Iterable<Future<T>>): FuturesOrdered<T> =
 @HiddenFromObjC
 public fun <T> Iterable<Future<T>>.collectFuturesOrdered(): FuturesOrdered<T> =
     FuturesOrdered.fromIterable(this)
-

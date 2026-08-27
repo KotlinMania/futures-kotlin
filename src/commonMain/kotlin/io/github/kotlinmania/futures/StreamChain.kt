@@ -42,11 +42,12 @@ public class Chain<T>(
         val hint1 = first?.sizeHint() ?: SizeHint(0, 0)
         val hint2 = second.sizeHint()
         val lower = (hint1.lower.toLong() + hint2.lower.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-        val upper = if (hint1.upper != null && hint2.upper != null) {
-            (hint1.upper.toLong() + hint2.upper.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-        } else {
-            null
-        }
+        val upper =
+            if (hint1.upper != null && hint2.upper != null) {
+                (hint1.upper.toLong() + hint2.upper.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+            } else {
+                null
+            }
         return SizeHint(lower, upper)
     }
 }

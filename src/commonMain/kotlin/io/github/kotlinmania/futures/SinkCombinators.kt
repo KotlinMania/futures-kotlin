@@ -424,6 +424,7 @@ public class WithSink<Item, in InItem, out E>(
     }
 
     public fun getRef(): Sink<Item, E> = sink
+
     public fun getMut(): Sink<Item, E> = sink
 }
 
@@ -528,6 +529,7 @@ public class WithFlatMap<Item, in InItem, out E>(
     }
 
     public fun getRef(): Sink<Item, E> = sink
+
     public fun getMut(): Sink<Item, E> = sink
 }
 
@@ -658,4 +660,3 @@ public fun <Item, E> Sink<Item, E>.pollCloseUnpin(context: TaskContext): Poll<Si
     pollClose(context)
 
 internal fun <Item, E, S : Sink<Item, E>> assertSink(sink: S): S = sink
-

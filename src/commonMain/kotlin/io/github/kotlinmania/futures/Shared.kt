@@ -70,11 +70,12 @@ public class Shared<T> internal constructor(
                     is Poll.Ready -> {
                         inner.output = p.value
                         inner.state.store(STATE_COMPLETE)
-                        val toWake = inner.withLock {
-                            val list = ArrayList(inner.wakersList)
-                            inner.wakersList.clear()
-                            list
-                        }
+                        val toWake =
+                            inner.withLock {
+                                val list = ArrayList(inner.wakersList)
+                                inner.wakersList.clear()
+                                list
+                            }
                         for (w in toWake) {
                             w.wakeByRef()
                         }
@@ -89,11 +90,12 @@ public class Shared<T> internal constructor(
             } catch (t: Throwable) {
                 inner.error = t
                 inner.state.store(STATE_POISONED)
-                val toWake = inner.withLock {
-                    val list = ArrayList(inner.wakersList)
-                    inner.wakersList.clear()
-                    list
-                }
+                val toWake =
+                    inner.withLock {
+                        val list = ArrayList(inner.wakersList)
+                        inner.wakersList.clear()
+                        list
+                    }
                 for (w in toWake) {
                     w.wakeByRef()
                 }

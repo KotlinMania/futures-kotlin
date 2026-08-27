@@ -24,6 +24,22 @@ public class Chunks<T>(
         internal fun <T> new(stream: Stream<T>, capacity: Int): Chunks<T> = Chunks(stream, capacity)
     }
 
+    /**
+     * Acquires a reference to the underlying stream that this combinator is pulling from.
+     */
+    public fun getRef(): Stream<T> = stream
+
+    /**
+     * Consumes this combinator, returning the underlying stream.
+     */
+    public fun intoInner(): Stream<T> = stream
+
+    private fun take(): List<T> {
+        val chunk = items.toList()
+        items.clear()
+        return chunk
+    }
+
     override fun isTerminated(): Boolean = streamDone && items.isEmpty()
 
     override fun pollNext(context: TaskContext): Poll<Yield<List<T>>> {

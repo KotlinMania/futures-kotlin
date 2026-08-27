@@ -23,8 +23,8 @@ public class Cycle<T>(
         return hint.lower == 0 && hint.upper == 0
     }
 
-    override fun pollNext(context: TaskContext): Poll<Yield<T>> {
-        return when (val p = stream.pollNext(context)) {
+    override fun pollNext(context: TaskContext): Poll<Yield<T>> =
+        when (val p = stream.pollNext(context)) {
             is Poll.Ready -> {
                 when (p.value) {
                     is Yield.Value -> p
@@ -36,7 +36,6 @@ public class Cycle<T>(
             }
             Poll.Pending -> Poll.Pending
         }
-    }
 
     override fun sizeHint(): SizeHint {
         val orig = factory().sizeHint()

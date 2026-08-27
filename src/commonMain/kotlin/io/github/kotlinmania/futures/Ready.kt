@@ -57,5 +57,3 @@ public fun <T, E> ok(value: T): Ready<Try<T, E>> = Ready(Try.Ok(value))
  */
 @HiddenFromObjC
 public fun <T, E> err(error: E): Ready<Try<T, E>> = Ready(Try.Err(error))
-
-
