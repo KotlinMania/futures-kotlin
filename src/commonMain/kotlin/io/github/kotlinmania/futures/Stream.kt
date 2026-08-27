@@ -162,3 +162,16 @@ public fun <T> Yield<T>.valueOrNull(): T? =
         is Yield.Value -> value
         Yield.End -> null
     }
+
+/**
+ * Type alias for Stream Item type.
+ */
+public typealias Item = Any?
+
+/**
+ * Sealed marker trait for TryStream implementation constraints.
+ */
+@HiddenFromObjC
+public sealed interface TryStreamSealed
+
+
