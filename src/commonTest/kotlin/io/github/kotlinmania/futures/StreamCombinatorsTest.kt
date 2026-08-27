@@ -290,4 +290,60 @@ class StreamCombinatorsTest {
         assertIs<Poll.Ready<List<Int>>>(res)
         assertEquals(listOf(10, 20, 30), res.value)
     }
+
+    @Test
+    fun cycleAndReadyChunks() {
+        val cx = TaskContext()
+        val cycled = { listOf(1, 2).asStream() }.cycle().take(5).collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(cycled)
+        assertEquals(listOf(1, 2, 1, 2, 1), cycled.value)
+
+        val readyChunked = listOf(1, 2, 3, 4).asStream().readyChunks(2).collect().poll(cx)
+        assertIs<Poll.Ready<List<List<Int>>>>(readyChunked)
+        assertEquals(listOf(listOf(1, 2), listOf(3, 4)), readyChunked.value)
+    }
+
+    @Test
+    fun forEachConcurrentAndBuffered() {
+        val cx = TaskContext()
+        val seen = mutableListOf<Int>()
+        val future = listOf(1, 2, 3).asStream().forEachConcurrent(2) {
+            seen.add(it)
+            Ready(Unit)
+        }
+        val p = future.poll(cx)
+        assertIs<Poll.Ready<Unit>>(p)
+        assertEquals(listOf(1, 2, 3), seen)
+
+        val futuresStream = listOf(Ready(10), Ready(20), Ready(30)).asStream()
+        val buffered = futuresStream.buffered(2).collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(buffered)
+        assertEquals(listOf(10, 20, 30), buffered.value)
+
+        val futuresStream2 = listOf(Ready(100), Ready(200)).asStream()
+        val bufUnordered = futuresStream2.bufferUnordered(2).collect().poll(cx)
+        assertIs<Poll.Ready<List<Int>>>(bufUnordered)
+        assertEquals(listOf(100, 200), bufUnordered.value)
+    }
+
+    @Test
+    fun sharedAndCatchUnwindAndRemoteHandle() {
+        val cx = TaskContext()
+        val okFut = Ready(42)
+        val shared = okFut.shared()
+        val s1 = shared.clone().poll(cx)
+        assertIs<Poll.Ready<Int>>(s1)
+        assertEquals(42, s1.value)
+        val s2 = shared.poll(cx)
+        assertIs<Poll.Ready<Int>>(s2)
+        assertEquals(42, s2.value)
+
+        val (remote, handle) = Ready("hello").remoteHandle()
+        val pRemote = remote.poll(cx)
+        assertIs<Poll.Ready<Unit>>(pRemote)
+        val pHandle = handle.poll(cx)
+        assertIs<Poll.Ready<String>>(pHandle)
+        assertEquals("hello", pHandle.value)
+    }
 }
+
