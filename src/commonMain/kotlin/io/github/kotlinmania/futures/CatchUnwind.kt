@@ -16,8 +16,8 @@ public class CatchUnwind<T>(
         internal fun <T> new(future: Future<T>): CatchUnwind<T> = CatchUnwind(future)
     }
 
-    override fun poll(context: TaskContext): Poll<Result<T>> {
-        return try {
+    override fun poll(context: TaskContext): Poll<Result<T>> =
+        try {
             when (val p = future.poll(context)) {
                 is Poll.Ready -> Poll.Ready(Result.success(p.value))
                 Poll.Pending -> Poll.Pending
@@ -25,7 +25,6 @@ public class CatchUnwind<T>(
         } catch (t: Throwable) {
             Poll.Ready(Result.failure(t))
         }
-    }
 }
 
 /**

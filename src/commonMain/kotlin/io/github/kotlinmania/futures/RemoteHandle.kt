@@ -28,8 +28,8 @@ public class RemoteHandle<T> internal constructor(
         keepRunning.store(true)
     }
 
-    override fun poll(context: TaskContext): Poll<T> {
-        return when (val p = rx.poll(context)) {
+    override fun poll(context: TaskContext): Poll<T> =
+        when (val p = rx.poll(context)) {
             is Poll.Ready -> {
                 when (val result = p.value) {
                     is Try.Ok -> {
@@ -45,7 +45,6 @@ public class RemoteHandle<T> internal constructor(
             }
             Poll.Pending -> Poll.Pending
         }
-    }
 }
 
 /**
@@ -82,11 +81,12 @@ public class Remote<T> internal constructor(
 public fun <T> Future<T>.remoteHandle(): Pair<Remote<T>, RemoteHandle<T>> {
     val (tx, rx) = channel<Result<T>>()
     val keepRunning = AtomicBoolean(false)
-    val wrapped = Remote(
-        tx = tx,
-        keepRunning = keepRunning,
-        future = this.catchUnwind(),
-    )
+    val wrapped =
+        Remote(
+            tx = tx,
+            keepRunning = keepRunning,
+            future = this.catchUnwind(),
+        )
     val handle = RemoteHandle(rx = rx, keepRunning = keepRunning)
     return Pair(wrapped, handle)
 }

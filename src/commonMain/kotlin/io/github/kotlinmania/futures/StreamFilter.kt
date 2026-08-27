@@ -17,6 +17,16 @@ public class Filter<T>(
         internal fun <T> new(stream: Stream<T>, predicate: (T) -> Boolean): Filter<T> = Filter(stream, predicate)
     }
 
+    /**
+     * Acquires a reference to the underlying stream that this combinator is pulling from.
+     */
+    public fun getRef(): Stream<T> = stream
+
+    /**
+     * Consumes this combinator, returning the underlying stream.
+     */
+    public fun intoInner(): Stream<T> = stream
+
     override fun isTerminated(): Boolean =
         (stream as? FusedStream<*>)?.isTerminated() ?: false
 

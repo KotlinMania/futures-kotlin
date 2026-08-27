@@ -84,6 +84,15 @@ public class FuturesUnordered<T> :
     }
 
     /**
+     * Extends this [FuturesUnordered] with the contents of an [Iterable] of futures.
+     */
+    public fun extend(futures: Iterable<Future<T>>) {
+        for (fut in futures) {
+            push(fut)
+        }
+    }
+
+    /**
      * Returns the number of futures contained in the set.
      */
     public fun len(): Int = withLock { tasks.size }
@@ -216,4 +225,3 @@ public fun <T> futuresUnordered(futures: Iterable<Future<T>>): FuturesUnordered<
 @HiddenFromObjC
 public fun <T> Iterable<Future<T>>.collectFuturesUnordered(): FuturesUnordered<T> =
     FuturesUnordered.fromIterable(this)
-

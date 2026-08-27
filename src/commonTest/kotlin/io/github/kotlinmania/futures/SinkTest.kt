@@ -7,7 +7,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-
 class SinkTest {
     /**
      * A small synchronous sink with a bounded buffer, used to exercise the
@@ -165,11 +164,12 @@ class SinkTest {
     fun eitherSink() {
         val list = mutableListOf<Int>()
         val deque = ArrayDeque<Int>()
-        val s: Sink<Int, Nothing> = if (true) {
-            list.asSink().leftSink<Int, Nothing, Sink<Int, Nothing>>().asSink()
-        } else {
-            deque.asSink().rightSink<Int, Nothing, Sink<Int, Nothing>>().asSink()
-        }
+        val s: Sink<Int, Nothing> =
+            if (true) {
+                list.asSink().leftSink<Int, Nothing, Sink<Int, Nothing>>().asSink()
+            } else {
+                deque.asSink().rightSink<Int, Nothing, Sink<Int, Nothing>>().asSink()
+            }
         assertEquals(SinkOutcome.Ready, s.startSend(0))
         assertEquals(listOf(0), list)
     }
@@ -240,9 +240,10 @@ class SinkTest {
     @Test
     fun withAsMap() {
         val v = mutableListOf<Int>()
-        val sink = v.asSink().with<Int, Int, Nothing> { item ->
-            ready(item * 2)
-        }
+        val sink =
+            v.asSink().with<Int, Int, Nothing> { item ->
+                ready(item * 2)
+            }
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(0).poll(TaskContext()))
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(1).poll(TaskContext()))
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(2).poll(TaskContext()))
@@ -252,10 +253,11 @@ class SinkTest {
     @Test
     fun withFlatMap() {
         val v = mutableListOf<Int>()
-        val sink = v.asSink().withFlatMap<Int, Int, Nothing> { item ->
-            val items = List(item) { item }
-            streamIter(items.map { Try.Ok(it) })
-        }
+        val sink =
+            v.asSink().withFlatMap<Int, Int, Nothing> { item ->
+                val items = List(item) { item }
+                streamIter(items.map { Try.Ok(it) })
+            }
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(0).poll(TaskContext()))
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(1).poll(TaskContext()))
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(2).poll(TaskContext()))
@@ -304,4 +306,3 @@ class SinkTest {
         assertEquals(SinkOutcome.Err("wrapped:error"), converted.startSend(1))
     }
 }
-

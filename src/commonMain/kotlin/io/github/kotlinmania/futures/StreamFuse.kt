@@ -23,6 +23,16 @@ public class StreamFuse<T>(
      */
     public fun isDone(): Boolean = done
 
+    /**
+     * Acquires a reference to the underlying stream that this combinator is pulling from.
+     */
+    public fun getRef(): Stream<T> = stream
+
+    /**
+     * Consumes this combinator, returning the underlying stream.
+     */
+    public fun intoInner(): Stream<T> = stream
+
     override fun isTerminated(): Boolean = done
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> {

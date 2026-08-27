@@ -9,6 +9,7 @@ import io.github.kotlinmania.futures.io.empty
 import io.github.kotlinmania.futures.io.readExact
 import io.github.kotlinmania.futures.io.readToEnd
 import io.github.kotlinmania.futures.io.repeat
+import io.github.kotlinmania.futures.io.sink
 import io.github.kotlinmania.futures.io.writeAll
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -156,5 +157,24 @@ class AsyncIoTest {
         assertTrue(readVal is Try.Ok)
         assertEquals(3, readVal.value)
         assertEquals(listOf<Byte>(100, 101, 102), list)
+    }
+
+    @Test
+    fun testSinkWriter() {
+        val writer = sink()
+        val data = byteArrayOf(1, 2, 3, 4, 5)
+        val writePoll = writer.pollWrite(context, data)
+        assertTrue(writePoll is Poll.Ready)
+        val writeVal = writePoll.value
+        assertTrue(writeVal is Try.Ok)
+        assertEquals(5, writeVal.value)
+
+        val flushPoll = writer.pollFlush(context)
+        assertTrue(flushPoll is Poll.Ready)
+        assertTrue(flushPoll.value is Try.Ok)
+
+        val closePoll = writer.pollClose(context)
+        assertTrue(closePoll is Poll.Ready)
+        assertTrue(closePoll.value is Try.Ok)
     }
 }

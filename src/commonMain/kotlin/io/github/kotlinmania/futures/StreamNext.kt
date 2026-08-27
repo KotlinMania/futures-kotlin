@@ -19,8 +19,8 @@ public class Next<T>(
     override fun isTerminated(): Boolean =
         (stream as? FusedStream<*>)?.isTerminated() ?: false
 
-    override fun poll(context: TaskContext): Poll<T?> {
-        return when (val p = stream.pollNext(context)) {
+    override fun poll(context: TaskContext): Poll<T?> =
+        when (val p = stream.pollNext(context)) {
             is Poll.Ready -> {
                 when (val y = p.value) {
                     is Yield.Value -> Poll.Ready(y.value)
@@ -29,7 +29,6 @@ public class Next<T>(
             }
             Poll.Pending -> Poll.Pending
         }
-    }
 }
 
 /**

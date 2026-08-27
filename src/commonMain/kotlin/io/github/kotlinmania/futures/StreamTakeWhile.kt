@@ -20,6 +20,16 @@ public class TakeWhile<T>(
             TakeWhile(stream, predicate)
     }
 
+    /**
+     * Acquires a reference to the underlying stream that this combinator is pulling from.
+     */
+    public fun getRef(): Stream<T> = stream
+
+    /**
+     * Consumes this combinator, returning the underlying stream.
+     */
+    public fun intoInner(): Stream<T> = stream
+
     override fun isTerminated(): Boolean =
         doneTaking || ((stream as? FusedStream<*>)?.isTerminated() ?: false)
 

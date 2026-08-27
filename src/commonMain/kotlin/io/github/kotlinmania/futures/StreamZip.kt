@@ -24,6 +24,16 @@ public class Zip<A, B>(
         internal fun <A, B> new(stream1: Stream<A>, stream2: Stream<B>): Zip<A, B> = Zip(stream1, stream2)
     }
 
+    /**
+     * Acquires references to the underlying streams that this combinator is pulling from.
+     */
+    public fun getRef(): Pair<Stream<A>, Stream<B>> = Pair(stream1, stream2)
+
+    /**
+     * Consumes this combinator, returning the underlying streams.
+     */
+    public fun intoInner(): Pair<Stream<A>, Stream<B>> = Pair(stream1, stream2)
+
     override fun isTerminated(): Boolean =
         done || (!hasQueued1 && !hasQueued2 && (((stream1 as? FusedStream<*>)?.isTerminated() ?: false) || ((stream2 as? FusedStream<*>)?.isTerminated() ?: false)))
 
@@ -90,12 +100,13 @@ public class Zip<A, B>(
 
         val upper1 = hint1.upper?.let { it + (if (hasQueued1) 1 else 0) }
         val upper2 = hint2.upper?.let { it + (if (hasQueued2) 1 else 0) }
-        val upper = when {
-            upper1 != null && upper2 != null -> min(upper1, upper2)
-            upper1 != null -> upper1
-            upper2 != null -> upper2
-            else -> null
-        }
+        val upper =
+            when {
+                upper1 != null && upper2 != null -> min(upper1, upper2)
+                upper1 != null -> upper1
+                upper2 != null -> upper2
+                else -> null
+            }
         return SizeHint(lower, upper)
     }
 }

@@ -294,11 +294,21 @@ class StreamCombinatorsTest {
     @Test
     fun cycleAndReadyChunks() {
         val cx = TaskContext()
-        val cycled = { listOf(1, 2).asStream() }.cycle().take(5).collect().poll(cx)
+        val cycled =
+            { listOf(1, 2).asStream() }
+                .cycle()
+                .take(5)
+                .collect()
+                .poll(cx)
         assertIs<Poll.Ready<List<Int>>>(cycled)
         assertEquals(listOf(1, 2, 1, 2, 1), cycled.value)
 
-        val readyChunked = listOf(1, 2, 3, 4).asStream().readyChunks(2).collect().poll(cx)
+        val readyChunked =
+            listOf(1, 2, 3, 4)
+                .asStream()
+                .readyChunks(2)
+                .collect()
+                .poll(cx)
         assertIs<Poll.Ready<List<List<Int>>>>(readyChunked)
         assertEquals(listOf(listOf(1, 2), listOf(3, 4)), readyChunked.value)
     }
@@ -307,10 +317,11 @@ class StreamCombinatorsTest {
     fun forEachConcurrentAndBuffered() {
         val cx = TaskContext()
         val seen = mutableListOf<Int>()
-        val future = listOf(1, 2, 3).asStream().forEachConcurrent(2) {
-            seen.add(it)
-            Ready(Unit)
-        }
+        val future =
+            listOf(1, 2, 3).asStream().forEachConcurrent(2) {
+                seen.add(it)
+                Ready(Unit)
+            }
         val p = future.poll(cx)
         assertIs<Poll.Ready<Unit>>(p)
         assertEquals(listOf(1, 2, 3), seen)
@@ -346,4 +357,3 @@ class StreamCombinatorsTest {
         assertEquals("hello", pHandle.value)
     }
 }
-
