@@ -262,3 +262,6 @@ public fun <T, E> Future<Try<T, E>>.inspectErr(action: (E) -> Unit): TryFuture<T
             }
     }
 }
+
+internal fun <T, F : Future<T>> assertFuture(future: F): F = future
+

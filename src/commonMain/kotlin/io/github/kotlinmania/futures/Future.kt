@@ -95,3 +95,11 @@ public fun <T, E> Future<Try<T, E>>.asTryFuture(): TryFuture<T, E> {
             delegate.poll(context)
     }
 }
+
+/**
+ * Sealed marker trait for TryFuture implementation constraints.
+ */
+@HiddenFromObjC
+public sealed interface TryFutureSealed
+
+

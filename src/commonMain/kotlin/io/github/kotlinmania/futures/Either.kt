@@ -3,7 +3,14 @@
 
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.io.AsyncBufRead
+import io.github.kotlinmania.futures.io.AsyncRead
+import io.github.kotlinmania.futures.io.AsyncSeek
+import io.github.kotlinmania.futures.io.AsyncWrite
+import io.github.kotlinmania.futures.io.IoError
+import io.github.kotlinmania.futures.io.SeekFrom
 import kotlin.native.HiddenFromObjC
+
 
 /**
  * Combines two different types into a single type.
@@ -208,3 +215,99 @@ public fun <Item, E> Either<Sink<Item, E>, Sink<Item, E>>.asSink(): Sink<Item, E
                 is Either.Right -> e.value.pollClose(context)
             }
     }
+
+/**
+ * Adapts an [Either] of two async readers into a single [AsyncRead].
+ */
+@HiddenFromObjC
+public fun Either<AsyncRead, AsyncRead>.asAsyncRead(): AsyncRead =
+    object : AsyncRead {
+        override fun pollRead(
+            context: TaskContext,
+            buf: ByteArray,
+            offset: Int,
+            length: Int,
+        ): Poll<Try<Int, IoError>> =
+            when (val e = this@asAsyncRead) {
+                is Either.Left -> e.value.pollRead(context, buf, offset, length)
+                is Either.Right -> e.value.pollRead(context, buf, offset, length)
+            }
+    }
+
+/**
+ * Adapts an [Either] of two async writers into a single [AsyncWrite].
+ */
+@HiddenFromObjC
+public fun Either<AsyncWrite, AsyncWrite>.asAsyncWrite(): AsyncWrite =
+    object : AsyncWrite {
+        override fun pollWrite(
+            context: TaskContext,
+            buf: ByteArray,
+            offset: Int,
+            length: Int,
+        ): Poll<Try<Int, IoError>> =
+            when (val e = this@asAsyncWrite) {
+                is Either.Left -> e.value.pollWrite(context, buf, offset, length)
+                is Either.Right -> e.value.pollWrite(context, buf, offset, length)
+            }
+
+        override fun pollFlush(context: TaskContext): Poll<Try<Unit, IoError>> =
+            when (val e = this@asAsyncWrite) {
+                is Either.Left -> e.value.pollFlush(context)
+                is Either.Right -> e.value.pollFlush(context)
+            }
+
+        override fun pollClose(context: TaskContext): Poll<Try<Unit, IoError>> =
+            when (val e = this@asAsyncWrite) {
+                is Either.Left -> e.value.pollClose(context)
+                is Either.Right -> e.value.pollClose(context)
+            }
+    }
+
+/**
+ * Adapts an [Either] of two async seekable streams into a single [AsyncSeek].
+ */
+@HiddenFromObjC
+public fun Either<AsyncSeek, AsyncSeek>.asAsyncSeek(): AsyncSeek =
+    object : AsyncSeek {
+        override fun pollSeek(
+            context: TaskContext,
+            pos: SeekFrom,
+        ): Poll<Try<Long, IoError>> =
+            when (val e = this@asAsyncSeek) {
+                is Either.Left -> e.value.pollSeek(context, pos)
+                is Either.Right -> e.value.pollSeek(context, pos)
+            }
+    }
+
+/**
+ * Adapts an [Either] of two async buffered readers into a single [AsyncBufRead].
+ */
+@HiddenFromObjC
+public fun Either<AsyncBufRead, AsyncBufRead>.asAsyncBufRead(): AsyncBufRead =
+    object : AsyncBufRead {
+        override fun pollRead(
+            context: TaskContext,
+            buf: ByteArray,
+            offset: Int,
+            length: Int,
+        ): Poll<Try<Int, IoError>> =
+            when (val e = this@asAsyncBufRead) {
+                is Either.Left -> e.value.pollRead(context, buf, offset, length)
+                is Either.Right -> e.value.pollRead(context, buf, offset, length)
+            }
+
+        override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> =
+            when (val e = this@asAsyncBufRead) {
+                is Either.Left -> e.value.pollFillBuf(context)
+                is Either.Right -> e.value.pollFillBuf(context)
+            }
+
+        override fun consume(amt: Int) {
+            when (val e = this@asAsyncBufRead) {
+                is Either.Left -> e.value.consume(amt)
+                is Either.Right -> e.value.consume(amt)
+            }
+        }
+    }
+

@@ -877,3 +877,43 @@ public class Peekable<T>(
  */
 @HiddenFromObjC
 public fun <T> Stream<T>.peekable(): Peekable<T> = Peekable(this)
+
+/**
+ * Tests whether every element of the stream matches a predicate.
+ */
+@HiddenFromObjC
+public fun <T> Stream<T>.all(predicate: (T) -> Boolean): Future<Boolean> = forAll(predicate)
+
+/**
+ * Maps each item to a stream and flattens the resulting streams.
+ */
+@HiddenFromObjC
+public fun <T, R> Stream<T>.flatMap(transform: (T) -> Stream<R>): Stream<R> =
+    map(transform).flatten()
+
+/**
+ * Concatenates all items from a stream of collections into a single collection.
+ */
+@HiddenFromObjC
+public fun <T> Stream<List<T>>.concat(): Future<List<T>> {
+    val stream = this
+    val accum = mutableListOf<T>()
+    return object : Future<List<T>> {
+        override fun poll(context: TaskContext): Poll<List<T>> {
+            while (true) {
+                when (val p = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> accum.addAll(y.value)
+                            Yield.End -> return Poll.ready(accum.toList())
+                        }
+                    }
+                    Poll.Pending -> return Poll.pending()
+                }
+            }
+        }
+    }
+}
+
+internal fun <T, S : Stream<T>> assertStream(stream: S): S = stream
+
