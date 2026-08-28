@@ -80,4 +80,9 @@ public class ReadLine(
             )
         }
     }
+
+    public companion object {
+        public fun new(reader: AsyncBufRead, buf: StringBuilder): ReadLine =
+            ReadLine(reader, buf)
+    }
 }

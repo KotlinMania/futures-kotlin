@@ -22,24 +22,30 @@ public fun interface Future<out T> {
 }
 
 /**
- * An owned dynamically typed [Future] for cases where the result cannot be
- * statically typed or needs an extra level of indirection.
+ * An owned dynamically typed [Future] for use in cases where you can't
+ * statically type your result or need to add some indirection.
  */
 public typealias BoxFuture<T> = Future<T>
 
 /**
- * [BoxFuture], but without a cross-thread sending requirement.
+ * `BoxFuture`, but without the thread-safety requirement.
  */
 public typealias LocalBoxFuture<T> = Future<T>
 
 /**
- * A future that tracks whether its underlying computation should no longer be
- * polled.
+ * A future which tracks whether or not the underlying future
+ * should no longer be polled.
+ *
+ * `isTerminated` will return `true` if a future should no longer be polled.
+ * Usually, this state occurs after `poll` (or `tryPoll`) returned
+ * `Poll.Ready`. However, `isTerminated` may also return `true` if a future
+ * has become inactive and can no longer make progress and should be ignored
+ * or dropped rather than being `poll`ed again.
  */
 @HiddenFromObjC
 public interface FusedFuture<out T> : Future<T> {
     /**
-     * Returns true when the underlying future should no longer be polled.
+     * Returns `true` if the underlying future should no longer be polled.
      */
     public fun isTerminated(): Boolean
 }
@@ -73,13 +79,17 @@ public sealed interface Try<out T, out E> {
 }
 
 /**
- * Convenience for futures that return [Try] values and includes adapters
- * tailored to those futures.
+ * A convenience for futures that return [Try] values that includes
+ * a variety of adapters tailored to such futures.
  */
 @HiddenFromObjC
 public interface TryFuture<out T, out E> : Future<Try<T, E>> {
     /**
-     * Poll this [TryFuture] as if it were a [Future].
+     * Poll this `TryFuture` as if it were a `Future`.
+     *
+     * This method is a stopgap for a compiler limitation that prevents us from
+     * directly inheriting from the `Future` trait; in the future it won't be
+     * needed.
      */
     public fun tryPoll(context: TaskContext): Poll<Try<T, E>> = poll(context)
 }
@@ -101,3 +111,4 @@ public fun <T, E> Future<Try<T, E>>.asTryFuture(): TryFuture<T, E> {
  */
 @HiddenFromObjC
 public sealed interface TryFutureSealed
+

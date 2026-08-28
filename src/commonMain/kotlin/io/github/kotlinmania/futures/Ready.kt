@@ -38,6 +38,11 @@ public class Ready<T>(
         @Suppress("UNCHECKED_CAST")
         return Poll.Ready(v as T)
     }
+
+    public companion object {
+        /** Create a new [Ready] future wrapping [value]. */
+        public fun <T> new(value: T): Ready<T> = Ready(value)
+    }
 }
 
 /**

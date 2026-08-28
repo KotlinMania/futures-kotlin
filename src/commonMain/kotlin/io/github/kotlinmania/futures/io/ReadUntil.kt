@@ -62,4 +62,9 @@ public class ReadUntil(
             }
         }
     }
+
+    public companion object {
+        public fun new(reader: AsyncBufRead, byte: Byte, buf: MutableList<Byte>): ReadUntil =
+            ReadUntil(reader, byte, buf)
+    }
 }

@@ -6,46 +6,73 @@ package io.github.kotlinmania.futures
 import kotlin.native.HiddenFromObjC
 
 /**
- * A stream of values produced asynchronously.
- *
- * If [Future] is an asynchronous version of a single value, then [Stream] is
- * the asynchronous version of an iterator: a sequence of value-producing
- * events that occur asynchronously to the caller.
- *
- * [pollNext] may be called even after a value has been produced. The stream
- * is exhausted when [Yield.End] is returned; calling [pollNext] again after
- * exhaustion is not required to behave sensibly.
- *
- * `SWIFT_EXPORT_ROLLOUT.md` gap #3.
- */
-/**
- * An owned dynamically typed [Stream] for cases where the result cannot be
- * statically typed or needs an extra level of indirection.
+ * An owned dynamically typed [Stream] for use in cases where you can't
+ * statically type your result or need to add some indirection.
  */
 public typealias BoxStream<T> = Stream<T>
 
 /**
- * [BoxStream], but without a cross-thread sending requirement.
+ * `BoxStream`, but without the thread-safety requirement.
  */
 public typealias LocalBoxStream<T> = Stream<T>
 
+/**
+ * A stream of values produced asynchronously.
+ *
+ * If [Future] is an asynchronous version of a single value, then [Stream] is
+ * an asynchronous version of an iterator: a sequence of value-producing
+ * events that occur asynchronously to the caller.
+ *
+ * The interface is modeled after [Future], but allows [pollNext] to be called
+ * even after a value has been produced, yielding [Yield.End] once the stream has
+ * been fully exhausted.
+ */
 @HiddenFromObjC
 public interface Stream<out T> {
     /**
-     * Pull out the next value of this stream, registering the current task
-     * for wakeup if no value is yet available, and yielding [Yield.End] once
-     * the stream is exhausted.
+     * Attempt to pull out the next value of this stream, registering the
+     * current task for wakeup if the value is not yet available, and returning
+     * [Yield.End] if the stream is exhausted.
+     *
+     * # Return value
+     *
+     * There are several possible return values, each indicating a distinct
+     * stream state:
+     *
+     * - [Poll.Pending] means that this stream's next value is not ready
+     *   yet. Implementations will ensure that the current task will be notified
+     *   when the next value may be ready.
+     *
+     * - `Poll.Ready(Yield.Value(val))` means that the stream has successfully
+     *   produced a value, `val`, and may produce further values on subsequent
+     *   [pollNext] calls.
+     *
+     * - `Poll.Ready(Yield.End)` means that the stream has terminated, and
+     *   [pollNext] should not be invoked again.
      */
     public fun pollNext(context: TaskContext): Poll<Yield<T>>
 
     /**
-     * Returns the bounds on the remaining length of the stream as
-     * `(lower, upper)`.
+     * Returns the bounds on the remaining length of the stream.
      *
-     * The default returns `(0, null)`, which is always correct for any
-     * stream. Implementations may override to support reservation
-     * optimizations downstream, but the value must not be relied on for
-     * memory-safety decisions.
+     * Specifically, [sizeHint] returns a [SizeHint] where [SizeHint.lower]
+     * is the lower bound, and [SizeHint.upper] is the upper bound.
+     *
+     * A `null` upper bound means that either there is no known upper bound, or the
+     * upper bound is larger than [Int.MAX_VALUE].
+     *
+     * # Implementation notes
+     *
+     * It is not enforced that a stream implementation yields the declared
+     * number of elements. A buggy stream may yield less than the lower bound
+     * or more than the upper bound of elements.
+     *
+     * [sizeHint] is primarily intended to be used for optimizations such as
+     * reserving space for the elements of the stream, but must not be
+     * trusted to e.g., omit bounds checks.
+     *
+     * The default implementation returns `SizeHint(0, null)` which is correct for any
+     * stream.
      */
     public fun sizeHint(): SizeHint = DEFAULT_SIZE_HINT
 
@@ -99,29 +126,35 @@ public data class SizeHint(
 )
 
 /**
- * A stream which tracks whether or not it should no longer be polled.
+ * A stream which tracks whether or not the underlying stream
+ * should no longer be polled.
  *
- * [isTerminated] returning `true` typically follows [Yield.End] from
- * [pollNext], but may also indicate a stream that has become inactive for
- * other reasons and should be dropped rather than polled further.
+ * `isTerminated` will return `true` if a future should no longer be polled.
+ * Usually, this state occurs after `pollNext` (or `tryPollNext`) returned
+ * `Poll.Ready(Yield.End)`. However, `isTerminated` may also return `true` if a
+ * stream has become inactive and can no longer make progress and should be
+ * ignored or dropped rather than being polled again.
  */
 @HiddenFromObjC
 public interface FusedStream<out T> : Stream<T> {
+    /**
+     * Returns `true` if the stream should no longer be polled.
+     */
     public fun isTerminated(): Boolean
 }
 
 /**
- * Convenience view of a [Stream] yielding [Try] values, mirroring
- * `futures::stream::TryStream` upstream.
- *
- * Hidden from Swift Export: same generic-sealed bridge concerns as [Stream].
+ * A convenience for streams that return [Try] values that includes
+ * a variety of adapters tailored to such futures.
  */
 @HiddenFromObjC
 public interface TryStream<out T, out E> : Stream<Try<T, E>> {
     /**
-     * Poll this [TryStream] as if it were a [Stream]. The default delegates
-     * to [pollNext]; provided so that callers operating against the
-     * try-shaped API surface have a name that signals the result type.
+     * Poll this `TryStream` as if it were a `Stream`.
+     *
+     * This method is a stopgap for a compiler limitation that prevents us from
+     * directly inheriting from the `Stream` trait; in the future it won't be
+     * needed.
      */
     public fun tryPollNext(context: TaskContext): Poll<Yield<Try<T, E>>> =
         pollNext(context)

@@ -58,4 +58,9 @@ public class ReadToString(
             }
         }
     }
+
+    public companion object {
+        public fun new(reader: AsyncRead, buf: StringBuilder): ReadToString =
+            ReadToString(reader, buf)
+    }
 }
