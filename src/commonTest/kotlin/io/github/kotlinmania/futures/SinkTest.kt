@@ -305,4 +305,43 @@ class SinkTest {
         val converted = bounded.sinkErrInto { "wrapped:$it" }
         assertEquals(SinkOutcome.Err("wrapped:error"), converted.startSend(1))
     }
+
+    @Test
+    fun sinkUnfoldTest() {
+        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.channel<Int>(1)
+        val unfold = unfoldSink(Unit) { _, i: Int ->
+            tx.send(i)
+        }
+        val cx = TaskContext()
+        assertEquals(SinkOutcome.ready(), unfold.startSend(1))
+        assertEquals(Poll.Ready(SinkOutcome.ready()), unfold.pollFlush(cx))
+        val item1 = rx.tryNext()
+        assertEquals(Try.ok(1), item1)
+
+        assertEquals(Poll.Ready(SinkOutcome.ready()), unfold.pollReady(cx))
+        assertEquals(SinkOutcome.ready(), unfold.startSend(2))
+        assertEquals(Poll.Ready(SinkOutcome.ready()), unfold.pollFlush(cx))
+        val item2 = rx.tryNext()
+        assertEquals(Try.ok(2), item2)
+    }
+
+    @Test
+    fun withPropagatesPollReady() {
+        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.channel<Int>(0)
+        val withSink = tx.with<Int, Int, io.github.kotlinmania.futures.channel.mpsc.SendError> { item ->
+            ready(item + 10)
+        }
+        val cx = TaskContext()
+        assertEquals(Poll.Ready(SinkOutcome.ready()), withSink.pollReady(cx))
+        assertEquals(SinkOutcome.ready(), withSink.startSend(0))
+        assertEquals(Poll.Pending, withSink.pollReady(cx))
+
+        val item1 = rx.pollNext(cx)
+        assertEquals(Poll.Ready(Yield.value(10)), item1)
+        assertEquals(Poll.Ready(SinkOutcome.ready()), withSink.pollReady(cx))
+        assertEquals(SinkOutcome.ready(), withSink.startSend(1))
+    }
 }
+
+
+
