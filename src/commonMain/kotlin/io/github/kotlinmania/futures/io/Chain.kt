@@ -9,16 +9,29 @@ import io.github.kotlinmania.futures.Try
 import kotlin.native.HiddenFromObjC
 
 /**
- * Reader for the [AsyncRead.chain] method.
+ * Reader for the [chain] method.
  */
 @HiddenFromObjC
 public class Chain<T : AsyncRead, U : AsyncRead>(
     public val first: T,
     public val second: U,
-) : AsyncRead {
+) : AsyncBufRead {
     private var doneFirst = false
 
+    /**
+     * Gets references to the underlying readers in this [Chain].
+     */
     public fun getRef(): Pair<T, U> = Pair(first, second)
+
+    /**
+     * Gets mutable references to the underlying readers in this [Chain].
+     */
+    public fun getMut(): Pair<T, U> = Pair(first, second)
+
+    /**
+     * Consumes the [Chain], returning the wrapped readers.
+     */
+    public fun intoInner(): Pair<T, U> = Pair(first, second)
 
     override fun pollRead(
         context: TaskContext,
@@ -46,4 +59,38 @@ public class Chain<T : AsyncRead, U : AsyncRead>(
         }
         return second.pollRead(context, buf, offset, length)
     }
+
+    override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> {
+        if (!doneFirst) {
+            val bufReader = first as? AsyncBufRead
+                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "first reader does not implement AsyncBufRead")))
+            when (val res = bufReader.pollFillBuf(context)) {
+                is Poll.Pending -> return Poll.Pending
+                is Poll.Ready ->
+                    when (val r = res.value) {
+                        is Try.Err -> return Poll.Ready(Try.err(r.error))
+                        is Try.Ok -> {
+                            if (r.value.isEmpty()) {
+                                doneFirst = true
+                            } else {
+                                return Poll.Ready(Try.ok(r.value))
+                            }
+                        }
+                    }
+            }
+        }
+        val bufReader = second as? AsyncBufRead
+            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "second reader does not implement AsyncBufRead")))
+        return bufReader.pollFillBuf(context)
+    }
+
+    override fun consume(amt: Int) {
+        if (!doneFirst) {
+            (first as? AsyncBufRead)?.consume(amt)
+        } else {
+            (second as? AsyncBufRead)?.consume(amt)
+        }
+    }
+
+    override fun toString(): String = "Chain(first=$first, second=$second, doneFirst=$doneFirst)"
 }

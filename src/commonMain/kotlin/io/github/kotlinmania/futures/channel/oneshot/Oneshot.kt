@@ -211,6 +211,8 @@ public class Sender<T> internal constructor(
     public fun close() {
         inner.dropTx()
     }
+
+    override fun toString(): String = "Sender { complete: ${inner.complete.load()} }"
 }
 
 /**
@@ -259,6 +261,8 @@ public class Receiver<T> internal constructor(
         }
         return false
     }
+
+    override fun toString(): String = "Receiver { complete: ${inner.complete.load()} }"
 }
 
 /**
