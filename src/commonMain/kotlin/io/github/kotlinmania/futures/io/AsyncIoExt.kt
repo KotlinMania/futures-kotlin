@@ -113,3 +113,36 @@ public fun AsyncWrite.flush(): Flush = Flush(this)
  */
 @HiddenFromObjC
 public fun AsyncWrite.close(): Close = Close(this)
+
+/**
+ * Wraps an [AsyncWrite] in a [BufWriter] with the specified capacity.
+ */
+@HiddenFromObjC
+public fun <W : AsyncWrite> W.bufWriter(capacity: Int = DEFAULT_BUF_SIZE): BufWriter<W> =
+    BufWriter(this, capacity)
+
+/**
+ * Wraps an [AsyncWrite] in a [LineWriter] with the specified capacity.
+ */
+@HiddenFromObjC
+public fun <W : AsyncWrite> W.lineWriter(capacity: Int = 1024): LineWriter<W> =
+    LineWriter(this, capacity)
+
+/**
+ * Wraps an [AsyncWrite] as a [Sink] of byte arrays.
+ */
+@HiddenFromObjC
+public fun <W : AsyncWrite> W.intoSink(): IntoSink<W> = IntoSink(this)
+
+/**
+ * Creates a future which seeks to [pos] on this [AsyncSeek].
+ */
+@HiddenFromObjC
+public fun <S : AsyncSeek> S.seek(pos: SeekFrom): Seek<S> = Seek(this, pos)
+
+/**
+ * Creates a future which copies all bytes from this [AsyncBufRead] into [writer], with an [io.github.kotlinmania.futures.AbortHandle].
+ */
+@HiddenFromObjC
+public fun AsyncBufRead.copyBufAbortable(writer: AsyncWrite): Pair<CopyBufAbortable, io.github.kotlinmania.futures.AbortHandle> =
+    io.github.kotlinmania.futures.io.copyBufAbortable(this, writer)
