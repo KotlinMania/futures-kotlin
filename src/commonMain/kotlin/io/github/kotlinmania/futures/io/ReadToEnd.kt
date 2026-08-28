@@ -43,4 +43,10 @@ public class ReadToEnd(
             }
         }
     }
+
+    public companion object {
+        public fun new(reader: AsyncRead, buf: MutableList<Byte>): ReadToEnd =
+            ReadToEnd(reader, buf)
+    }
 }
+
