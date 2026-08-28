@@ -136,8 +136,10 @@ internal class BoundedInner<T>(
 public class Sender<T> internal constructor(
     internal val inner: BoundedInner<T>,
 ) : Sink<T, SendError> {
+    private var isDisconnected: Boolean = false
+
     override fun pollReady(context: TaskContext): Poll<SinkOutcome<SendError>> {
-        if (inner.receiverDropped.load() || inner.isClosed.load()) {
+        if (isDisconnected || inner.receiverDropped.load() || inner.isClosed.load()) {
             return Poll.ready(SinkOutcome.err(SendError(isFull = false)))
         }
 
@@ -159,7 +161,7 @@ public class Sender<T> internal constructor(
     }
 
     override fun startSend(item: T): SinkOutcome<SendError> {
-        if (inner.receiverDropped.load() || inner.isClosed.load()) {
+        if (isDisconnected || inner.receiverDropped.load() || inner.isClosed.load()) {
             return SinkOutcome.err(SendError(isFull = false))
         }
 
@@ -184,14 +186,14 @@ public class Sender<T> internal constructor(
     }
 
     override fun pollFlush(context: TaskContext): Poll<SinkOutcome<SendError>> {
-        if (inner.receiverDropped.load()) {
+        if (isDisconnected || inner.receiverDropped.load()) {
             return Poll.ready(SinkOutcome.err(SendError(isFull = false)))
         }
         return Poll.ready(SinkOutcome.ready())
     }
 
     override fun pollClose(context: TaskContext): Poll<SinkOutcome<SendError>> {
-        closeChannel()
+        disconnect()
         return Poll.ready(SinkOutcome.ready())
     }
 
@@ -199,7 +201,7 @@ public class Sender<T> internal constructor(
      * Attempts to send a message without blocking.
      */
     public fun trySend(msg: T): Try<Unit, TrySendError<T>> {
-        if (inner.receiverDropped.load() || inner.isClosed.load()) {
+        if (isDisconnected || inner.receiverDropped.load() || inner.isClosed.load()) {
             return Try.err(TrySendError(SendError(isFull = false), msg))
         }
 
@@ -226,7 +228,7 @@ public class Sender<T> internal constructor(
      * Returns whether the sender is closed or receiver has disconnected.
      */
     public fun isClosed(): Boolean =
-        inner.isClosed.load() || inner.receiverDropped.load()
+        isDisconnected || inner.isClosed.load() || inner.receiverDropped.load()
 
     /**
      * Closes the channel so that no further messages can be sent.
@@ -256,8 +258,11 @@ public class Sender<T> internal constructor(
      * Disconnects this sender handle.
      */
     public fun disconnect() {
-        if (inner.numSenders.fetchAndAdd(-1) == 1) {
-            inner.recvWaker.wake()
+        if (!isDisconnected) {
+            isDisconnected = true
+            if (inner.numSenders.fetchAndAdd(-1) == 1) {
+                inner.recvWaker.wake()
+            }
         }
     }
 
@@ -416,15 +421,17 @@ internal class UnboundedInner<T> {
 public class UnboundedSender<T> internal constructor(
     internal val inner: UnboundedInner<T>,
 ) : Sink<T, SendError> {
+    private var isDisconnected: Boolean = false
+
     override fun pollReady(context: TaskContext): Poll<SinkOutcome<SendError>> {
-        if (inner.receiverDropped.load() || inner.isClosed.load()) {
+        if (isDisconnected || inner.receiverDropped.load() || inner.isClosed.load()) {
             return Poll.ready(SinkOutcome.err(SendError(isFull = false)))
         }
         return Poll.ready(SinkOutcome.ready())
     }
 
     override fun startSend(item: T): SinkOutcome<SendError> {
-        if (inner.receiverDropped.load() || inner.isClosed.load()) {
+        if (isDisconnected || inner.receiverDropped.load() || inner.isClosed.load()) {
             return SinkOutcome.err(SendError(isFull = false))
         }
         var slot: TryLock<Unit>? = null
@@ -438,14 +445,14 @@ public class UnboundedSender<T> internal constructor(
     }
 
     override fun pollFlush(context: TaskContext): Poll<SinkOutcome<SendError>> {
-        if (inner.receiverDropped.load()) {
+        if (isDisconnected || inner.receiverDropped.load()) {
             return Poll.ready(SinkOutcome.err(SendError(isFull = false)))
         }
         return Poll.ready(SinkOutcome.ready())
     }
 
     override fun pollClose(context: TaskContext): Poll<SinkOutcome<SendError>> {
-        closeChannel()
+        disconnect()
         return Poll.ready(SinkOutcome.ready())
     }
 
@@ -458,7 +465,7 @@ public class UnboundedSender<T> internal constructor(
      * Attempts to send a message along the unbounded channel.
      */
     public fun trySend(msg: T): Try<Unit, TrySendError<T>> {
-        if (inner.receiverDropped.load() || inner.isClosed.load()) {
+        if (isDisconnected || inner.receiverDropped.load() || inner.isClosed.load()) {
             return Try.err(TrySendError(SendError(isFull = false), msg))
         }
         var slot: TryLock<Unit>? = null
@@ -475,7 +482,7 @@ public class UnboundedSender<T> internal constructor(
      * Returns whether the channel is closed or receiver disconnected.
      */
     public fun isClosed(): Boolean =
-        inner.isClosed.load() || inner.receiverDropped.load()
+        isDisconnected || inner.isClosed.load() || inner.receiverDropped.load()
 
     /**
      * Closes the channel.
@@ -495,8 +502,11 @@ public class UnboundedSender<T> internal constructor(
      * Disconnects this sender handle.
      */
     public fun disconnect() {
-        if (inner.numSenders.fetchAndAdd(-1) == 1) {
-            inner.recvWaker.wake()
+        if (!isDisconnected) {
+            isDisconnected = true
+            if (inner.numSenders.fetchAndAdd(-1) == 1) {
+                inner.recvWaker.wake()
+            }
         }
     }
 
