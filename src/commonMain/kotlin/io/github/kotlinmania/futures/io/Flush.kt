@@ -16,6 +16,13 @@ import kotlin.native.HiddenFromObjC
 public class Flush(
     private val writer: AsyncWrite,
 ) : Future<Try<Unit, IoError>> {
+    public interface Output
+
+    public companion object {
+        public fun new(writer: AsyncWrite): Flush = Flush(writer)
+    }
+
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> =
         writer.pollFlush(context)
 }
+

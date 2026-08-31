@@ -59,8 +59,11 @@ public class ReadToString(
         }
     }
 
+    public interface Output
+
     public companion object {
         public fun new(reader: AsyncRead, buf: StringBuilder): ReadToString =
             ReadToString(reader, buf)
     }
 }
+

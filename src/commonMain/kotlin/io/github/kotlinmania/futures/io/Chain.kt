@@ -18,6 +18,11 @@ public class Chain<T : AsyncRead, U : AsyncRead>(
 ) : AsyncBufRead {
     private var doneFirst = false
 
+    public companion object {
+        public fun <T : AsyncRead, U : AsyncRead> new(first: T, second: U): Chain<T, U> =
+            Chain(first, second)
+    }
+
     /**
      * Gets references to the underlying readers in this [Chain].
      */
@@ -29,9 +34,17 @@ public class Chain<T : AsyncRead, U : AsyncRead>(
     public fun getMut(): Pair<T, U> = Pair(first, second)
 
     /**
+     * Gets pinned mutable references to the underlying readers in this [Chain].
+     */
+    public fun getPinMut(): Pair<T, U> = Pair(first, second)
+
+    /**
      * Consumes the [Chain], returning the wrapped readers.
      */
     public fun intoInner(): Pair<T, U> = Pair(first, second)
+
+    public fun fmt(): String = "Chain"
+
 
     override fun pollRead(
         context: TaskContext,

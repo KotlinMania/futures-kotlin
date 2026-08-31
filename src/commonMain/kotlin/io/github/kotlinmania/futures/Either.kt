@@ -18,6 +18,10 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public sealed interface Either<out A, out B> {
+    public interface Output
+    public interface Item
+    public interface Error
+
     /**
      * First branch of the type.
      */
@@ -41,6 +45,7 @@ public sealed interface Either<out A, out B> {
         @HiddenFromObjC
         public fun <B> right(value: B): Either<Nothing, B> = Right(value)
     }
+
 
     /** Convert this either to pinned reference projection. */
     public fun asPinRef(): Either<A, B> = this

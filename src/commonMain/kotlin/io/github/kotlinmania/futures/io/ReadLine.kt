@@ -81,8 +81,21 @@ public class ReadLine(
         }
     }
 
+    public interface Output
+
+    public fun drop() {
+        // Drop lifecycle hook matching upstream
+    }
+
     public companion object {
         public fun new(reader: AsyncBufRead, buf: StringBuilder): ReadLine =
             ReadLine(reader, buf)
+
+        public fun readLineInternal(
+            reader: AsyncBufRead,
+            context: TaskContext,
+            buf: StringBuilder,
+        ): Poll<Try<Int, IoError>> = ReadLine(reader, buf).poll(context)
     }
 }
+

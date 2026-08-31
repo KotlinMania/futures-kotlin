@@ -19,6 +19,18 @@ public class Read(
     private val offset: Int = 0,
     private val length: Int = buf.size - offset,
 ) : Future<Try<Int, IoError>> {
+    public interface Output
+
+    public companion object {
+        public fun new(
+            reader: AsyncRead,
+            buf: ByteArray,
+            offset: Int = 0,
+            length: Int = buf.size - offset,
+        ): Read = Read(reader, buf, offset, length)
+    }
+
     override fun poll(context: TaskContext): Poll<Try<Int, IoError>> =
         reader.pollRead(context, buf, offset, length)
 }
+

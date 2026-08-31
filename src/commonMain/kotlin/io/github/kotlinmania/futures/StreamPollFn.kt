@@ -12,8 +12,19 @@ import kotlin.native.HiddenFromObjC
 public class StreamPollFn<T>(
     private val f: (TaskContext) -> Poll<Yield<T>>,
 ) : Stream<T> {
+    public interface Item
+
     override fun pollNext(context: TaskContext): Poll<Yield<T>> = f(context)
+
+    public fun fmt(): String = "PollFn"
+
+    override fun toString(): String = fmt()
+
+    public companion object {
+        public fun <T> new(f: (TaskContext) -> Poll<Yield<T>>): StreamPollFn<T> = StreamPollFn(f)
+    }
 }
+
 
 /**
  * Creates a new stream wrapping a function returning `Poll<Yield<T>>`.
@@ -21,3 +32,4 @@ public class StreamPollFn<T>(
 @HiddenFromObjC
 public fun <T> streamPollFn(f: (TaskContext) -> Poll<Yield<T>>): StreamPollFn<T> =
     StreamPollFn(f)
+

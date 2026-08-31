@@ -16,8 +16,12 @@ public class Scan<T, S, R>(
 ) : FusedStream<R> {
     private var done: Boolean = false
 
+    public interface StateFn
+    public interface Item
+    public interface Error
+
     public companion object {
-        internal fun <T, S, R> new(
+        public fun <T, S, R> new(
             stream: Stream<T>,
             initialState: S,
             operation: (S, T) -> Pair<S, R?>?,
@@ -30,9 +34,29 @@ public class Scan<T, S, R>(
     public fun getRef(): Stream<T> = stream
 
     /**
+     * Acquires a mutable reference to the underlying stream.
+     */
+    public fun getMut(): Stream<T> = stream
+
+    /**
+     * Acquires a pinned mutable reference to the underlying stream.
+     */
+    public fun getPinMut(): Stream<T> = stream
+
+    /**
      * Consumes this combinator, returning the underlying stream.
      */
     public fun intoInner(): Stream<T> = stream
+
+    /**
+     * Returns whether the stream has finished taking items.
+     */
+    public fun isDoneTaking(): Boolean = done
+
+    public fun fmt(): String = "Scan"
+
+    override fun toString(): String = fmt()
+
 
     override fun isTerminated(): Boolean =
         done || ((stream as? FusedStream<*>)?.isTerminated() ?: false)

@@ -17,6 +17,13 @@ public class Seek<out S : AsyncSeek>(
     public val seek: S,
     public val pos: SeekFrom,
 ) : Future<Try<Long, IoError>> {
+    public interface Output
+
+    public companion object {
+        public fun <S : AsyncSeek> new(seek: S, pos: SeekFrom): Seek<S> = Seek(seek, pos)
+    }
+
     override fun poll(context: TaskContext): Poll<Try<Long, IoError>> =
         seek.pollSeek(context, pos)
 }
+
