@@ -251,6 +251,61 @@ class StreamTest {
     }
 
     @Test
+    fun readyChunks() {
+        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.channel<Int>(16)
+        val s = rx.readyChunks(2)
+        val cx = TaskContext()
+        assertEquals(Poll.Pending, s.pollNext(cx))
+
+        tx.trySend(1)
+        assertEquals(Poll.Ready(Yield.Value(listOf(1))), s.pollNext(cx))
+
+        tx.trySend(2)
+        tx.trySend(3)
+        tx.trySend(4)
+        assertEquals(Poll.Ready(Yield.Value(listOf(2, 3))), s.pollNext(cx))
+        assertEquals(Poll.Ready(Yield.Value(listOf(4))), s.pollNext(cx))
+    }
+
+    @Test
+    fun selectWithStrategyDoesntTerminateEarly() {
+        class SlowStream(
+            private val timesShouldPoll: Int,
+            var timesPolled: Int = 0,
+        ) : Stream<Int> {
+            override fun pollNext(context: TaskContext): Poll<Yield<Int>> {
+                timesPolled += 1
+                if (timesPolled % 2 == 0) {
+                    context.wakeByRef()
+                    return Poll.Pending
+                }
+                if (timesPolled >= timesShouldPoll) {
+                    return Poll.Ready(Yield.End)
+                }
+                return Poll.Ready(Yield.Value(timesPolled))
+            }
+        }
+
+        for (side in listOf(PollNext.Left, PollNext.Right)) {
+            val timesShouldPoll = 10
+            val slow = SlowStream(timesShouldPoll)
+            val b = streamIter(listOf(10, 20))
+            val selected = selectWithStrategy(slow, b) { side }
+            val cx = TaskContext()
+            while (true) {
+                when (val p = selected.pollNext(cx)) {
+                    is Poll.Ready<*> -> if (p.value is Yield.End) break
+                    Poll.Pending -> {}
+                }
+                if (slow.timesPolled >= timesShouldPoll + 1) break
+            }
+            assertEquals(timesShouldPoll + 1, slow.timesPolled)
+        }
+    }
+
+
+
+    @Test
     fun all() {
         fun isEven(n: Int): Boolean = n % 2 == 0
         val cx = TaskContext()

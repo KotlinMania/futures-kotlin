@@ -75,7 +75,15 @@ public class Abortable<T>(
     private val task: Future<T>,
     private val registration: AbortRegistration,
 ) : Future<Try<T, Aborted>> {
+    public interface Output
+
     public fun isAborted(): Boolean = registration.inner.aborted.load()
+
+    public fun tryPoll(context: TaskContext): Poll<Try<T, Aborted>> = poll(context)
+
+    public fun fmt(): String = "Abortable"
+
+    override fun toString(): String = fmt()
 
     override fun poll(context: TaskContext): Poll<Try<T, Aborted>> {
         if (isAborted()) {
@@ -98,6 +106,9 @@ public class Abortable<T>(
 
     public companion object {
         @HiddenFromObjC
+        public fun <T> new(task: Future<T>, reg: AbortRegistration): Abortable<T> = Abortable(task, reg)
+
+        @HiddenFromObjC
         public fun <T> of(task: Future<T>, reg: AbortRegistration): Abortable<T> = Abortable(task, reg)
     }
 }
@@ -111,7 +122,13 @@ public class AbortableStream<T>(
     private val registration: AbortRegistration,
 ) : Stream<T>,
     FusedStream<T> {
+    public interface Item
+
     public fun isAborted(): Boolean = registration.inner.aborted.load()
+
+    public fun fmt(): String = "AbortableStream"
+
+    override fun toString(): String = fmt()
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> {
         if (isAborted()) {
@@ -141,6 +158,10 @@ public class AbortableStream<T>(
     }
 
     public companion object {
+        @HiddenFromObjC
+        public fun <T> new(stream: Stream<T>, reg: AbortRegistration): AbortableStream<T> =
+            AbortableStream(stream, reg)
+
         @HiddenFromObjC
         public fun <T> of(stream: Stream<T>, reg: AbortRegistration): AbortableStream<T> =
             AbortableStream(stream, reg)

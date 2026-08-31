@@ -18,10 +18,37 @@ public class LineWriter<out W : AsyncWrite>(
 ) : AsyncWrite {
     private val bufWriter: BufWriter<W> = BufWriter(inner, capacity)
 
+    public companion object {
+        public fun <W : AsyncWrite> new(inner: W): LineWriter<W> = LineWriter(inner)
+
+        public fun <W : AsyncWrite> withCapacity(capacity: Int, inner: W): LineWriter<W> =
+            LineWriter(inner, capacity)
+    }
+
+    /**
+     * Gets a reference to the underlying writer.
+     */
+    public fun getRef(): W = inner
+
+    /**
+     * Gets a mutable reference to the underlying writer.
+     */
+    public fun getMut(): W = inner
+
+    /**
+     * Consumes this [LineWriter], returning the underlying writer.
+     */
+    public fun intoInner(): W = inner
+
+    public fun fmt(): String = "LineWriter"
+
+    override fun toString(): String = fmt()
+
     /**
      * Returns a copy of the internally buffered data.
      */
     public fun buffer(): ByteArray = bufWriter.buffer()
+
 
     private fun flushIfCompletedLine(context: TaskContext): Poll<Try<Unit, IoError>> {
         val currentBuf = bufWriter.buffer()

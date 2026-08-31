@@ -22,7 +22,18 @@ private class Block(
 public class IntoSink<out W : AsyncWrite>(
     public val writer: W,
 ) : Sink<ByteArray, IoError> {
+    public interface Error
+
+    public companion object {
+        public fun <W : AsyncWrite> new(writer: W): IntoSink<W> = IntoSink(writer)
+    }
+
+    public fun fmt(): String = "IntoSink"
+
+    override fun toString(): String = fmt()
+
     private var buffer: Block? = null
+
 
     private fun pollFlushBuffer(context: TaskContext): Poll<Try<Unit, IoError>> {
         val block = buffer ?: return Poll.Ready(Try.ok(Unit))

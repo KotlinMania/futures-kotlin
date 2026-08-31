@@ -19,7 +19,19 @@ public class WriteAll(
     private var offset: Int = 0,
     private var length: Int = buf.size - offset,
 ) : Future<Try<Unit, IoError>> {
+    public interface Output
+
+    public companion object {
+        public fun new(
+            writer: AsyncWrite,
+            buf: ByteArray,
+            offset: Int = 0,
+            length: Int = buf.size - offset,
+        ): WriteAll = WriteAll(writer, buf, offset, length)
+    }
+
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> {
+
         while (length > 0) {
             val pollRes = writer.pollWrite(context, buf, offset, length)
             when (pollRes) {

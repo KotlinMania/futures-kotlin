@@ -23,11 +23,23 @@ public class BufWriter<out W : AsyncWrite>(
     private var bufLen: Int = 0
     private var written: Int = 0
 
+    public companion object {
+        public fun <W : AsyncWrite> new(inner: W): BufWriter<W> = BufWriter(inner)
+
+        public fun <W : AsyncWrite> withCapacity(capacity: Int, inner: W): BufWriter<W> =
+            BufWriter(inner, capacity)
+    }
+
     /**
      * Returns a copy of the internally buffered data.
      */
     public fun buffer(): ByteArray =
         if (bufLen > 0) buf.copyOfRange(0, bufLen) else ByteArray(0)
+
+    public fun fmt(): String = "BufWriter"
+
+    override fun toString(): String = fmt()
+
 
     /**
      * Capacity of the internal buffer.

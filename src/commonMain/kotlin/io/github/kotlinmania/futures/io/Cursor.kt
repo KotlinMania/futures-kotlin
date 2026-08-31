@@ -22,6 +22,10 @@ public class Cursor(
 
     public constructor() : this(ByteArray(0))
 
+    public companion object {
+        public fun new(buffer: ByteArray = ByteArray(0)): Cursor = Cursor(buffer)
+    }
+
     /**
      * Gets the current position of this cursor.
      */
@@ -43,6 +47,12 @@ public class Cursor(
      * Returns the underlying buffer.
      */
     public fun getRef(): ByteArray = buffer
+
+    /**
+     * Returns a mutable reference to the underlying buffer.
+     */
+    public fun getMut(): ByteArray = buffer
+
 
     override fun pollRead(
         context: TaskContext,

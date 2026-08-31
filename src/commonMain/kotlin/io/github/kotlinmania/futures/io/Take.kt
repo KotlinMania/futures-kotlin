@@ -15,7 +15,26 @@ import kotlin.native.HiddenFromObjC
 public class Take<R : AsyncRead>(
     public val inner: R,
     private var limit: Long,
-) : AsyncRead {
+) : AsyncBufRead {
+    public companion object {
+        public fun <R : AsyncRead> new(inner: R, limit: Long): Take<R> = Take(inner, limit)
+    }
+
+    /**
+     * Gets a reference to the underlying reader.
+     */
+    public fun getRef(): R = inner
+
+    /**
+     * Gets a mutable reference to the underlying reader.
+     */
+    public fun getMut(): R = inner
+
+    /**
+     * Consumes the `Take`, returning the wrapped reader.
+     */
+    public fun intoInner(): R = inner
+
     /**
      * Returns the remaining number of bytes that can be read before this instance will return EOF.
      */
@@ -52,4 +71,31 @@ public class Take<R : AsyncRead>(
                 }
         }
     }
+
+    override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> {
+        if (limit <= 0) {
+            return Poll.Ready(Try.ok(ByteArray(0)))
+        }
+        val bufReader = inner as? AsyncBufRead
+            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner reader does not implement AsyncBufRead")))
+        return when (val res = bufReader.pollFillBuf(context)) {
+            is Poll.Pending -> Poll.Pending
+            is Poll.Ready ->
+                when (val r = res.value) {
+                    is Try.Err -> Poll.Ready(Try.err(r.error))
+                    is Try.Ok -> {
+                        val available = r.value
+                        val cap = minOf(available.size.toLong(), limit).toInt()
+                        Poll.Ready(Try.ok(available.copyOfRange(0, cap)))
+                    }
+                }
+        }
+    }
+
+    override fun consume(amt: Int) {
+        val actual = minOf(amt.toLong(), limit).toInt()
+        limit -= actual
+        (inner as? AsyncBufRead)?.consume(actual)
+    }
 }
+

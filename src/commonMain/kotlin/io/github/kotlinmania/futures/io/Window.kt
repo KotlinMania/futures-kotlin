@@ -23,10 +23,36 @@ public class Window(
         require(rangeStart <= rangeEnd) { "start ($rangeStart) must not exceed end ($rangeEnd)" }
     }
 
+    public companion object {
+        public fun new(inner: ByteArray, start: Int = 0, end: Int = inner.size): Window =
+            Window(inner, start, end)
+    }
+
+    /**
+     * Gets the underlying buffer reference.
+     */
+    public fun getRef(): ByteArray = inner
+
+    /**
+     * Gets the underlying buffer mutable reference.
+     */
+    public fun getMut(): ByteArray = inner
+
+    /**
+     * Gets a slice/copy of the active window bytes.
+     */
+    public fun asRef(): ByteArray = asByteArray()
+
+    /**
+     * Gets the mutable buffer.
+     */
+    public fun asMut(): ByteArray = inner
+
     /**
      * Gets the starting index of this window into the underlying buffer.
      */
     public fun start(): Int = rangeStart
+
 
     /**
      * Gets the end index of this window into the underlying buffer.

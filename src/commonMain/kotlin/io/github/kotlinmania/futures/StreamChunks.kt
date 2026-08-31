@@ -20,8 +20,11 @@ public class Chunks<T>(
         require(capacity > 0) { "capacity must be greater than 0" }
     }
 
+    public interface Item
+    public interface Error
+
     public companion object {
-        internal fun <T> new(stream: Stream<T>, capacity: Int): Chunks<T> = Chunks(stream, capacity)
+        public fun <T> new(stream: Stream<T>, capacity: Int): Chunks<T> = Chunks(stream, capacity)
     }
 
     /**
@@ -30,9 +33,24 @@ public class Chunks<T>(
     public fun getRef(): Stream<T> = stream
 
     /**
+     * Acquires a mutable reference to the underlying stream.
+     */
+    public fun getMut(): Stream<T> = stream
+
+    /**
+     * Acquires a pinned mutable reference to the underlying stream.
+     */
+    public fun getPinMut(): Stream<T> = stream
+
+    /**
      * Consumes this combinator, returning the underlying stream.
      */
     public fun intoInner(): Stream<T> = stream
+
+    public fun fmt(): String = "Chunks"
+
+    override fun toString(): String = fmt()
+
 
     private fun take(): List<T> {
         val chunk = items.toList()

@@ -16,5 +16,12 @@ import kotlin.native.HiddenFromObjC
 public class FillBuf(
     private val reader: AsyncBufRead,
 ) : Future<Try<ByteArray, IoError>> {
+    public interface Output
+
+    public companion object {
+        public fun new(reader: AsyncBufRead): FillBuf = FillBuf(reader)
+    }
+
     override fun poll(context: TaskContext): Poll<Try<ByteArray, IoError>> = reader.pollFillBuf(context)
 }
+

@@ -44,9 +44,29 @@ public class ReadToEnd(
         }
     }
 
+    public interface Output
+
+    public class Guard(
+        public val buf: MutableList<Byte>,
+        public var len: Int,
+    ) {
+        public fun drop() {
+            while (buf.size > len) {
+                buf.removeAt(buf.size - 1)
+            }
+        }
+    }
+
     public companion object {
         public fun new(reader: AsyncRead, buf: MutableList<Byte>): ReadToEnd =
             ReadToEnd(reader, buf)
+
+        public fun readToEndInternal(
+            reader: AsyncRead,
+            context: TaskContext,
+            buf: MutableList<Byte>,
+        ): Poll<Try<Int, IoError>> = ReadToEnd(reader, buf).poll(context)
     }
 }
+
 

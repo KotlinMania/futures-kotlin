@@ -63,8 +63,18 @@ public class ReadUntil(
         }
     }
 
+    public interface Output
+
     public companion object {
         public fun new(reader: AsyncBufRead, byte: Byte, buf: MutableList<Byte>): ReadUntil =
             ReadUntil(reader, byte, buf)
+
+        public fun readUntilInternal(
+            reader: AsyncBufRead,
+            context: TaskContext,
+            byte: Byte,
+            buf: MutableList<Byte>,
+        ): Poll<Try<Int, IoError>> = ReadUntil(reader, byte, buf).poll(context)
     }
 }
+

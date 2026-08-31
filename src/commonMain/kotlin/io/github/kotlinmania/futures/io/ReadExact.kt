@@ -19,7 +19,19 @@ public class ReadExact(
     private var offset: Int = 0,
     private var length: Int = buf.size - offset,
 ) : Future<Try<Unit, IoError>> {
+    public interface Output
+
+    public companion object {
+        public fun new(
+            reader: AsyncRead,
+            buf: ByteArray,
+            offset: Int = 0,
+            length: Int = buf.size - offset,
+        ): ReadExact = ReadExact(reader, buf, offset, length)
+    }
+
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> {
+
         while (length > 0) {
             val pollRes = reader.pollRead(context, buf, offset, length)
             when (pollRes) {
