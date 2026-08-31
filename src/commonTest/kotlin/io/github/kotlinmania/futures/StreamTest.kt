@@ -1,7 +1,9 @@
+// port-lint: tests futures/tests/stream.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -57,46 +59,28 @@ class StreamTest {
     fun defaultSizeHintIsZeroAndUnbounded() {
         val stream =
             object : Stream<Int> {
-                override fun pollNext(context: TaskContext): Poll<Yield<Int>> =
-                    Poll.ready(Yield.end())
+                override fun pollNext(context: TaskContext): Poll<Yield<Int>> = Poll.ready(Yield.end())
             }
 
-        val hint = stream.sizeHint()
-        assertEquals(0, hint.lower)
-        assertNull(hint.upper)
+        assertEquals(SizeHint(lower = 0, upper = null), stream.sizeHint())
     }
 
     @Test
-    fun overriddenSizeHintShrinksAsItemsConsumed() {
-        val stream = ListStream(listOf(10, 20))
-        assertEquals(SizeHint(2, 2), stream.sizeHint())
-
-        stream.pollNext(TaskContext())
-        assertEquals(SizeHint(1, 1), stream.sizeHint())
-
-        stream.pollNext(TaskContext())
-        assertEquals(SizeHint(0, 0), stream.sizeHint())
-    }
-
-    @Test
-    fun fusedStreamReportsTermination() {
+    fun isTerminatedReflectsDoneState() {
         class OnceStream : FusedStream<Int> {
-            private var produced = false
-            private var ended = false
+            private var yielded = false
+            private var terminated = false
+
+            override fun isTerminated(): Boolean = terminated
 
             override fun pollNext(context: TaskContext): Poll<Yield<Int>> =
-                when {
-                    !produced -> {
-                        produced = true
-                        Poll.ready(Yield.value(99))
-                    }
-                    else -> {
-                        ended = true
-                        Poll.ready(Yield.end())
-                    }
+                if (!yielded) {
+                    yielded = true
+                    Poll.ready(Yield.value(99))
+                } else {
+                    terminated = true
+                    Poll.ready(Yield.end())
                 }
-
-            override fun isTerminated(): Boolean = ended
         }
 
         val stream = OnceStream()
@@ -150,5 +134,149 @@ class StreamTest {
         assertEquals(42, v.valueOrNull())
         assertNull(e.valueOrNull())
         assertNotNull(v.valueOrNull())
+    }
+
+    @Test
+    fun select() {
+        fun selectAndCompare(a: List<Int>, b: List<Int>, expected: List<Int>) {
+            val stA = streamIter(a)
+            val stB = streamIter(b)
+            val selected = streamSelect(stA, stB)
+            val cx = TaskContext()
+            val result = mutableListOf<Int>()
+            while (true) {
+                when (val p = selected.pollNext(cx)) {
+                    is Poll.Ready -> {
+                        when (val y = p.value) {
+                            is Yield.Value -> result.add(y.value)
+                            Yield.End -> break
+                        }
+                    }
+                    Poll.Pending -> break
+                }
+            }
+            assertEquals(expected, result)
+        }
+
+        selectAndCompare(listOf(1, 2, 3), listOf(4, 5, 6), listOf(1, 4, 2, 5, 3, 6))
+        selectAndCompare(listOf(1, 2, 3), listOf(4, 5), listOf(1, 4, 2, 5, 3))
+        selectAndCompare(listOf(1, 2), listOf(4, 5, 6), listOf(1, 4, 2, 5, 6))
+    }
+
+    @Test
+    fun flatMap() {
+        val st = streamIter(listOf(
+            streamIter(listOf(0, 1, 2, 3, 4)),
+            streamIter(listOf(6, 7, 8, 9, 10)),
+            streamIter(listOf(0, 1, 2)),
+        ))
+
+        val flat = st.flatMap { s -> s.filter { v -> v % 2 == 0 } }
+        val cx = TaskContext()
+        val collected = flat.collect().poll(cx)
+        assertEquals(Poll.Ready(listOf(0, 2, 4, 6, 8, 10, 0, 2)), collected)
+    }
+
+    @Test
+    fun scan() {
+        val values = streamIter(listOf(1, 2, 3, 4, 6, 8, 2))
+            .scan(1) { state, e ->
+                val nextState = state + 1
+                if (e < nextState) {
+                    Pair(nextState, e)
+                } else {
+                    null
+                }
+            }
+
+        val cx = TaskContext()
+        val collected = values.collect().poll(cx)
+        assertEquals(Poll.Ready(listOf(1, 2, 3, 4)), collected)
+    }
+
+    @Test
+    fun takeUntil() {
+        fun makeStopFut(stopOn: Int): Future<Unit> {
+            var i = 0
+            return pollFn {
+                i += 1
+                if (i <= stopOn) {
+                    Poll.pending()
+                } else {
+                    Poll.ready(Unit)
+                }
+            }
+        }
+
+        val cx = TaskContext()
+
+        // Verify stopping works
+        val stream1 = streamIter((1..10).toList())
+        val stopFut1 = makeStopFut(5)
+        val takeUntil1 = stream1.takeUntil(stopFut1)
+        val folded1 = takeUntil1.fold(0) { _, i -> i }
+        assertEquals(Poll.Ready(5), folded1.poll(cx))
+
+        // Verify takeFuture() works
+        val stream2 = streamIter((1..10).toList())
+        val stopFut2 = makeStopFut(5)
+        val takeUntil2 = stream2.takeUntil(stopFut2)
+        assertEquals(Poll.Ready(Yield.Value(1)), takeUntil2.pollNext(cx))
+        assertEquals(Poll.Ready(Yield.Value(2)), takeUntil2.pollNext(cx))
+        assertNotNull(takeUntil2.takeFuture())
+        val folded2 = takeUntil2.fold(0) { _, i -> i }
+        assertEquals(Poll.Ready(10), folded2.poll(cx))
+
+        // Verify takeFuture() returns null if stream is stopped
+        val stream3 = streamIter((1..10).toList())
+        val stopFut3 = makeStopFut(1)
+        val takeUntil3 = stream3.takeUntil(stopFut3)
+        assertEquals(Poll.Ready(Yield.Value(1)), takeUntil3.pollNext(cx))
+        assertEquals(Poll.Ready(Yield.End), takeUntil3.pollNext(cx))
+        assertNull(takeUntil3.takeFuture())
+    }
+
+    @Test
+    fun chunksPanicOnCapZero() {
+        assertFailsWith<IllegalArgumentException> {
+            streamIter(listOf(1, 2)).chunks(0)
+        }
+    }
+
+    @Test
+    fun readyChunksPanicOnCapZero() {
+        assertFailsWith<IllegalArgumentException> {
+            streamIter(listOf(1, 2)).readyChunks(0)
+        }
+    }
+
+    @Test
+    fun all() {
+        fun isEven(n: Int): Boolean = n % 2 == 0
+        val cx = TaskContext()
+
+        val empty = streamIter(emptyList<Int>())
+        assertEquals(Poll.Ready(true), empty.all(::isEven).poll(cx))
+
+        val allEven = streamIter(listOf(2, 4, 6, 8))
+        assertEquals(Poll.Ready(true), allEven.all(::isEven).poll(cx))
+
+        val notAllEven = streamIter(listOf(2, 3, 4))
+        assertEquals(Poll.Ready(false), notAllEven.all(::isEven).poll(cx))
+    }
+
+    @Test
+    fun any() {
+        fun isEven(n: Int): Boolean = n % 2 == 0
+        val cx = TaskContext()
+
+        val empty = streamIter(emptyList<Int>())
+        assertEquals(Poll.Ready(false), empty.any(::isEven).poll(cx))
+
+        val hasEven = streamIter(listOf(1, 2, 3))
+        assertEquals(Poll.Ready(true), hasEven.any(::isEven).poll(cx))
+
+        val noEven = streamIter(listOf(1, 3, 5))
+        assertEquals(Poll.Ready(false), noEven.any(::isEven).poll(cx))
     }
 }
