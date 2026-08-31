@@ -45,6 +45,10 @@ public fun interface Waker {
     public fun wakeByRef()
 }
 
+public fun Waker.wake() {
+    wakeByRef()
+}
+
 /**
  * Polling context passed to futures, streams, and sinks.
  */

@@ -20,4 +20,30 @@ class SelectAllTest {
         assertEquals(1, idx)
         assertEquals(2, rest.size)
     }
+
+    @Test
+    fun smoke() {
+        var v: List<Future<Int>> = listOf(ready(1), ready(2), ready(3))
+        val c = mutableSetOf(1, 2, 3)
+
+        val cx = TaskContext()
+
+        val r1 = (selectAll(v).poll(cx) as Poll.Ready).value
+        assertTrue(c.remove(r1.first))
+        assertEquals(0, r1.second)
+        v = r1.third
+
+        val r2 = (selectAll(v).poll(cx) as Poll.Ready).value
+        assertTrue(c.remove(r2.first))
+        assertEquals(0, r2.second)
+        v = r2.third
+
+        val r3 = (selectAll(v).poll(cx) as Poll.Ready).value
+        assertTrue(c.remove(r3.first))
+        assertEquals(0, r3.second)
+        v = r3.third
+
+        assertTrue(c.isEmpty())
+        assertTrue(v.isEmpty())
+    }
 }

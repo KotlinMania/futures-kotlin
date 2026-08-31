@@ -37,4 +37,21 @@ class StreamUnfoldTest {
         assertEquals(Yield.end(), p4.value)
         assertTrue(st.isTerminated())
     }
+
+    @Test
+    fun unfold1() {
+        val stream = streamUnfold(0) { state ->
+            if (state <= 2) {
+                ready(Pair(state * 2, state + 1) as Pair<Int, Int>?)
+            } else {
+                ready(null as Pair<Int, Int>?)
+            }
+        }
+        val cx = TaskContext()
+        assertEquals(Poll.ready(Yield.value(0)), stream.pollNext(cx))
+        assertEquals(Poll.ready(Yield.value(2)), stream.pollNext(cx))
+        assertEquals(Poll.ready(Yield.value(4)), stream.pollNext(cx))
+        assertEquals(Poll.ready(Yield.end()), stream.pollNext(cx))
+        assertTrue(stream.isTerminated())
+    }
 }
