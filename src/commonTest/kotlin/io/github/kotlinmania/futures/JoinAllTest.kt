@@ -23,4 +23,23 @@ class JoinAllTest {
         assertTrue(res is Poll.Ready)
         assertEquals(emptyList(), res.value)
     }
+
+    @Test
+    fun collectCollects() {
+        val cx = TaskContext()
+        val res1 = joinAll(listOf(ready(1), ready(2))).poll(cx)
+        assertEquals(Poll.ready(listOf(1, 2)), res1)
+
+        val res2 = joinAll(listOf(ready(1))).poll(cx)
+        assertEquals(Poll.ready(listOf(1)), res2)
+    }
+
+    @Test
+    fun joinAllSizes() {
+        val bufs = listOf(byteArrayOf(1, 2, 3), byteArrayOf(), byteArrayOf(0))
+        val iter = bufs.map { ready(it.size) }
+        val cx = TaskContext()
+        val res = joinAll(iter).poll(cx)
+        assertEquals(Poll.ready(listOf(3, 0, 1)), res)
+    }
 }

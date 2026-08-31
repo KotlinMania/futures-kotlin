@@ -77,7 +77,7 @@ public class Shared<T> internal constructor(
                                 list
                             }
                         for (w in toWake) {
-                            w.wakeByRef()
+                            w.wake()
                         }
                         completed = true
                         return Poll.Ready(p.value)
@@ -97,7 +97,7 @@ public class Shared<T> internal constructor(
                         list
                     }
                 for (w in toWake) {
-                    w.wakeByRef()
+                    w.wake()
                 }
                 throw t
             }
@@ -105,6 +105,8 @@ public class Shared<T> internal constructor(
 
         return Poll.Pending
     }
+
+    public fun ptrEq(other: Shared<T>): Boolean = inner === other.inner
 
     public fun clone(): Shared<T> = Shared(inner)
 }

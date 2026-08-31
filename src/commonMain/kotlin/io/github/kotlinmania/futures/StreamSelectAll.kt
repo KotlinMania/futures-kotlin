@@ -14,19 +14,27 @@ import kotlin.native.HiddenFromObjC
 public class SelectAllStream<T>(
     private val streams: MutableList<Stream<T>> = mutableListOf(),
 ) : FusedStream<T> {
+    private var terminated: Boolean = false
+
     public fun push(stream: Stream<T>) {
         streams.add(stream)
+        terminated = false
     }
 
     public fun size(): Int = streams.size
+
+    public fun len(): Int = streams.size
 
     public fun isEmpty(): Boolean = streams.isEmpty()
 
     public fun clear() {
         streams.clear()
+        terminated = false
     }
 
-    override fun isTerminated(): Boolean = streams.isEmpty()
+    public fun iter(): List<Stream<T>> = streams.toList()
+
+    override fun isTerminated(): Boolean = terminated
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> {
         var i = 0
@@ -47,6 +55,7 @@ public class SelectAllStream<T>(
                         Yield.End -> {
                             streams.removeAt(i)
                             if (streams.isEmpty()) {
+                                terminated = true
                                 Poll.ready(Yield.end())
                             } else {
                                 continue
@@ -57,6 +66,7 @@ public class SelectAllStream<T>(
             }
         }
         return if (streams.isEmpty()) {
+            terminated = true
             Poll.ready(Yield.end())
         } else {
             Poll.pending()
