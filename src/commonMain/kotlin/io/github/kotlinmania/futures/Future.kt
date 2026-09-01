@@ -113,4 +113,3 @@ public fun <T, E> Future<Try<T, E>>.asTryFuture(): TryFuture<T, E> {
 public sealed interface TryFutureSealed
 
 public typealias Sealed = TryFutureSealed
-

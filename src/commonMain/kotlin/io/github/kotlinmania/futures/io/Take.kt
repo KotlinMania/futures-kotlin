@@ -76,8 +76,9 @@ public class Take<R : AsyncRead>(
         if (limit <= 0) {
             return Poll.Ready(Try.ok(ByteArray(0)))
         }
-        val bufReader = inner as? AsyncBufRead
-            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner reader does not implement AsyncBufRead")))
+        val bufReader =
+            inner as? AsyncBufRead
+                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner reader does not implement AsyncBufRead")))
         return when (val res = bufReader.pollFillBuf(context)) {
             is Poll.Pending -> Poll.Pending
             is Poll.Ready ->
@@ -98,4 +99,3 @@ public class Take<R : AsyncRead>(
         (inner as? AsyncBufRead)?.consume(actual)
     }
 }
-

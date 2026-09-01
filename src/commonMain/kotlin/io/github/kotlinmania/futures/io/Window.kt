@@ -53,7 +53,6 @@ public class Window(
      */
     public fun start(): Int = rangeStart
 
-
     /**
      * Gets the end index of this window into the underlying buffer.
      */

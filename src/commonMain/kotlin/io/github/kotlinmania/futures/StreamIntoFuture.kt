@@ -27,10 +27,11 @@ public class StreamFuture<St : Stream<T>, T>(
             is Poll.Ready -> {
                 val st = stream!!
                 stream = null
-                val item = when (val res = next.value) {
-                    is Yield.Value -> res.value
-                    is Yield.End -> null
-                }
+                val item =
+                    when (val res = next.value) {
+                        is Yield.Value -> res.value
+                        is Yield.End -> null
+                    }
                 Poll.Ready(item to st)
             }
         }

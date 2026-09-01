@@ -25,11 +25,9 @@ public class StreamPollFn<T>(
     }
 }
 
-
 /**
  * Creates a new stream wrapping a function returning `Poll<Yield<T>>`.
  */
 @HiddenFromObjC
 public fun <T> streamPollFn(f: (TaskContext) -> Poll<Yield<T>>): StreamPollFn<T> =
     StreamPollFn(f)
-

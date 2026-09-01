@@ -80,11 +80,12 @@ class TryStreamCombinatorsTest {
 
     @Test
     fun testTryBuffered() {
-        val futures = listOf(
-            Try.ok(ready(Try.ok(1))),
-            Try.ok(ready(Try.ok(2))),
-            Try.ok(ready(Try.ok(3))),
-        )
+        val futures =
+            listOf(
+                Try.ok(ready(Try.ok(1))),
+                Try.ok(ready(Try.ok(2))),
+                Try.ok(ready(Try.ok(3))),
+            )
         val stream = streamIter(futures).asTryStream().tryBuffered(2)
         val context = TaskContext()
 
@@ -107,10 +108,11 @@ class TryStreamCombinatorsTest {
 
     @Test
     fun testTryBufferUnordered() {
-        val futures = listOf(
-            Try.ok(ready(Try.ok(10))),
-            Try.ok(ready(Try.ok(20))),
-        )
+        val futures =
+            listOf(
+                Try.ok(ready(Try.ok(10))),
+                Try.ok(ready(Try.ok(20))),
+            )
         val stream = streamIter(futures).asTryStream().tryBufferUnordered(2)
         val context = TaskContext()
 
@@ -131,10 +133,11 @@ class TryStreamCombinatorsTest {
     fun testTryForEachConcurrent() {
         val collected = mutableListOf<Int>()
         val stream = streamIter(listOf(Try.ok(1), Try.ok(2), Try.ok(3))).asTryStream()
-        val fut = stream.tryForEachConcurrent(limit = 2) { item ->
-            collected.add(item)
-            ready(Try.ok(Unit))
-        }
+        val fut =
+            stream.tryForEachConcurrent(limit = 2) { item ->
+                collected.add(item)
+                ready(Try.ok(Unit))
+            }
         val context = TaskContext()
         val res = fut.poll(context)
         assertTrue(res is Poll.Ready)
@@ -145,9 +148,10 @@ class TryStreamCombinatorsTest {
     @Test
     fun testTryForEachConcurrentError() {
         val stream = streamIter(listOf(Try.ok(1), Try.err("failed"))).asTryStream()
-        val fut = stream.tryForEachConcurrent {
-            ready(Try.ok(Unit))
-        }
+        val fut =
+            stream.tryForEachConcurrent {
+                ready(Try.ok(Unit))
+            }
         val context = TaskContext()
         val res = fut.poll(context)
         assertTrue(res is Poll.Ready)
@@ -159,14 +163,18 @@ class TryStreamCombinatorsTest {
         var okVal: Int? = null
         var errVal: String? = null
 
-        val okStream = streamIter(listOf(Try.ok(42))).asTryStream()
-            .inspectOk { okVal = it }
+        val okStream =
+            streamIter(listOf(Try.ok(42)))
+                .asTryStream()
+                .inspectOk { okVal = it }
         val context = TaskContext()
         okStream.pollNext(context)
         assertEquals(42, okVal)
 
-        val errStream = streamIter(listOf(Try.err("boom"))).asTryStream()
-            .inspectErr { errVal = it }
+        val errStream =
+            streamIter(listOf(Try.err("boom")))
+                .asTryStream()
+                .inspectErr { errVal = it }
         errStream.pollNext(context)
         assertEquals("boom", errVal)
     }

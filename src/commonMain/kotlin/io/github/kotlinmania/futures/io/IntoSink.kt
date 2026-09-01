@@ -34,16 +34,16 @@ public class IntoSink<out W : AsyncWrite>(
 
     private var buffer: Block? = null
 
-
     private fun pollFlushBuffer(context: TaskContext): Poll<Try<Unit, IoError>> {
         val block = buffer ?: return Poll.Ready(Try.ok(Unit))
         while (block.offset < block.bytes.size) {
-            val pollRes = writer.pollWrite(
-                context,
-                block.bytes,
-                block.offset,
-                block.bytes.size - block.offset,
-            )
+            val pollRes =
+                writer.pollWrite(
+                    context,
+                    block.bytes,
+                    block.offset,
+                    block.bytes.size - block.offset,
+                )
             when (pollRes) {
                 is Poll.Pending -> return Poll.Pending
                 is Poll.Ready -> {

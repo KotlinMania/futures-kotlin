@@ -15,6 +15,7 @@ import io.github.kotlinmania.futures.sink.SinkErrInto
 import io.github.kotlinmania.futures.sink.SinkMapErr
 import io.github.kotlinmania.futures.sink.With
 import io.github.kotlinmania.futures.sink.WithFlatMap
+import kotlin.native.HiddenFromObjC
 import io.github.kotlinmania.futures.sink.buffer as sinkBuffer
 import io.github.kotlinmania.futures.sink.close as sinkClose
 import io.github.kotlinmania.futures.sink.drain as sinkDrain
@@ -27,7 +28,6 @@ import io.github.kotlinmania.futures.sink.sinkErrInto as sinkErrIntoExt
 import io.github.kotlinmania.futures.sink.sinkMapErr as sinkMapErrExt
 import io.github.kotlinmania.futures.sink.with as sinkWith
 import io.github.kotlinmania.futures.sink.withFlatMap as sinkWithFlatMap
-import kotlin.native.HiddenFromObjC
 
 /**
  * Sink for the [drainSink] function that discards all items sent to it.

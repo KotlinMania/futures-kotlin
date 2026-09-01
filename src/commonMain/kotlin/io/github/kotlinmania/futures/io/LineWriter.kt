@@ -49,7 +49,6 @@ public class LineWriter<out W : AsyncWrite>(
      */
     public fun buffer(): ByteArray = bufWriter.buffer()
 
-
     private fun flushIfCompletedLine(context: TaskContext): Poll<Try<Unit, IoError>> {
         val currentBuf = bufWriter.buffer()
         return if (currentBuf.isNotEmpty() && currentBuf.last() == '\n'.code.toByte()) {
@@ -103,15 +102,16 @@ public class LineWriter<out W : AsyncWrite>(
 
         val linesLen = newlineIndex
         val pollInner = bufWriter.innerPollWrite(context, buf, offset, linesLen)
-        val flushed = when (pollInner) {
-            is Poll.Pending -> return Poll.Pending
-            is Poll.Ready -> {
-                when (val r = pollInner.value) {
-                    is Try.Err -> return Poll.Ready(Try.err(r.error))
-                    is Try.Ok -> r.value
+        val flushed =
+            when (pollInner) {
+                is Poll.Pending -> return Poll.Pending
+                is Poll.Ready -> {
+                    when (val r = pollInner.value) {
+                        is Try.Err -> return Poll.Ready(Try.err(r.error))
+                        is Try.Ok -> r.value
+                    }
                 }
             }
-        }
 
         if (flushed == 0) {
             return Poll.Ready(Try.ok(0))
@@ -119,11 +119,12 @@ public class LineWriter<out W : AsyncWrite>(
 
         val tailOffset = offset + flushed
         val tailLen = length - flushed
-        val buffered = if (tailLen > 0) {
-            bufWriter.writeToBuf(buf, tailOffset, tailLen)
-        } else {
-            0
-        }
+        val buffered =
+            if (tailLen > 0) {
+                bufWriter.writeToBuf(buf, tailOffset, tailLen)
+            } else {
+                0
+            }
 
         return Poll.Ready(Try.ok(flushed + buffered))
     }

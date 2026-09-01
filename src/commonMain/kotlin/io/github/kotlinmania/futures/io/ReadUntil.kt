@@ -77,4 +77,3 @@ public class ReadUntil(
         ): Poll<Try<Int, IoError>> = ReadUntil(reader, byte, buf).poll(context)
     }
 }
-

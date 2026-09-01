@@ -14,7 +14,9 @@ public enum class PollNext {
     Left,
 
     /** Poll the second stream. */
-    Right;
+    Right,
+
+    ;
 
     /** Toggle the value and return the other one. */
     public fun toggle(): PollNext = other()
@@ -39,7 +41,8 @@ internal enum class InternalState {
     Start,
     LeftFinished,
     RightFinished,
-    BothFinished;
+    BothFinished,
+    ;
 
     fun finish(ps: PollNext): InternalState =
         when (this) {

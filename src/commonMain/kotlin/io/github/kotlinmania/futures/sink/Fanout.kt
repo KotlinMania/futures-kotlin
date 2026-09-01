@@ -20,7 +20,6 @@ public class Fanout<Item, out E>(
     private val sink1: Sink<Item, E>,
     private val sink2: Sink<Item, E>,
 ) : Sink<Item, E> {
-
     /**
      * Get a reference to the inner sinks.
      */

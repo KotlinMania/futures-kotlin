@@ -17,7 +17,9 @@ public class Scan<T, S, R>(
     private var done: Boolean = false
 
     public interface StateFn
+
     public interface Item
+
     public interface Error
 
     public companion object {
@@ -56,7 +58,6 @@ public class Scan<T, S, R>(
     public fun fmt(): String = "Scan"
 
     override fun toString(): String = fmt()
-
 
     override fun isTerminated(): Boolean =
         done || ((stream as? FusedStream<*>)?.isTerminated() ?: false)
