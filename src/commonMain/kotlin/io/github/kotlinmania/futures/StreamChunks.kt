@@ -21,6 +21,7 @@ public class Chunks<T>(
     }
 
     public interface Item
+
     public interface Error
 
     public companion object {
@@ -50,7 +51,6 @@ public class Chunks<T>(
     public fun fmt(): String = "Chunks"
 
     override fun toString(): String = fmt()
-
 
     private fun take(): List<T> {
         val chunk = items.toList()

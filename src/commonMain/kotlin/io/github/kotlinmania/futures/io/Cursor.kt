@@ -53,7 +53,6 @@ public class Cursor(
      */
     public fun getMut(): ByteArray = buffer
 
-
     override fun pollRead(
         context: TaskContext,
         buf: ByteArray,

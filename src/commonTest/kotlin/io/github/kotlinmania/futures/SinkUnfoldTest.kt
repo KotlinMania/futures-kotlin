@@ -3,7 +3,6 @@ package io.github.kotlinmania.futures
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class SinkUnfoldTest {
     private val context = TaskContext()
@@ -11,11 +10,12 @@ class SinkUnfoldTest {
     @Test
     fun testSinkUnfoldAccumulates() {
         var recordedSum = 0
-        val sink = unfoldSink<Int, Int, String>(0) { sum, item ->
-            val next = sum + item
-            recordedSum = next
-            ok(next)
-        }
+        val sink =
+            unfoldSink<Int, Int, String>(0) { sum, item ->
+                val next = sum + item
+                recordedSum = next
+                ok(next)
+            }
 
         val ready1 = sink.pollReady(context)
         assertEquals(Poll.Ready(SinkOutcome.Ready), ready1)
@@ -40,13 +40,14 @@ class SinkUnfoldTest {
 
     @Test
     fun testSinkUnfoldError() {
-        val sink = unfoldSink<Int, Int, String>(0) { _, item ->
-            if (item < 0) {
-                err("negative number")
-            } else {
-                ok(item)
+        val sink =
+            unfoldSink<Int, Int, String>(0) { _, item ->
+                if (item < 0) {
+                    err("negative number")
+                } else {
+                    ok(item)
+                }
             }
-        }
 
         sink.pollReady(context)
         sink.startSend(-1)

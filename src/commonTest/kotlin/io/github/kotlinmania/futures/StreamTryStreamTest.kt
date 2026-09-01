@@ -8,11 +8,12 @@ class StreamTryStreamTest {
     @Test
     fun tryFilterMapAfterErr() {
         val cx = TaskContext()
-        val s = streamIter(listOf<Try<Int, Int>>(Try.Ok(1), Try.Ok(2), Try.Ok(3)))
-            .asTryStream()
-            .tryFilterMap<Int, Int, Unit> { v ->
-                Future { Poll.Ready(Try.Err(v)) }
-            }
+        val s =
+            streamIter(listOf<Try<Int, Int>>(Try.Ok(1), Try.Ok(2), Try.Ok(3)))
+                .asTryStream()
+                .tryFilterMap<Int, Int, Unit> { v ->
+                    Future { Poll.Ready(Try.Err(v)) }
+                }
 
         val p = s.pollNext(cx)
         assertEquals(Poll.Ready(Yield.Value(Try.Err(1))), p)
@@ -21,11 +22,12 @@ class StreamTryStreamTest {
     @Test
     fun trySkipWhileAfterErr() {
         val cx = TaskContext()
-        val s = streamIter(listOf<Try<Int, String>>(Try.Ok(1), Try.Ok(2), Try.Ok(3)))
-            .asTryStream()
-            .trySkipWhile { _ ->
-                Future { Poll.Ready(Try.Err("error")) }
-            }
+        val s =
+            streamIter(listOf<Try<Int, String>>(Try.Ok(1), Try.Ok(2), Try.Ok(3)))
+                .asTryStream()
+                .trySkipWhile { _ ->
+                    Future { Poll.Ready(Try.Err("error")) }
+                }
 
         val p = s.pollNext(cx)
         assertEquals(Poll.Ready(Yield.Value(Try.Err("error"))), p)
@@ -34,11 +36,12 @@ class StreamTryStreamTest {
     @Test
     fun tryTakeWhileAfterErr() {
         val cx = TaskContext()
-        val s = streamIter(listOf<Try<Int, String>>(Try.Ok(1), Try.Ok(2), Try.Ok(3)))
-            .asTryStream()
-            .tryTakeWhile { _ ->
-                Future { Poll.Ready(Try.Err("error")) }
-            }
+        val s =
+            streamIter(listOf<Try<Int, String>>(Try.Ok(1), Try.Ok(2), Try.Ok(3)))
+                .asTryStream()
+                .tryTakeWhile { _ ->
+                    Future { Poll.Ready(Try.Err("error")) }
+                }
 
         val p = s.pollNext(cx)
         assertEquals(Poll.Ready(Yield.Value(Try.Err("error"))), p)
@@ -108,17 +111,19 @@ class StreamTryStreamTest {
         val cx = TaskContext()
 
         val st = streamIter(listOf<Try<Int, String>>(Try.Ok(1), Try.Ok(2), Try.Ok(3))).asTryStream()
-        val fold = st.tryFold(0) { acc, item ->
-            Future { Poll.Ready(Try.Ok(acc + item)) }
-        }
+        val fold =
+            st.tryFold(0) { acc, item ->
+                Future { Poll.Ready(Try.Ok(acc + item)) }
+            }
         assertEquals(Poll.Ready(Try.Ok(6)), fold.poll(cx))
 
         var sum = 0
         val forEachSt = streamIter(listOf<Try<Int, String>>(Try.Ok(10), Try.Ok(20))).asTryStream()
-        val forEach = forEachSt.tryForEach { item ->
-            sum += item
-            Future { Poll.Ready(Try.Ok(Unit)) }
-        }
+        val forEach =
+            forEachSt.tryForEach { item ->
+                sum += item
+                Future { Poll.Ready(Try.Ok(Unit)) }
+            }
         assertEquals(Poll.Ready(Try.Ok(Unit)), forEach.poll(cx))
         assertEquals(30, sum)
     }
@@ -126,15 +131,16 @@ class StreamTryStreamTest {
     @Test
     fun tryUnfold() {
         val cx = TaskContext()
-        val st = tryStreamUnfold<Int, Int, String>(0) { state ->
-            Future {
-                if (state <= 2) {
-                    Poll.Ready(Try.Ok(Pair(state * 2, state + 1)))
-                } else {
-                    Poll.Ready(Try.Ok(null))
+        val st =
+            tryStreamUnfold<Int, Int, String>(0) { state ->
+                Future {
+                    if (state <= 2) {
+                        Poll.Ready(Try.Ok(Pair(state * 2, state + 1)))
+                    } else {
+                        Poll.Ready(Try.Ok(null))
+                    }
                 }
-            }
-        }.asTryStream()
+            }.asTryStream()
 
         val collected = st.tryCollect()
         assertEquals(Poll.Ready(Try.Ok(listOf(0, 2, 4))), collected.poll(cx))

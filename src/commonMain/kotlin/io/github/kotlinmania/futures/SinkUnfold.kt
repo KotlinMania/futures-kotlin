@@ -16,4 +16,6 @@ public typealias SinkUnfold<T, Item, E> = io.github.kotlinmania.futures.sink.Unf
 public fun <T, Item, E> unfoldSink(
     init: T,
     function: (T, Item) -> Future<Try<T, E>>,
-): io.github.kotlinmania.futures.sink.Unfold<T, Item, E> = io.github.kotlinmania.futures.sink.unfold(init, function)
+): io.github.kotlinmania.futures.sink.Unfold<T, Item, E> =
+    io.github.kotlinmania.futures.sink
+        .unfold(init, function)

@@ -68,5 +68,3 @@ public class ReadToEnd(
         ): Poll<Try<Int, IoError>> = ReadToEnd(reader, buf).poll(context)
     }
 }
-
-

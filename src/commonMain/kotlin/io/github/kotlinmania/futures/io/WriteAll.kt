@@ -31,7 +31,6 @@ public class WriteAll(
     }
 
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> {
-
         while (length > 0) {
             val pollRes = writer.pollWrite(context, buf, offset, length)
             when (pollRes) {

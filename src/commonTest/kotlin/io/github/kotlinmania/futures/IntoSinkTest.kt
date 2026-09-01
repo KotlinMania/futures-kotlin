@@ -6,7 +6,6 @@ import io.github.kotlinmania.futures.io.intoSink
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class IntoSinkTest {
     private val context = TaskContext()

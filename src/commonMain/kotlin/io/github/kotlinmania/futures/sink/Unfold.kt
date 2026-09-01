@@ -26,8 +26,9 @@ public class Unfold<T, in Item, out E>(
         pollFlush(context)
 
     override fun startSend(item: Item): SinkOutcome<E> {
-        val value = state.takeValue()
-            ?: error("startSend called without pollReady returning Ready first")
+        val value =
+            state.takeValue()
+                ?: error("startSend called without pollReady returning Ready first")
         val future = function(value, item)
         state = UnfoldState.InProgress(future)
         return SinkOutcome.ready()

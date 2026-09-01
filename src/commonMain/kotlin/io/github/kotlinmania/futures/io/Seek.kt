@@ -26,4 +26,3 @@ public class Seek<out S : AsyncSeek>(
     override fun poll(context: TaskContext): Poll<Try<Long, IoError>> =
         seek.pollSeek(context, pos)
 }
-

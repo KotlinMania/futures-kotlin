@@ -31,7 +31,6 @@ public class ReadExact(
     }
 
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> {
-
         while (length > 0) {
             val pollRes = reader.pollRead(context, buf, offset, length)
             when (pollRes) {

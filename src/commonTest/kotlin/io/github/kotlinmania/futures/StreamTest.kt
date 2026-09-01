@@ -165,11 +165,14 @@ class StreamTest {
 
     @Test
     fun flatMap() {
-        val st = streamIter(listOf(
-            streamIter(listOf(0, 1, 2, 3, 4)),
-            streamIter(listOf(6, 7, 8, 9, 10)),
-            streamIter(listOf(0, 1, 2)),
-        ))
+        val st =
+            streamIter(
+                listOf(
+                    streamIter(listOf(0, 1, 2, 3, 4)),
+                    streamIter(listOf(6, 7, 8, 9, 10)),
+                    streamIter(listOf(0, 1, 2)),
+                ),
+            )
 
         val flat = st.flatMap { s -> s.filter { v -> v % 2 == 0 } }
         val cx = TaskContext()
@@ -179,15 +182,16 @@ class StreamTest {
 
     @Test
     fun scan() {
-        val values = streamIter(listOf(1, 2, 3, 4, 6, 8, 2))
-            .scan(1) { state, e ->
-                val nextState = state + 1
-                if (e < nextState) {
-                    Pair(nextState, e)
-                } else {
-                    null
+        val values =
+            streamIter(listOf(1, 2, 3, 4, 6, 8, 2))
+                .scan(1) { state, e ->
+                    val nextState = state + 1
+                    if (e < nextState) {
+                        Pair(nextState, e)
+                    } else {
+                        null
+                    }
                 }
-            }
 
         val cx = TaskContext()
         val collected = values.collect().poll(cx)
@@ -252,7 +256,9 @@ class StreamTest {
 
     @Test
     fun readyChunks() {
-        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.channel<Int>(16)
+        val (tx, rx) =
+            io.github.kotlinmania.futures.channel.mpsc
+                .channel<Int>(16)
         val s = rx.readyChunks(2)
         val cx = TaskContext()
         assertEquals(Poll.Pending, s.pollNext(cx))
@@ -303,8 +309,6 @@ class StreamTest {
         }
     }
 
-
-
     @Test
     fun all() {
         fun isEven(n: Int): Boolean = n % 2 == 0
@@ -343,10 +347,11 @@ class StreamTest {
         val cx = TaskContext()
         while (true) {
             when (val p = stream.pollNext(cx)) {
-                is Poll.Ready -> when (val y = p.value) {
-                    is Yield.Value -> results.add(y.value)
-                    Yield.End -> break
-                }
+                is Poll.Ready ->
+                    when (val y = p.value) {
+                        is Yield.Value -> results.add(y.value)
+                        Yield.End -> break
+                    }
                 Poll.Pending -> break
             }
         }

@@ -17,7 +17,6 @@ public class SinkMapErr<in Item, E, out E2>(
     private val sink: Sink<Item, E>,
     private val transform: (E) -> E2,
 ) : Sink<Item, E2> {
-
     /**
      * Get a reference to the inner sink.
      */

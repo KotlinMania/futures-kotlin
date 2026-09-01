@@ -15,11 +15,12 @@ public class StreamSelectCombinator<T>(
     public companion object {
         internal fun <T> new(stream1: Stream<T>, stream2: Stream<T>): StreamSelectCombinator<T> {
             val state = arrayOf(PollNext.Left)
-            val inner = selectWithStrategy(stream1, stream2, state) { s ->
-                val current = s[0]
-                s[0] = current.toggle()
-                current
-            }
+            val inner =
+                selectWithStrategy(stream1, stream2, state) { s ->
+                    val current = s[0]
+                    s[0] = current.toggle()
+                    current
+                }
             return StreamSelectCombinator(inner)
         }
     }

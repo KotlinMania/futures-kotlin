@@ -13,8 +13,14 @@ public class TryFlattenErr<T, E2>(
     future: TryFuture<T, TryFuture<T, E2>>,
 ) : FusedFuture<Try<T, E2>> {
     private sealed interface State<out T, out E2> {
-        class First<T, E2>(val future: TryFuture<T, TryFuture<T, E2>>) : State<T, E2>
-        class Second<T, E2>(val future: TryFuture<T, E2>) : State<T, E2>
+        class First<T, E2>(
+            val future: TryFuture<T, TryFuture<T, E2>>,
+        ) : State<T, E2>
+
+        class Second<T, E2>(
+            val future: TryFuture<T, E2>,
+        ) : State<T, E2>
+
         object Empty : State<Nothing, Nothing>
     }
 

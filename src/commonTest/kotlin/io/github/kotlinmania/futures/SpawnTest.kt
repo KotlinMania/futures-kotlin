@@ -9,7 +9,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @HiddenFromObjC
-class RecordSpawner : Spawn, LocalSpawn {
+class RecordSpawner :
+    Spawn,
+    LocalSpawn {
     val spawned = mutableListOf<Future<Unit>>()
 
     override fun spawnObj(future: FutureObj<Unit>): Result<Unit> {

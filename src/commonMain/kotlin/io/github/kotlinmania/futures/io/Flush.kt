@@ -25,4 +25,3 @@ public class Flush(
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> =
         writer.pollFlush(context)
 }
-

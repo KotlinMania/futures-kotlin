@@ -3,11 +3,9 @@ package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.io.AsyncWrite
 import io.github.kotlinmania.futures.io.IoError
-import io.github.kotlinmania.futures.io.IoErrorKind
 import io.github.kotlinmania.futures.io.LineWriter
 import io.github.kotlinmania.futures.io.lineWriter
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

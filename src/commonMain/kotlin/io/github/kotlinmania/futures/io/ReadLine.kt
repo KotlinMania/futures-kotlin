@@ -98,4 +98,3 @@ public class ReadLine(
         ): Poll<Try<Int, IoError>> = ReadLine(reader, buf).poll(context)
     }
 }
-

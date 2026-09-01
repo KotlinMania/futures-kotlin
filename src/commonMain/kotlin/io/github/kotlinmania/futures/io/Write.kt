@@ -33,4 +33,3 @@ public class Write(
     override fun poll(context: TaskContext): Poll<Try<Int, IoError>> =
         writer.pollWrite(context, buf, offset, length)
 }
-

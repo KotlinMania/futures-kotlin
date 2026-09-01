@@ -45,7 +45,6 @@ public class Chain<T : AsyncRead, U : AsyncRead>(
 
     public fun fmt(): String = "Chain"
 
-
     override fun pollRead(
         context: TaskContext,
         buf: ByteArray,
@@ -75,8 +74,9 @@ public class Chain<T : AsyncRead, U : AsyncRead>(
 
     override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> {
         if (!doneFirst) {
-            val bufReader = first as? AsyncBufRead
-                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "first reader does not implement AsyncBufRead")))
+            val bufReader =
+                first as? AsyncBufRead
+                    ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "first reader does not implement AsyncBufRead")))
             when (val res = bufReader.pollFillBuf(context)) {
                 is Poll.Pending -> return Poll.Pending
                 is Poll.Ready ->
@@ -92,8 +92,9 @@ public class Chain<T : AsyncRead, U : AsyncRead>(
                     }
             }
         }
-        val bufReader = second as? AsyncBufRead
-            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "second reader does not implement AsyncBufRead")))
+        val bufReader =
+            second as? AsyncBufRead
+                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "second reader does not implement AsyncBufRead")))
         return bufReader.pollFillBuf(context)
     }
 

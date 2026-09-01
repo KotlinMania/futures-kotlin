@@ -40,7 +40,6 @@ public class BufWriter<out W : AsyncWrite>(
 
     override fun toString(): String = fmt()
 
-
     /**
      * Capacity of the internal buffer.
      */
@@ -174,14 +173,16 @@ public class BufWriter<out W : AsyncWrite>(
         offset: Int,
         length: Int,
     ): Poll<Try<Int, IoError>> {
-        val reader = inner as? AsyncRead
-            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner writer does not implement AsyncRead")))
+        val reader =
+            inner as? AsyncRead
+                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner writer does not implement AsyncRead")))
         return reader.pollRead(context, buf, offset, length)
     }
 
     override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> {
-        val bufReader = inner as? AsyncBufRead
-            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner writer does not implement AsyncBufRead")))
+        val bufReader =
+            inner as? AsyncBufRead
+                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner writer does not implement AsyncBufRead")))
         return bufReader.pollFillBuf(context)
     }
 
@@ -203,8 +204,9 @@ public class BufWriter<out W : AsyncWrite>(
                 }
             }
         }
-        val seeker = inner as? AsyncSeek
-            ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner writer does not implement AsyncSeek")))
+        val seeker =
+            inner as? AsyncSeek
+                ?: return Poll.Ready(Try.err(IoError(IoErrorKind.Other, "inner writer does not implement AsyncSeek")))
         return seeker.pollSeek(context, pos)
     }
 }

@@ -24,4 +24,3 @@ public class FillBuf(
 
     override fun poll(context: TaskContext): Poll<Try<ByteArray, IoError>> = reader.pollFillBuf(context)
 }
-

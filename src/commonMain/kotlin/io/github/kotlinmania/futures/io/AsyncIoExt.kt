@@ -145,4 +145,5 @@ public fun <S : AsyncSeek> S.seek(pos: SeekFrom): Seek<S> = Seek(this, pos)
  */
 @HiddenFromObjC
 public fun AsyncBufRead.copyBufAbortable(writer: AsyncWrite): Pair<CopyBufAbortable, io.github.kotlinmania.futures.AbortHandle> =
-    io.github.kotlinmania.futures.io.copyBufAbortable(this, writer)
+    io.github.kotlinmania.futures.io
+        .copyBufAbortable(this, writer)

@@ -25,4 +25,3 @@ public class Close(
     override fun poll(context: TaskContext): Poll<Try<Unit, IoError>> =
         writer.pollClose(context)
 }
-
