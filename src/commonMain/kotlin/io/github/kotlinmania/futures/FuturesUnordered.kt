@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/stream/futures_unordered/mod.rs
+// port-lint: source stream/futures_unordered/mod.rs
 @file:OptIn(
     kotlin.experimental.ExperimentalObjCRefinement::class,
     kotlin.concurrent.atomics.ExperimentalAtomicApi::class,

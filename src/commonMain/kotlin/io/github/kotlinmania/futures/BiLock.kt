@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/lock/bilock.rs
+// port-lint: source lock/bilock.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class, kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
 
 package io.github.kotlinmania.futures
@@ -18,10 +18,14 @@ private val LOCKED_SENTINEL = Any()
  * Error indicating two [BiLock] instances were not two halves of a whole, and thus could not be reunited.
  */
 @HiddenFromObjC
-public class BiLockReuniteError(
+public class ReuniteError(
     public val first: BiLock<*>,
     public val second: BiLock<*>,
-) : Exception("tried to reunite two BiLocks that don't form a pair")
+) : Exception("tried to reunite two BiLocks that don't form a pair") {
+    override fun toString(): String = "ReuniteError(...)"
+}
+
+public typealias BiLockReuniteError = ReuniteError
 
 /**
  * Returned RAII-like guard from the [BiLock.pollLock] method.
@@ -36,9 +40,17 @@ public class BiLockGuard<T> internal constructor(
         bilock.setValue(value)
     }
 
+    public fun deref(): T = get()
+
+    public fun derefMut(): T = get()
+
+    public fun asPinMut(): T = get()
+
     public fun unlock() {
         bilock.unlock()
     }
+
+    override fun toString(): String = "BiLockGuard(${get()})"
 
     public inline fun <R> withValue(block: (T) -> R): R {
         try {
@@ -57,6 +69,8 @@ public class BiLockAcquire<T> internal constructor(
     private val bilock: BiLock<T>,
 ) : Future<BiLockGuard<T>> {
     override fun poll(context: TaskContext): Poll<BiLockGuard<T>> = bilock.pollLock(context)
+
+    override fun toString(): String = "BiLockAcquire(...)"
 }
 
 /**
@@ -128,8 +142,10 @@ public class BiLock<T> private constructor(
         if (isPairOf(other)) {
             Result.success(inner.value)
         } else {
-            Result.failure(BiLockReuniteError(this, other))
+            Result.failure(ReuniteError(this, other))
         }
+
+    override fun toString(): String = "BiLock(...)"
 
     internal fun getValue(): T = inner.value
 

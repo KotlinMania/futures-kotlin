@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/never.rs
+// port-lint: source never.rs
 package io.github.kotlinmania.futures
 
 /**

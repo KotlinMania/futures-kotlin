@@ -1,4 +1,4 @@
-// port-lint: source futures-core/src/task/poll.rs
+// port-lint: source async_await/poll.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

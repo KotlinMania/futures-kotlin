@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/stream/stream/into_future.rs
+// port-lint: tests stream/stream/into_future.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

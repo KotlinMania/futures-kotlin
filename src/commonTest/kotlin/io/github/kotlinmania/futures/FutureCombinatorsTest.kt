@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/future/mod.rs
+// port-lint: tests future/mod.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test
@@ -236,5 +236,47 @@ class FutureCombinatorsTest {
         val poll = fut.poll(TaskContext())
         assertTrue(poll is Poll.Ready)
         assertEquals((1..12).toList(), list)
+    }
+
+    @Test
+    fun testNowOrNever() {
+        val readyFut = ready("hello")
+        assertEquals("hello", readyFut.nowOrNever())
+
+        val pendingFut = pending<String>()
+        assertEquals(null, pendingFut.nowOrNever())
+    }
+
+    @Test
+    fun testLeftAndRightFuture() {
+        val left = ready(1).leftFuture<Int, String>()
+        assertTrue(left is Either.Left)
+        val pLeft = left.value.poll(TaskContext())
+        assertTrue(pLeft is Poll.Ready)
+        assertEquals(1, pLeft.value)
+
+        val right = ready("hello").rightFuture<Int, String>()
+        assertTrue(right is Either.Right)
+        val pRight = right.value.poll(TaskContext())
+        assertTrue(pRight is Poll.Ready)
+        assertEquals("hello", pRight.value)
+    }
+
+    @Test
+    fun testIntoStreamAndPollUnpin() {
+        val stream = ready(42).intoStream()
+        val p1 = stream.pollNext(TaskContext())
+        assertTrue(p1 is Poll.Ready)
+        val yield1 = p1.value
+        assertTrue(yield1 is Yield.Value)
+        assertEquals(42, yield1.value)
+
+        val p2 = stream.pollNext(TaskContext())
+        assertTrue(p2 is Poll.Ready && p2.value is Yield.End)
+
+        val fut = ready(100)
+        val pollRes = fut.pollUnpin(TaskContext())
+        assertTrue(pollRes is Poll.Ready)
+        assertEquals(100, pollRes.value)
     }
 }

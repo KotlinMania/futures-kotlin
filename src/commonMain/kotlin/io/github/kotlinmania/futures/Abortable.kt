@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/abortable.rs
+// port-lint: source abortable.rs
 @file:OptIn(
     kotlin.experimental.ExperimentalObjCRefinement::class,
     kotlin.concurrent.atomics.ExperimentalAtomicApi::class,

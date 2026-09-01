@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/select_all.rs
+// port-lint: source future/select_all.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

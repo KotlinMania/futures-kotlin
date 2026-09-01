@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/future/future/map.rs
+// port-lint: tests future/future/map.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

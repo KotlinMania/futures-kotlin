@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/future/remote_handle.rs
+// port-lint: source future/future/remote_handle.rs
 @file:OptIn(
     kotlin.experimental.ExperimentalObjCRefinement::class,
     kotlin.concurrent.atomics.ExperimentalAtomicApi::class,

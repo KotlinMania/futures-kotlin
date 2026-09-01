@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/abortable.rs
+// port-lint: tests abortable.rs
 package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.channel.mpsc.unbounded

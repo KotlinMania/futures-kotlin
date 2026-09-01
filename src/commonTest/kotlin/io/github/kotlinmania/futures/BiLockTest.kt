@@ -1,4 +1,4 @@
-// port-lint: tests futures/tests/bilock.rs
+// port-lint: tests lock/bilock.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test
@@ -56,6 +56,24 @@ class BiLockTest {
         val failReunite = a1.reunite(b2)
         assertTrue(failReunite.isFailure)
         assertIs<BiLockReuniteError>(failReunite.exceptionOrNull())
+        assertIs<ReuniteError>(failReunite.exceptionOrNull())
+        assertEquals("ReuniteError(...)", failReunite.exceptionOrNull()?.toString())
+    }
+
+    @Test
+    fun guardDerefAndToString() {
+        val (a, b) = BiLock.new("test")
+        val cx = TaskContext()
+        val lockPoll = a.pollLock(cx)
+        assertIs<Poll.Ready<BiLockGuard<String>>>(lockPoll)
+        val guard = lockPoll.value
+        assertEquals("test", guard.deref())
+        assertEquals("test", guard.derefMut())
+        assertEquals("test", guard.asPinMut())
+        assertEquals("BiLockGuard(test)", guard.toString())
+        assertEquals("BiLock(...)", a.toString())
+        assertEquals("BiLockAcquire(...)", a.lock().toString())
+        guard.unlock()
     }
 
     @Test

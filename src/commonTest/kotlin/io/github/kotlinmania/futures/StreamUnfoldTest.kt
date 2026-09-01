@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/stream/unfold.rs
+// port-lint: tests stream/unfold.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

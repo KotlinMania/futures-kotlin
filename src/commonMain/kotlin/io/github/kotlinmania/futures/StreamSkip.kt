@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/stream/stream/skip.rs
+// port-lint: source stream/stream/skip.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

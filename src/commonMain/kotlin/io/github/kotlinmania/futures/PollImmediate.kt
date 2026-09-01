@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/poll_immediate.rs
+// port-lint: source future/poll_immediate.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

@@ -1,4 +1,4 @@
-// port-lint: source futures-task/src/spawn.rs
+// port-lint: source task/spawn.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

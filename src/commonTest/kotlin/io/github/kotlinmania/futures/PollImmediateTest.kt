@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/future/poll_immediate.rs
+// port-lint: tests future/poll_immediate.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

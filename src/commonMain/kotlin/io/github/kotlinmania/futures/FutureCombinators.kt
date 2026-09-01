@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/mod.rs
+// port-lint: source future/mod.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures
@@ -221,6 +221,42 @@ public fun <T, E> Future<Try<T, E>>.inspectErr(action: (E) -> Unit): TryFuture<T
                 }
                 is Poll.Pending -> Poll.Pending
             }
+    }
+}
+
+/**
+ * Wrap this future in an [Either] future, making it the left-hand variant.
+ */
+@HiddenFromObjC
+public fun <A, B> Future<A>.leftFuture(): Either<Future<A>, Future<B>> = Either.Left(this)
+
+/**
+ * Wrap this future in an [Either] future, making it the right-hand variant.
+ */
+@HiddenFromObjC
+public fun <A, B> Future<B>.rightFuture(): Either<Future<A>, Future<B>> = Either.Right(this)
+
+/**
+ * Convert this future into a single element stream.
+ */
+@HiddenFromObjC
+public fun <T> Future<T>.intoStream(): Once<T> = streamOnce(this)
+
+/**
+ * A convenience for calling [Future.poll] on future types.
+ */
+@HiddenFromObjC
+public fun <T> Future<T>.pollUnpin(context: TaskContext): Poll<T> = this.poll(context)
+
+/**
+ * Evaluates the future once, returning the result if ready immediately, or null if pending.
+ */
+@HiddenFromObjC
+public fun <T> Future<T>.nowOrNever(): T? {
+    val context = TaskContext(noopWaker())
+    return when (val p = this.poll(context)) {
+        is Poll.Ready -> p.value
+        Poll.Pending -> null
     }
 }
 

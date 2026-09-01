@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/option.rs
+// port-lint: source future/option.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

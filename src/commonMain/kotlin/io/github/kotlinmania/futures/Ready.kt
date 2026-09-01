@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/ready.rs
+// port-lint: source future/ready.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures
@@ -26,6 +26,13 @@ public class Ready<T>(
         @Suppress("UNCHECKED_CAST")
         return v as T
     }
+
+    /**
+     * Unwraps the value from this immediately ready future.
+     */
+    public fun into_inner(): T = intoInner()
+
+    override fun toString(): String = if (hasValue) "Ready(Some($value))" else "Ready(None)"
 
     override fun isTerminated(): Boolean = !hasValue
 
