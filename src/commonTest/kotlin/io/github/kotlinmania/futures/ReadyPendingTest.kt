@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/ready.rs
+// port-lint: source future/ready.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

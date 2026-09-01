@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/io/sink.rs
+// port-lint: source io/sink.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures.io
@@ -25,13 +25,18 @@ public class Sink : AsyncWrite {
         return Poll.Ready(Try.ok(length))
     }
 
+    public fun pollWriteVectored(
+        context: TaskContext,
+        bufs: List<ByteArray>,
+    ): Poll<Try<Int, IoError>> = Poll.Ready(Try.ok(bufs.sumOf { it.size }))
+
     override fun pollFlush(context: TaskContext): Poll<Try<Unit, IoError>> =
         Poll.Ready(Try.ok(Unit))
 
     override fun pollClose(context: TaskContext): Poll<Try<Unit, IoError>> =
         Poll.Ready(Try.ok(Unit))
 
-    override fun toString(): String = "Sink"
+    override fun toString(): String = "Sink { .. }"
 }
 
 /**

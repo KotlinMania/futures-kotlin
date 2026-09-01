@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/stream/select_with_strategy.rs
+// port-lint: tests stream/select_with_strategy.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

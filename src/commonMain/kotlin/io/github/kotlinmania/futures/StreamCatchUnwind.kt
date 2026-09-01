@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/stream/stream/catch_unwind.rs
+// port-lint: source stream/stream/catch_unwind.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

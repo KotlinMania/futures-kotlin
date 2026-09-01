@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/try_future/try_flatten.rs
+// port-lint: source future/try_future/try_flatten.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

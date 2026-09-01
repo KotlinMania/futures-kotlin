@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/stream/stream/ready_chunks.rs
+// port-lint: source stream/stream/ready_chunks.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

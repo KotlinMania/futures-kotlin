@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/unfold_state.rs
+// port-lint: source unfold_state.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

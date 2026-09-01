@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/src/future/lazy.rs
+// port-lint: tests future/lazy.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

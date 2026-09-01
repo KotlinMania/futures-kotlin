@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/future/lazy.rs
+// port-lint: source future/lazy.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

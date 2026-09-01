@@ -1,4 +1,4 @@
-// port-lint: source futures-util/src/stream/stream/skip_while.rs
+// port-lint: source stream/stream/skip_while.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures

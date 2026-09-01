@@ -1,16 +1,23 @@
-// port-lint: source futures-util/src/stream/futures_ordered.rs
+// port-lint: source stream/futures_ordered.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures
 
 import kotlin.native.HiddenFromObjC
 
-private class OrderWrapperOutput<T>(
+internal class OrderWrapper<T>(
     val data: T,
     val index: Long,
-) : Comparable<OrderWrapperOutput<T>> {
-    override fun compareTo(other: OrderWrapperOutput<T>): Int =
+) : Comparable<OrderWrapper<T>> {
+    override fun equals(other: Any?): Boolean =
+        other is OrderWrapper<*> && this.index == other.index
+
+    override fun hashCode(): Int = index.hashCode()
+
+    override fun compareTo(other: OrderWrapper<T>): Int =
         index.compareTo(other.index)
+
+    override fun toString(): String = "OrderWrapper(data=$data, index=$index)"
 }
 
 private class MinHeap<T : Comparable<T>> {
@@ -91,8 +98,8 @@ private class MinHeap<T : Comparable<T>> {
 public class FuturesOrdered<T> :
     FusedStream<T>,
     Iterable<Future<T>> {
-    private val inProgressQueue = FuturesUnordered<OrderWrapperOutput<T>>()
-    private val queuedOutputs = MinHeap<OrderWrapperOutput<T>>()
+    private val inProgressQueue = FuturesUnordered<OrderWrapper<T>>()
+    private val queuedOutputs = MinHeap<OrderWrapper<T>>()
     private var nextIncomingIndex: Long = 0L
     private var nextOutgoingIndex: Long = 0L
     private val inFlightFutures = mutableListOf<Future<T>>()
@@ -113,10 +120,10 @@ public class FuturesOrdered<T> :
         nextIncomingIndex++
         inFlightFutures.add(future)
         val wrapped =
-            object : Future<OrderWrapperOutput<T>> {
-                override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
+            object : Future<OrderWrapper<T>> {
+                override fun poll(context: TaskContext): Poll<OrderWrapper<T>> =
                     when (val p = future.poll(context)) {
-                        is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
+                        is Poll.Ready -> Poll.ready(OrderWrapper(p.value, index))
                         Poll.Pending -> Poll.pending()
                     }
             }
@@ -147,10 +154,10 @@ public class FuturesOrdered<T> :
         val index = nextOutgoingIndex
         inFlightFutures.add(0, future)
         val wrapped =
-            object : Future<OrderWrapperOutput<T>> {
-                override fun poll(context: TaskContext): Poll<OrderWrapperOutput<T>> =
+            object : Future<OrderWrapper<T>> {
+                override fun poll(context: TaskContext): Poll<OrderWrapper<T>> =
                     when (val p = future.poll(context)) {
-                        is Poll.Ready -> Poll.ready(OrderWrapperOutput(p.value, index))
+                        is Poll.Ready -> Poll.ready(OrderWrapper(p.value, index))
                         Poll.Pending -> Poll.pending()
                     }
             }
@@ -247,7 +254,7 @@ public class FuturesOrdered<T> :
 
     override fun iterator(): Iterator<Future<T>> = inFlightFutures.iterator()
 
-    override fun toString(): String = "FuturesOrdered(len=${len()})"
+    override fun toString(): String = "FuturesOrdered { ... }"
 
     public companion object {
         public fun <T> new(): FuturesOrdered<T> = FuturesOrdered()
@@ -255,6 +262,9 @@ public class FuturesOrdered<T> :
         public fun <T> default(): FuturesOrdered<T> = FuturesOrdered()
 
         public fun <T> fromIterable(futures: Iterable<Future<T>>): FuturesOrdered<T> =
+            FuturesOrdered(futures)
+
+        public fun <T> fromIter(futures: Iterable<Future<T>>): FuturesOrdered<T> =
             FuturesOrdered(futures)
     }
 }
