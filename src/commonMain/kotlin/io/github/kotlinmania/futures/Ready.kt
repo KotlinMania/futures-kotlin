@@ -27,11 +27,6 @@ public class Ready<T>(
         return v as T
     }
 
-    /**
-     * Unwraps the value from this immediately ready future.
-     */
-    public fun into_inner(): T = intoInner()
-
     override fun toString(): String = if (hasValue) "Ready(Some($value))" else "Ready(None)"
 
     override fun isTerminated(): Boolean = !hasValue
