@@ -125,3 +125,26 @@ public fun <T, E> TryStream<T, E>.tryAll(predicate: (T) -> Future<Boolean>): Try
 @HiddenFromObjC
 public fun <T, E> TryStream<T, E>.tryAny(predicate: (T) -> Future<Boolean>): TryAny<T, E> =
     TryAny.new(this, predicate)
+
+/**
+ * Inspects the Ok value of items yielded by this stream.
+ */
+@HiddenFromObjC
+public fun <T, E> TryStream<T, E>.inspectOk(action: (T) -> Unit): Stream<Try<T, E>> =
+    this.inspect { item ->
+        if (item is Try.Ok) {
+            action(item.value)
+        }
+    }
+
+/**
+ * Inspects the Err value of items yielded by this stream.
+ */
+@HiddenFromObjC
+public fun <T, E> TryStream<T, E>.inspectErr(action: (E) -> Unit): Stream<Try<T, E>> =
+    this.inspect { item ->
+        if (item is Try.Err) {
+            action(item.error)
+        }
+    }
+
