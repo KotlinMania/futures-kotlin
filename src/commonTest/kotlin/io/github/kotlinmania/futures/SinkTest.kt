@@ -341,6 +341,26 @@ class SinkTest {
         assertEquals(Poll.Ready(SinkOutcome.ready()), withSink.pollReady(cx))
         assertEquals(SinkOutcome.ready(), withSink.startSend(1))
     }
+
+    @Test
+    fun sinkMapErrChannel() {
+        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.channel<Int>(1)
+        val mapped = tx.sinkMapErr { "err:$it" }
+        val cx = TaskContext()
+        assertEquals(SinkOutcome.Ready, mapped.startSend(42))
+        assertEquals(Poll.Ready(SinkOutcome.Ready), mapped.pollFlush(cx))
+        assertEquals(Try.Ok(42), rx.tryNext())
+    }
+
+    @Test
+    fun sinkErrIntoChannel() {
+        val (tx, rx) = io.github.kotlinmania.futures.channel.mpsc.channel<Int>(1)
+        val converted = tx.sinkErrInto { "into:$it" }
+        val cx = TaskContext()
+        assertEquals(SinkOutcome.Ready, converted.startSend(84))
+        assertEquals(Poll.Ready(SinkOutcome.Ready), converted.pollFlush(cx))
+        assertEquals(Try.Ok(84), rx.tryNext())
+    }
 }
 
 

@@ -334,4 +334,23 @@ class StreamTest {
         val noEven = streamIter(listOf(1, 3, 5))
         assertEquals(Poll.Ready(false), noEven.any(::isEven).poll(cx))
     }
+
+    @Test
+    fun inspectAndAsStream() {
+        val recorded = mutableListOf<Int>()
+        val stream = listOf(10, 20, 30).asStream().inspect { recorded.add(it) }
+        val results = mutableListOf<Int>()
+        val cx = TaskContext()
+        while (true) {
+            when (val p = stream.pollNext(cx)) {
+                is Poll.Ready -> when (val y = p.value) {
+                    is Yield.Value -> results.add(y.value)
+                    Yield.End -> break
+                }
+                Poll.Pending -> break
+            }
+        }
+        assertEquals(listOf(10, 20, 30), results)
+        assertEquals(listOf(10, 20, 30), recorded)
+    }
 }
