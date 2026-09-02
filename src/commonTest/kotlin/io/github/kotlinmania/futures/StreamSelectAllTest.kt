@@ -150,4 +150,31 @@ class StreamSelectAllTest {
         assertEquals(Poll.ready(Yield.end()), s2.pollNext(cx))
         assertEquals(0, s2.iter().size)
     }
+
+    @Test
+    fun iterMut() {
+        val stream = SelectAllStream<Unit>()
+        stream.push(pendingStream())
+        stream.push(pendingStream())
+        stream.push(pendingStream())
+
+        val iter = stream.iter().toMutableList()
+        assertEquals(3, iter.size)
+    }
+
+    @Test
+    fun intoIter() {
+        val stream = SelectAllStream<Unit>()
+        stream.push(pendingStream())
+        stream.push(pendingStream())
+        stream.push(pendingStream())
+
+        val iter = stream.iter().iterator()
+        var count = 0
+        while (iter.hasNext()) {
+            iter.next()
+            count++
+        }
+        assertEquals(3, count)
+    }
 }

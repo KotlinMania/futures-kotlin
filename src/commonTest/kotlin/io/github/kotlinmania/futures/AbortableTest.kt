@@ -97,6 +97,30 @@ class AbortableTest {
     }
 
     @Test
+    fun abortableAwakens() {
+        val (_tx, aRx) =
+            io.github.kotlinmania.futures.channel.oneshot
+                .channel<Unit>()
+        val (abortableRx, abortHandle) = abortable(aRx)
+
+        var wakeCount = 0
+        val cx = TaskContext(Waker { wakeCount++ })
+
+        assertEquals(0, wakeCount)
+        assertEquals(Poll.pending(), abortableRx.poll(cx))
+        assertEquals(0, wakeCount)
+
+        abortHandle.abort()
+        assertEquals(1, wakeCount)
+        assertTrue(abortableRx.isAborted())
+        val res = abortableRx.poll(cx)
+        assertIs<Poll.Ready<Try<Try<Unit, io.github.kotlinmania.futures.channel.oneshot.Canceled>, Aborted>>>(res)
+        val v = res.value
+        assertIs<Try.Err<Aborted>>(v)
+        assertEquals(Aborted, v.error)
+    }
+
+    @Test
     fun abortableResolves() {
         val (tx, aRx) =
             io.github.kotlinmania.futures.channel.oneshot
@@ -121,6 +145,26 @@ class AbortableTest {
         abortHandle.abort()
         assertTrue(abortableRx.isAborted())
         val cx = TaskContext()
+        assertEquals(Poll.ready(Yield.end()), abortableRx.pollNext(cx))
+    }
+
+    @Test
+    fun abortableStreamAwakens() {
+        val (_tx, aRx) =
+            io.github.kotlinmania.futures.channel.mpsc
+                .channel<Unit>(1)
+        val (abortableRx, abortHandle) = abortable(aRx)
+
+        var wakeCount = 0
+        val cx = TaskContext(Waker { wakeCount++ })
+
+        assertEquals(0, wakeCount)
+        assertEquals(Poll.pending(), abortableRx.pollNext(cx))
+        assertEquals(0, wakeCount)
+
+        abortHandle.abort()
+        assertEquals(1, wakeCount)
+        assertTrue(abortableRx.isAborted())
         assertEquals(Poll.ready(Yield.end()), abortableRx.pollNext(cx))
     }
 

@@ -211,4 +211,32 @@ class FuturesOrderedTest {
         assertIs<Poll.Ready<List<Int>>>(collected)
         assertEquals(listOf(10, 20, 30), collected.value)
     }
+
+    @Test
+    fun queueNeverUnblocked() {
+        val (_aTx, aRx) = oneshot<Any>()
+        val (bTx, bRx) = oneshot<Any>()
+        val (cTx, cRx) = oneshot<Any>()
+
+        val selected =
+            select(bRx, cRx).map { either ->
+                when (either) {
+                    is Either.Left -> either.value
+                    is Either.Right -> either.value
+                }
+            }
+
+        val stream = listOf(aRx, selected).collectFuturesOrdered()
+        val cx = TaskContext()
+
+        for (i in 0 until 10) {
+            assertIs<Poll.Pending>(stream.pollNext(cx))
+        }
+
+        bTx.send(Unit)
+        assertIs<Poll.Pending>(stream.pollNext(cx))
+        cTx.send(Unit)
+        assertIs<Poll.Pending>(stream.pollNext(cx))
+        assertIs<Poll.Pending>(stream.pollNext(cx))
+    }
 }

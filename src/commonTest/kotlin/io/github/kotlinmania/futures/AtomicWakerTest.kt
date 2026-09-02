@@ -63,4 +63,35 @@ class AtomicWakerTest {
         assertEquals("AtomicWaker", waker.toString())
         assertNull(waker.take())
     }
+
+    @Test
+    fun basic() {
+        val atomicWaker = AtomicWaker()
+        var woken = 0
+        var pendingCount = 0
+
+        val fut =
+            pollFn<Unit> { cx ->
+                if (woken == 1) {
+                    Poll.ready(Unit)
+                } else {
+                    assertEquals(0, pendingCount)
+                    pendingCount++
+                    atomicWaker.register(cx.waker)
+                    Poll.pending()
+                }
+            }
+
+        var woke = 0
+        val cx = TaskContext(Waker { woke++ })
+        assertEquals(Poll.pending(), fut.poll(cx))
+        assertEquals(1, pendingCount)
+        assertEquals(0, woke)
+
+        woken = 1
+        atomicWaker.wake()
+        assertEquals(1, woke)
+
+        assertEquals(Poll.ready(Unit), fut.poll(cx))
+    }
 }

@@ -145,4 +145,70 @@ class FuturesUnorderedTest {
         assertIs<Poll.Ready<List<Int>>>(collected)
         assertEquals(listOf(10, 20, 30), collected.value)
     }
+
+    @Test
+    fun finishedFuture() {
+        val (_aTx, aRx) = oneshot<Int>()
+        val (bTx, bRx) = oneshot<Int>()
+        val (cTx, cRx) = oneshot<Int>()
+
+        val selected =
+            select(bRx, cRx).map { either ->
+                when (either) {
+                    is Either.Left -> either.value.first
+                    is Either.Right -> either.value.first
+                }
+            }
+
+        val stream = listOf(aRx, selected).collectFuturesUnordered()
+        val cx = TaskContext()
+
+        for (i in 0 until 10) {
+            assertTrue(stream.pollNext(cx) is Poll.Pending)
+        }
+
+        bTx.send(12)
+        cTx.send(3)
+
+        val p1 = stream.pollNext(cx)
+        assertIs<Poll.Ready<Yield<Try<Int, Canceled>>>>(p1)
+        assertEquals(Yield.value(Try.ok(12)), p1.value)
+
+        assertTrue(stream.pollNext(cx) is Poll.Pending)
+        assertTrue(stream.pollNext(cx) is Poll.Pending)
+    }
+
+    @Test
+    fun clear() {
+        val tasks = FuturesUnordered<Int>()
+        tasks.push(ready(1))
+        tasks.push(ready(2))
+        assertEquals(2, tasks.len())
+
+        tasks.clear()
+        assertTrue(tasks.isEmpty())
+
+        val cx = TaskContext()
+        val p = tasks.pollNext(cx)
+        assertIs<Poll.Ready<Yield<Int>>>(p)
+        assertEquals(Yield.end(), p.value)
+        assertTrue(tasks.isTerminated())
+
+        tasks.clear()
+        assertFalse(tasks.isTerminated())
+    }
+
+    @Test
+    fun clearInLoop() {
+        val futures = FuturesUnordered<Unit>()
+        for (i in 0 until 50) {
+            for (j in 0 until 10) {
+                futures.push(ready(Unit))
+            }
+            val cx = TaskContext()
+            val p = futures.pollNext(cx)
+            assertIs<Poll.Ready<Yield<Unit>>>(p)
+            futures.clear()
+        }
+    }
 }
