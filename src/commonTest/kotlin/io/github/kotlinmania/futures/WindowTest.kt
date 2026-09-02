@@ -1,4 +1,4 @@
-// port-lint: tests futures-util/tests/io_window.rs
+// port-lint: tests futures/tests/io_window.rs
 package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.io.Window
@@ -41,6 +41,33 @@ class WindowTest {
         }
         assertFailsWith<IllegalArgumentException> {
             window.set(3, 1)
+        }
+    }
+
+    @Test
+    fun set() {
+        val buffer = Window(byteArrayOf(1, 2, 3))
+        buffer.set(0, 3)
+        assertContentEquals(byteArrayOf(1, 2, 3), buffer.asByteArray())
+        buffer.set(3, 3)
+        assertContentEquals(byteArrayOf(), buffer.asByteArray())
+        buffer.set(0, 2)
+        assertContentEquals(byteArrayOf(1, 2), buffer.asByteArray())
+    }
+
+    @Test
+    fun setPanicOutOfBounds() {
+        val buffer = Window(byteArrayOf(1, 2, 3))
+        assertFailsWith<IllegalArgumentException> {
+            buffer.set(2, 4)
+        }
+    }
+
+    @Test
+    fun setPanicStartIsGreaterThanEnd() {
+        val buffer = Window(byteArrayOf(1, 2, 3))
+        assertFailsWith<IllegalArgumentException> {
+            buffer.set(3, 2)
         }
     }
 }
