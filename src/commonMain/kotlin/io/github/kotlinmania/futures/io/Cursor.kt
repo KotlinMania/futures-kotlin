@@ -111,7 +111,7 @@ public class Cursor(
         val toWrite = minOf(length, buf.size - offset)
         val requiredSize = currentPos + toWrite
         if (requiredSize > buffer.size) {
-            val newBuf = ByteArray(maxOf(requiredSize, buffer.size * 2))
+            val newBuf = ByteArray(requiredSize)
             buffer.copyInto(newBuf, 0, 0, buffer.size)
             buffer = newBuf
         }
