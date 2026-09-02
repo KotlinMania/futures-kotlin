@@ -72,6 +72,88 @@ public sealed class SeekFrom {
 }
 
 /**
+ * Non-owning slice of a contiguous byte buffer for vectored I/O.
+ */
+@HiddenFromObjC
+public class IoSlice(
+    public val buffer: ByteArray,
+    public var offset: Int = 0,
+    public var length: Int = buffer.size - offset,
+) {
+    public val isEmpty: Boolean get() = length == 0
+    public fun len(): Int = length
+
+    public fun advance(count: Int) {
+        val n = minOf(count, length)
+        offset += n
+        length -= n
+    }
+
+    public companion object {
+        public fun advanceSlices(bufs: MutableList<IoSlice>, count: Int) {
+            while (bufs.isNotEmpty() && bufs[0].isEmpty) {
+                bufs.removeAt(0)
+            }
+            var left = count
+            while (bufs.isNotEmpty() && left > 0) {
+                val head = bufs[0]
+                if (head.length <= left) {
+                    left -= head.length
+                    bufs.removeAt(0)
+                } else {
+                    head.advance(left)
+                    left = 0
+                }
+            }
+            while (bufs.isNotEmpty() && bufs[0].isEmpty) {
+                bufs.removeAt(0)
+            }
+        }
+    }
+}
+
+/**
+ * Mutable non-owning slice of a contiguous byte buffer for vectored I/O.
+ */
+@HiddenFromObjC
+public class IoSliceMut(
+    public val buffer: ByteArray,
+    public var offset: Int = 0,
+    public var length: Int = buffer.size - offset,
+) {
+    public val isEmpty: Boolean get() = length == 0
+    public fun len(): Int = length
+
+    public fun advance(count: Int) {
+        val n = minOf(count, length)
+        offset += n
+        length -= n
+    }
+
+    public companion object {
+        public fun advanceSlices(bufs: MutableList<IoSliceMut>, count: Int) {
+            while (bufs.isNotEmpty() && bufs[0].isEmpty) {
+                bufs.removeAt(0)
+            }
+            var left = count
+            while (bufs.isNotEmpty() && left > 0) {
+                val head = bufs[0]
+                if (head.length <= left) {
+                    left -= head.length
+                    bufs.removeAt(0)
+                } else {
+                    head.advance(left)
+                    left = 0
+                }
+            }
+            while (bufs.isNotEmpty() && bufs[0].isEmpty) {
+                bufs.removeAt(0)
+            }
+        }
+    }
+}
+
+/**
  * Read bytes asynchronously.
  *
  * This interface is analogous to standard blocking read operations, but integrates
@@ -94,6 +176,21 @@ public interface AsyncRead {
         offset: Int = 0,
         length: Int = buf.size - offset,
     ): Poll<Try<Int, IoError>>
+
+    /**
+     * Attempt to read from the [AsyncRead] into [bufs] using vectored I/O operations.
+     */
+    public fun pollReadVectored(
+        context: TaskContext,
+        bufs: List<IoSliceMut>,
+    ): Poll<Try<Int, IoError>> {
+        for (b in bufs) {
+            if (!b.isEmpty) {
+                return pollRead(context, b.buffer, b.offset, b.length)
+            }
+        }
+        return pollRead(context, ByteArray(0), 0, 0)
+    }
 }
 
 /**
@@ -119,6 +216,21 @@ public interface AsyncWrite {
         offset: Int = 0,
         length: Int = buf.size - offset,
     ): Poll<Try<Int, IoError>>
+
+    /**
+     * Attempt to write bytes from [bufs] using vectored I/O operations.
+     */
+    public fun pollWriteVectored(
+        context: TaskContext,
+        bufs: List<IoSlice>,
+    ): Poll<Try<Int, IoError>> {
+        for (b in bufs) {
+            if (!b.isEmpty) {
+                return pollWrite(context, b.buffer, b.offset, b.length)
+            }
+        }
+        return pollWrite(context, ByteArray(0), 0, 0)
+    }
 
     /**
      * Attempt to flush the object, ensuring that any buffered data reaches its destination.

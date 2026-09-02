@@ -134,4 +134,26 @@ class OneshotTest {
         assertFalse(tx1.isConnectedTo(rx2))
         assertFalse(tx2.isConnectedTo(rx1))
     }
+
+    @Test
+    fun cancelLots() {
+        val n = 200
+        for (i in 0 until n) {
+            val (otx, rx) = oneshot<Int>()
+            rx.close()
+            val cx = TaskContext()
+            assertEquals(Poll.Ready(Unit), otx.cancellation().poll(cx))
+        }
+    }
+
+    @Test
+    fun cancelSends() {
+        val n = 200
+        for (i in 0 until n) {
+            val (otx, rx) = oneshot<Int>()
+            rx.close()
+            val sendRes = otx.send(42)
+            assertTrue(sendRes is Try.Err)
+        }
+    }
 }

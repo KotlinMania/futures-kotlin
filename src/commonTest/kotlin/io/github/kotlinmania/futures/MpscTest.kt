@@ -203,19 +203,133 @@ class MpscTest {
     }
 
     @Test
-    fun sameReceiverCheck() {
-        val (tx1, _) = channel<Int>(1)
-        val tx2 = tx1.clone()
-        val (tx3, _) = channel<Int>(1)
+    fun sameReceiver() {
+        val (txa1, _) = channel<Int>(1)
+        val txa2 = txa1.clone()
+        val (txb1, _) = channel<Int>(1)
+        val txb2 = txb1.clone()
 
-        assertTrue(tx1.sameReceiver(tx2))
-        assertFalse(tx1.sameReceiver(tx3))
+        assertTrue(txa1.sameReceiver(txa2))
+        assertTrue(txb1.sameReceiver(txb2))
+        assertFalse(txa1.sameReceiver(txb1))
 
-        val (utx1, _) = unbounded<Int>()
-        val utx2 = utx1.clone()
-        val (utx3, _) = unbounded<Int>()
+        txa1.disconnect()
+        txb1.closeChannel()
 
-        assertTrue(utx1.sameReceiver(utx2))
-        assertFalse(utx1.sameReceiver(utx3))
+        assertFalse(txa1.sameReceiver(txa2))
+        assertTrue(txb1.sameReceiver(txb2))
+    }
+
+    @Test
+    fun isConnectedTo() {
+        val (txa, rxa) = channel<Int>(1)
+        val (txb, rxb) = channel<Int>(1)
+
+        assertTrue(txa.isConnectedTo(rxa))
+        assertTrue(txb.isConnectedTo(rxb))
+        assertFalse(txa.isConnectedTo(rxb))
+        assertFalse(txb.isConnectedTo(rxa))
+    }
+
+    @Test
+    fun hashReceiver() {
+        val (txa1, _) = channel<Int>(1)
+        val txa2 = txa1.clone()
+        val (txb1, _) = channel<Int>(1)
+        val txb2 = txb1.clone()
+
+        val hashA1 = txa1.hashReceiver()
+        val hashA2 = txa2.hashReceiver()
+        val hashB1 = txb1.hashReceiver()
+        val hashB2 = txb2.hashReceiver()
+
+        assertEquals(hashA1, hashA2)
+        assertEquals(hashB1, hashB2)
+        assertTrue(hashA1 != hashB1)
+
+        txa1.disconnect()
+        txb1.closeChannel()
+
+        val newHashA1 = txa1.hashReceiver()
+        val newHashA2 = txa2.hashReceiver()
+        val newHashB1 = txb1.hashReceiver()
+        val newHashB2 = txb2.hashReceiver()
+
+        assertTrue(newHashA1 != newHashA2)
+        assertEquals(newHashB1, newHashB2)
+    }
+
+    @Test
+    fun trySendFail() {
+        val (tx, rx) = channel<String>(0)
+        assertTrue(tx.trySend("hello") is Try.Ok)
+        assertTrue(tx.trySend("fail") is Try.Err)
+
+        val item1 = rx.tryNext()
+        assertIs<Try.Ok<String?>>(item1)
+        assertEquals("hello", item1.value)
+
+        assertTrue(tx.trySend("goodbye") is Try.Ok)
+        tx.disconnect()
+
+        val item2 = rx.tryNext()
+        assertIs<Try.Ok<String?>>(item2)
+        assertEquals("goodbye", item2.value)
+
+        val item3 = rx.tryNext()
+        assertIs<Try.Ok<String?>>(item3)
+        assertNull(item3.value)
+    }
+
+    @Test
+    fun trySendRecv() {
+        val (tx, rx) = channel<String>(1)
+        assertTrue(tx.trySend("hello") is Try.Ok)
+        assertTrue(tx.trySend("hello") is Try.Ok)
+        assertTrue(tx.trySend("hello") is Try.Err) // should be full
+
+        val r1 = rx.tryNext()
+        assertIs<Try.Ok<String?>>(r1)
+        assertEquals("hello", r1.value)
+
+        val r2 = rx.tryNext()
+        assertIs<Try.Ok<String?>>(r2)
+        assertEquals("hello", r2.value)
+
+        val r3 = rx.tryNext()
+        assertTrue(r3 is Try.Err) // should be empty
+
+        assertTrue(tx.trySend("hello") is Try.Ok)
+
+        val r4 = rx.tryNext()
+        assertIs<Try.Ok<String?>>(r4)
+        assertEquals("hello", r4.value)
+
+        val r5 = rx.tryNext()
+        assertTrue(r5 is Try.Err) // should be empty
+    }
+
+    @Test
+    fun unboundedLen() {
+        val (tx, rx) = unbounded<Int>()
+        assertEquals(0, tx.len())
+        assertTrue(tx.isEmpty())
+        assertTrue(tx.unboundedSend(1) is Try.Ok)
+        assertEquals(1, tx.len())
+        assertFalse(tx.isEmpty())
+        assertTrue(tx.unboundedSend(2) is Try.Ok)
+        assertEquals(2, tx.len())
+        assertFalse(tx.isEmpty())
+
+        val item1 = rx.tryNext()
+        assertIs<Try.Ok<Int?>>(item1)
+        assertEquals(1, item1.value)
+        assertEquals(1, tx.len())
+
+        val item2 = rx.tryNext()
+        assertIs<Try.Ok<Int?>>(item2)
+        assertEquals(2, item2.value)
+        assertEquals(0, tx.len())
+        assertTrue(tx.isEmpty())
     }
 }

@@ -103,6 +103,14 @@ public fun AsyncWrite.writeAll(
 ): WriteAll = WriteAll(this, buf, offset, length)
 
 /**
+ * Creates a future which will write all bytes from [bufs] into this writer.
+ */
+@HiddenFromObjC
+public fun AsyncWrite.writeAllVectored(
+    bufs: MutableList<IoSlice>,
+): WriteAllVectored = WriteAllVectored.new(this, bufs)
+
+/**
  * Creates a future which will flush this writer.
  */
 @HiddenFromObjC

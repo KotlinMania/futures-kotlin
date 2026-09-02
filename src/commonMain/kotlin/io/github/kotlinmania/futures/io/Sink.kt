@@ -25,10 +25,10 @@ public class Sink : AsyncWrite {
         return Poll.Ready(Try.ok(length))
     }
 
-    public fun pollWriteVectored(
+    override fun pollWriteVectored(
         context: TaskContext,
-        bufs: List<ByteArray>,
-    ): Poll<Try<Int, IoError>> = Poll.Ready(Try.ok(bufs.sumOf { it.size }))
+        bufs: List<IoSlice>,
+    ): Poll<Try<Int, IoError>> = Poll.Ready(Try.ok(bufs.sumOf { it.length }))
 
     override fun pollFlush(context: TaskContext): Poll<Try<Unit, IoError>> =
         Poll.Ready(Try.ok(Unit))
