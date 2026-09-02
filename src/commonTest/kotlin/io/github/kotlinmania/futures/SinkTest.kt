@@ -1,4 +1,4 @@
-// port-lint: tests io/sink.rs
+// port-lint: tests futures/tests/sink.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

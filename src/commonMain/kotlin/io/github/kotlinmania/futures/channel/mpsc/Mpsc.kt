@@ -126,7 +126,7 @@ internal class BoundedInner<T>(
     val isClosed: AtomicBoolean = AtomicBoolean(false)
     val receiverDropped: AtomicBoolean = AtomicBoolean(false)
 
-    fun effectiveCapacity(): Int = maxOf(buffer, 0)
+    fun effectiveCapacity(): Int = maxOf(buffer + maxOf(numSenders.load(), 0), 0)
 }
 
 /**
@@ -150,7 +150,7 @@ public class Sender<T> internal constructor(
         }
         try {
             val limit = inner.effectiveCapacity()
-            if (inner.queue.size <= limit) {
+            if (inner.queue.size < limit) {
                 return Poll.ready(SinkOutcome.ready())
             }
             inner.parkedSenders.add(context.waker)
@@ -171,10 +171,7 @@ public class Sender<T> internal constructor(
         }
         try {
             val limit = inner.effectiveCapacity()
-            if (limit == 0 && inner.queue.isNotEmpty()) {
-                return SinkOutcome.err(SendError(isFull = true))
-            }
-            if (limit > 0 && inner.queue.size > limit) {
+            if (inner.queue.size >= limit) {
                 return SinkOutcome.err(SendError(isFull = true))
             }
             inner.queue.add(item)
@@ -252,7 +249,30 @@ public class Sender<T> internal constructor(
      * Returns true if both senders point to the same channel.
      */
     public fun sameReceiver(other: Sender<T>): Boolean =
-        inner === other.inner
+        !isDisconnected && !other.isDisconnected && inner === other.inner
+
+    /**
+     * Returns whether this sender sends to the given receiver.
+     */
+    public fun isConnectedTo(receiver: Receiver<T>): Boolean =
+        !isDisconnected && inner === receiver.inner
+
+    /**
+     * Returns the number of messages currently in the queue, or 0 if disconnected.
+     */
+    public fun len(): Int =
+        if (isDisconnected) 0 else inner.queue.size
+
+    /**
+     * Returns true if there are no messages currently in the queue or if disconnected.
+     */
+    public fun isEmpty(): Boolean = len() == 0
+
+    /**
+     * Hashes the receiver identity.
+     */
+    public fun hashReceiver(): Int =
+        if (isDisconnected) 0 else inner.hashCode()
 
     /**
      * Disconnects this sender handle.
@@ -496,7 +516,30 @@ public class UnboundedSender<T> internal constructor(
      * Returns true if both senders point to the same channel.
      */
     public fun sameReceiver(other: UnboundedSender<T>): Boolean =
-        inner === other.inner
+        !isDisconnected && !other.isDisconnected && inner === other.inner
+
+    /**
+     * Returns whether this sender sends to the given receiver.
+     */
+    public fun isConnectedTo(receiver: UnboundedReceiver<T>): Boolean =
+        !isDisconnected && inner === receiver.inner
+
+    /**
+     * Returns the number of messages currently in the queue, or 0 if disconnected.
+     */
+    public fun len(): Int =
+        if (isDisconnected) 0 else inner.queue.size
+
+    /**
+     * Returns true if there are no messages currently in the queue or if disconnected.
+     */
+    public fun isEmpty(): Boolean = len() == 0
+
+    /**
+     * Hashes the receiver identity.
+     */
+    public fun hashReceiver(): Int =
+        if (isDisconnected) 0 else inner.hashCode()
 
     /**
      * Disconnects this sender handle.
