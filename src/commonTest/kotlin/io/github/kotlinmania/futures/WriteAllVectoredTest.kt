@@ -92,22 +92,23 @@ class WriteAllVectoredTest {
     fun testWriteAllVectored() {
         val cx = TaskContext()
 
-        val testCases: List<Pair<List<ByteArray>, ByteArray>> = listOf(
-            emptyList<ByteArray>() to byteArrayOf(),
-            listOf(byteArrayOf(), byteArrayOf()) to byteArrayOf(),
-            listOf(byteArrayOf(1)) to byteArrayOf(1),
-            listOf(byteArrayOf(1, 2)) to byteArrayOf(1, 2),
-            listOf(byteArrayOf(1, 2, 3)) to byteArrayOf(1, 2, 3),
-            listOf(byteArrayOf(1, 2, 3, 4)) to byteArrayOf(1, 2, 3, 4),
-            listOf(byteArrayOf(1, 2, 3, 4, 5)) to byteArrayOf(1, 2, 3, 4, 5),
-            listOf(byteArrayOf(1), byteArrayOf(2)) to byteArrayOf(1, 2),
-            listOf(byteArrayOf(1, 1), byteArrayOf(2, 2)) to byteArrayOf(1, 1, 2, 2),
-            listOf(byteArrayOf(1, 1, 1), byteArrayOf(2, 2, 2)) to byteArrayOf(1, 1, 1, 2, 2, 2),
-            listOf(byteArrayOf(1, 1, 1, 1), byteArrayOf(2, 2, 2, 2)) to byteArrayOf(1, 1, 1, 1, 2, 2, 2, 2),
-            listOf(byteArrayOf(1), byteArrayOf(2), byteArrayOf(3)) to byteArrayOf(1, 2, 3),
-            listOf(byteArrayOf(1, 1), byteArrayOf(2, 2), byteArrayOf(3, 3)) to byteArrayOf(1, 1, 2, 2, 3, 3),
-            listOf(byteArrayOf(1, 1, 1), byteArrayOf(2, 2, 2), byteArrayOf(3, 3, 3)) to byteArrayOf(1, 1, 1, 2, 2, 2, 3, 3, 3),
-        )
+        val testCases: List<Pair<List<ByteArray>, ByteArray>> =
+            listOf(
+                emptyList<ByteArray>() to byteArrayOf(),
+                listOf(byteArrayOf(), byteArrayOf()) to byteArrayOf(),
+                listOf(byteArrayOf(1)) to byteArrayOf(1),
+                listOf(byteArrayOf(1, 2)) to byteArrayOf(1, 2),
+                listOf(byteArrayOf(1, 2, 3)) to byteArrayOf(1, 2, 3),
+                listOf(byteArrayOf(1, 2, 3, 4)) to byteArrayOf(1, 2, 3, 4),
+                listOf(byteArrayOf(1, 2, 3, 4, 5)) to byteArrayOf(1, 2, 3, 4, 5),
+                listOf(byteArrayOf(1), byteArrayOf(2)) to byteArrayOf(1, 2),
+                listOf(byteArrayOf(1, 1), byteArrayOf(2, 2)) to byteArrayOf(1, 1, 2, 2),
+                listOf(byteArrayOf(1, 1, 1), byteArrayOf(2, 2, 2)) to byteArrayOf(1, 1, 1, 2, 2, 2),
+                listOf(byteArrayOf(1, 1, 1, 1), byteArrayOf(2, 2, 2, 2)) to byteArrayOf(1, 1, 1, 1, 2, 2, 2, 2),
+                listOf(byteArrayOf(1), byteArrayOf(2), byteArrayOf(3)) to byteArrayOf(1, 2, 3),
+                listOf(byteArrayOf(1, 1), byteArrayOf(2, 2), byteArrayOf(3, 3)) to byteArrayOf(1, 1, 2, 2, 3, 3),
+                listOf(byteArrayOf(1, 1, 1), byteArrayOf(2, 2, 2), byteArrayOf(3, 3, 3)) to byteArrayOf(1, 1, 1, 2, 2, 2, 3, 3, 3),
+            )
 
         for ((inputArrays, wanted) in testCases) {
             val dst = testWriter(2, 2)

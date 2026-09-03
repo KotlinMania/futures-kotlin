@@ -5,7 +5,6 @@ import io.github.kotlinmania.futures.channel.oneshot.Canceled
 import io.github.kotlinmania.futures.channel.oneshot.oneshot
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 

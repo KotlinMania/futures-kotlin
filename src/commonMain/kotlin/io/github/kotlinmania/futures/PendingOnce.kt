@@ -19,15 +19,14 @@ public class PendingOnce<T>(
     FusedFuture<T> {
     private val polledBefore = AtomicBoolean(false)
 
-    override fun poll(context: TaskContext): Poll<T> {
-        return if (polledBefore.load()) {
+    override fun poll(context: TaskContext): Poll<T> =
+        if (polledBefore.load()) {
             future.poll(context)
         } else {
             polledBefore.store(true)
             context.waker.wakeByRef()
             Poll.pending()
         }
-    }
 
     override fun isTerminated(): Boolean =
         polledBefore.load() && (future as? FusedFuture<*>)?.isTerminated() ?: false

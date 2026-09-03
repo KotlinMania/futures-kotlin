@@ -81,6 +81,7 @@ public class IoSlice(
     public var length: Int = buffer.size - offset,
 ) {
     public val isEmpty: Boolean get() = length == 0
+
     public fun len(): Int = length
 
     public fun advance(count: Int) {
@@ -122,6 +123,7 @@ public class IoSliceMut(
     public var length: Int = buffer.size - offset,
 ) {
     public val isEmpty: Boolean get() = length == 0
+
     public fun len(): Int = length
 
     public fun advance(count: Int) {

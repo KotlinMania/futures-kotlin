@@ -38,4 +38,3 @@ public fun <T> Poll<T>.unwrap(): T =
         is Poll.Ready -> value
         Poll.Pending -> throw IllegalStateException("called Poll.unwrap() on a Pending value")
     }
-

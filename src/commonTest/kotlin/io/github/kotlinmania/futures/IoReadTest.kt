@@ -24,10 +24,11 @@ class IoReadTest {
 
     @Test
     fun testMockReaderEmpty() {
-        val reader = MockReader { buf, offset, length ->
-            assertEquals(0, length)
-            Poll.Ready(Try.err(IoError.from(IoErrorKind.BrokenPipe)))
-        }
+        val reader =
+            MockReader { buf, offset, length ->
+                assertEquals(0, length)
+                Poll.Ready(Try.err(IoError.from(IoErrorKind.BrokenPipe)))
+            }
 
         val res = reader.pollRead(context, ByteArray(0), 0, 0)
         assertTrue(res is Poll.Ready)
@@ -38,11 +39,12 @@ class IoReadTest {
 
     @Test
     fun testMockReaderRead() {
-        val reader = MockReader { buf, offset, length ->
-            assertEquals(4, length)
-            "four".encodeToByteArray().copyInto(buf, destinationOffset = offset)
-            Poll.Ready(Try.ok(4))
-        }
+        val reader =
+            MockReader { buf, offset, length ->
+                assertEquals(4, length)
+                "four".encodeToByteArray().copyInto(buf, destinationOffset = offset)
+                Poll.Ready(Try.ok(4))
+            }
 
         val buf = ByteArray(4)
         val res = reader.pollRead(context, buf, 0, 4)
