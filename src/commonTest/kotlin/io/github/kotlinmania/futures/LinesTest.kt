@@ -111,14 +111,18 @@ class LinesTest {
             object : io.github.kotlinmania.futures.io.AsyncBufRead {
                 var count = 0
 
-                override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, io.github.kotlinmania.futures.io.IoError>> {
-                    return if (count == 0) {
+                override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, io.github.kotlinmania.futures.io.IoError>> =
+                    if (count == 0) {
                         count++
                         Poll.ready(Try.ok(byteArrayOf('x'.code.toByte())))
                     } else {
-                        Poll.ready(Try.err(io.github.kotlinmania.futures.io.IoError(io.github.kotlinmania.futures.io.IoErrorKind.InvalidInput, "test error")))
+                        Poll.ready(
+                            Try.err(
+                                io.github.kotlinmania.futures.io
+                                    .IoError(io.github.kotlinmania.futures.io.IoErrorKind.InvalidInput, "test error"),
+                            ),
+                        )
                     }
-                }
 
                 override fun consume(amt: Int) {}
 
@@ -127,9 +131,13 @@ class LinesTest {
                     buf: ByteArray,
                     offset: Int,
                     length: Int,
-                ): Poll<Try<Int, io.github.kotlinmania.futures.io.IoError>> {
-                    return Poll.ready(Try.err(io.github.kotlinmania.futures.io.IoError(io.github.kotlinmania.futures.io.IoErrorKind.InvalidInput, "test error")))
-                }
+                ): Poll<Try<Int, io.github.kotlinmania.futures.io.IoError>> =
+                    Poll.ready(
+                        Try.err(
+                            io.github.kotlinmania.futures.io
+                                .IoError(io.github.kotlinmania.futures.io.IoErrorKind.InvalidInput, "test error"),
+                        ),
+                    )
             }
         val lines = failingReader.lines()
         val res = lines.pollNext(context)

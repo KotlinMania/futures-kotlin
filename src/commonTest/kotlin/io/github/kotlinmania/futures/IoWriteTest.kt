@@ -30,10 +30,11 @@ class IoWriteTest {
 
     @Test
     fun testMockWriterEmpty() {
-        val writer = MockWriter { buf, offset, length ->
-            assertEquals(0, length)
-            Poll.Ready(Try.err(IoError.from(IoErrorKind.BrokenPipe)))
-        }
+        val writer =
+            MockWriter { buf, offset, length ->
+                assertEquals(0, length)
+                Poll.Ready(Try.err(IoError.from(IoErrorKind.BrokenPipe)))
+            }
 
         val res = writer.pollWrite(context, ByteArray(0), 0, 0)
         assertTrue(res is Poll.Ready)
@@ -44,10 +45,11 @@ class IoWriteTest {
 
     @Test
     fun testMockWriterWrite() {
-        val writer = MockWriter { buf, offset, length ->
-            assertEquals(4, length)
-            Poll.Ready(Try.ok(4))
-        }
+        val writer =
+            MockWriter { buf, offset, length ->
+                assertEquals(4, length)
+                Poll.Ready(Try.ok(4))
+            }
 
         val res = writer.pollWrite(context, "four".encodeToByteArray(), 0, 4)
         assertTrue(res is Poll.Ready)

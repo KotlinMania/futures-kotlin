@@ -17,7 +17,9 @@ public sealed interface PopResult<out T> {
     /**
      * Some data has been popped.
      */
-    public data class Data<T>(public val value: T) : PopResult<T>
+    public data class Data<T>(
+        public val value: T,
+    ) : PopResult<T>
 
     /**
      * The queue is empty.

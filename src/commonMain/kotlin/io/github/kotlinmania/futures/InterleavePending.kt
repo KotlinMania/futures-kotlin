@@ -23,8 +23,8 @@ public class InterleavePendingFuture<T>(
 
     public fun intoInner(): Future<T> = future
 
-    override fun poll(context: TaskContext): Poll<T> {
-        return if (pended.load()) {
+    override fun poll(context: TaskContext): Poll<T> =
+        if (pended.load()) {
             val next = future.poll(context)
             if (next.isReady()) {
                 pended.store(false)
@@ -35,7 +35,6 @@ public class InterleavePendingFuture<T>(
             pended.store(true)
             Poll.pending()
         }
-    }
 
     override fun isTerminated(): Boolean =
         (future as? FusedFuture<*>)?.isTerminated() ?: false
@@ -55,8 +54,8 @@ public class InterleavePendingStream<T>(
 
     public fun intoInner(): Stream<T> = stream
 
-    override fun pollNext(context: TaskContext): Poll<Yield<T>> {
-        return if (pended.load()) {
+    override fun pollNext(context: TaskContext): Poll<Yield<T>> =
+        if (pended.load()) {
             val next = stream.pollNext(context)
             if (next.isReady()) {
                 pended.store(false)
@@ -67,7 +66,6 @@ public class InterleavePendingStream<T>(
             pended.store(true)
             Poll.pending()
         }
-    }
 
     override fun sizeHint(): SizeHint = stream.sizeHint()
 
@@ -88,8 +86,8 @@ public class InterleavePendingSink<Item, Error>(
 
     public fun intoInner(): Sink<Item, Error> = sink
 
-    override fun pollReady(context: TaskContext): Poll<SinkOutcome<Error>> {
-        return if (pended.load()) {
+    override fun pollReady(context: TaskContext): Poll<SinkOutcome<Error>> =
+        if (pended.load()) {
             val next = sink.pollReady(context)
             if (next.isReady()) {
                 pended.store(false)
@@ -100,13 +98,12 @@ public class InterleavePendingSink<Item, Error>(
             pended.store(true)
             Poll.pending()
         }
-    }
 
     override fun startSend(item: Item): SinkOutcome<Error> =
         sink.startSend(item)
 
-    override fun pollFlush(context: TaskContext): Poll<SinkOutcome<Error>> {
-        return if (pended.load()) {
+    override fun pollFlush(context: TaskContext): Poll<SinkOutcome<Error>> =
+        if (pended.load()) {
             val next = sink.pollFlush(context)
             if (next.isReady()) {
                 pended.store(false)
@@ -117,10 +114,9 @@ public class InterleavePendingSink<Item, Error>(
             pended.store(true)
             Poll.pending()
         }
-    }
 
-    override fun pollClose(context: TaskContext): Poll<SinkOutcome<Error>> {
-        return if (pended.load()) {
+    override fun pollClose(context: TaskContext): Poll<SinkOutcome<Error>> =
+        if (pended.load()) {
             val next = sink.pollClose(context)
             if (next.isReady()) {
                 pended.store(false)
@@ -131,7 +127,6 @@ public class InterleavePendingSink<Item, Error>(
             pended.store(true)
             Poll.pending()
         }
-    }
 }
 
 /**
