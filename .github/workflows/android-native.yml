@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v6.0.0
+        uses: actions/setup-java@v6.0.1
         with:
           distribution: zulu
           java-version: '21'
@@ -31,8 +31,6 @@ jobs:
       - name: Compile Android Native targets
         run: >
           ./gradlew
-          compileKotlinAndroidNativeArm32
           compileKotlinAndroidNativeArm64
-          compileKotlinAndroidNativeX86
           compileKotlinAndroidNativeX64
           --no-configuration-cache
