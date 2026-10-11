@@ -3,27 +3,9 @@
 
 package io.github.kotlinmania.futures
 
-import kotlin.native.HiddenFromObjC
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-
-@HiddenFromObjC
-class RecordSpawner :
-    Spawn,
-    LocalSpawn {
-    val spawned = mutableListOf<Future<Unit>>()
-
-    override fun spawnObj(future: FutureObj<Unit>): Result<Unit> {
-        spawned.add(future)
-        return Result.success(Unit)
-    }
-
-    override fun spawnLocalObj(future: LocalFutureObj<Unit>): Result<Unit> {
-        spawned.add(future)
-        return Result.success(Unit)
-    }
-}
 
 class SpawnTest {
     @Test
