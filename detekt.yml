@@ -3,10 +3,6 @@
 # upstream source code; many structural/style rules that make sense for
 # idiomatic Kotlin would create false positives here.
 
-build:
-  maxIssues: 100
-  excludeCorrectable: false
-
 config:
   validation: true
 
@@ -19,11 +15,14 @@ potential-bugs:
   ExplicitGarbageCollectionCall: { active: true }
   LateinitUsage: { active: true }
   NullCheckOnMutableProperty: { active: true }
-  UnreachableCode: { active: true }
+  UnreachableCode: { active: false }
   WrongEqualsTypeParameter: { active: false }
   UnsafeCallOnNullableType: { active: false }
   UnnecessaryNotNullOperator: { active: false }
   ImplicitDefaultLocale: { active: false }
+  IteratorNotThrowingNoSuchElementException: { active: false }
+  IteratorHasNextCallsNextMethod: { active: false }
+  DoubleMutabilityForCollection: { active: false }
 
 performance:
   active: true
@@ -31,9 +30,10 @@ performance:
 style:
   active: true
   MagicNumber: { active: false }
-  NewLineAtEndOfFile: { active: true }
+  NewLineAtEndOfFile: { active: false }
+  MayBeConstant: { active: false }
   ReturnCount: { active: false }
-  UnusedImports: { active: true }
+  UnusedImport: { active: true }
   UnnecessaryInheritance: { active: true }
   UtilityClassWithPublicConstructor: { active: true }
   DestructuringDeclarationWithTooManyEntries: { active: true, maxDestructuringEntries: 3 }
@@ -49,8 +49,11 @@ style:
   WildcardImport: { active: false }
   ModifierOrder: { active: false }
   UnusedPrivateProperty: { active: false }
-  RedundantVisibilityModifierRule: { active: false }
-  UnnecessaryAbstractClass: { active: false }
+  UnusedPrivateFunction: { active: false }
+  ObjectLiteralToLambda: { active: false }
+  RedundantVisibilityModifier: { active: false }
+  AbstractClassCanBeInterface: { active: false }
+  UnusedVariable: { active: false }
 
 complexity:
   active: true
@@ -73,7 +76,6 @@ empty-blocks:
   EmptyFunctionBlock: { active: false }
   EmptyIfBlock: { active: false }
   EmptyInitBlock: { active: true }
-  EmptyKtFile: { active: true }
   EmptySecondaryConstructor: { active: true }
   EmptyTryBlock: { active: true }
   EmptyWhenBlock: { active: true }

@@ -9,7 +9,6 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.append
-import io.github.kotlinmania.quote.toTokens
 import io.github.kotlinmania.syn.CommaParse
 import io.github.kotlinmania.syn.Expr
 import io.github.kotlinmania.syn.ExprList

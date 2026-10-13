@@ -32,9 +32,8 @@ public class FuturesUnordered<T> :
         var future: Future<T>?,
         val queued: AtomicBoolean,
         val woken: AtomicBoolean,
-    ) {
-        lateinit var waker: Waker
-    }
+        var waker: Waker? = null,
+    )
 
     public constructor()
 
@@ -154,7 +153,7 @@ public class FuturesUnordered<T> :
             }
 
             val (node, fut) = taskPair
-            val taskContext = TaskContext(waker = node.waker)
+            val taskContext = TaskContext(waker = requireNotNull(node.waker) { "TaskNode waker is null" })
             val pollResult = fut.poll(taskContext)
             polled++
 
