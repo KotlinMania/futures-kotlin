@@ -6,8 +6,8 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.formatIdent
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.syn.CommaParse
+import io.github.kotlinmania.syn.ExprList
 import io.github.kotlinmania.syn.Index
-import io.github.kotlinmania.syn.Punctuated
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.parseExpr
@@ -18,7 +18,15 @@ import io.github.kotlinmania.syn.parseExpr
 internal fun streamSelect(input: TokenStream): SynResult<TokenStream> {
     val args =
         parse2(
-            { stream -> Punctuated.parseTerminated(stream, ::parseExpr, CommaParse::parse) },
+            { stream ->
+                val list = ExprList()
+                while (!stream.isEmpty()) {
+                    list.pushValue(parseExpr(stream).getOrElse { return@parse2 SynResult.failure(it) })
+                    if (stream.isEmpty()) break
+                    list.pushPunct(CommaParse.parse(stream).getOrElse { return@parse2 SynResult.failure(it) })
+                }
+                SynResult.success(list)
+            },
             input,
         ).getOrElse { return SynResult.failure(it) }
     if (args.len() < 2) {
@@ -31,7 +39,7 @@ internal fun streamSelect(input: TokenStream): SynResult<TokenStream> {
     val fieldIdents = (0 until args.len()).map { i -> formatIdent("__{}", i) }
     val fieldIdents2 = (0 until args.len()).map { i -> formatIdent("___{}", i) }
     val fieldIndices = (0 until args.len()).map { i -> Index(i.toUInt(), Span.callSite()) }
-    val argTokens = args.iter().asSequence().map { e -> e.toTokenStream() }.toList()
+    val argTokens = args.toList().map { e -> e.toTokenStream() }
 
     val tokens =
         quote(
