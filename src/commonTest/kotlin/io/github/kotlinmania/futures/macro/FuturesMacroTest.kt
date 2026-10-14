@@ -29,19 +29,14 @@ class FuturesMacroTest {
     @Test
     fun selectAndSelectBiasedExpandResultEnumAndBranches() {
         val input =
-            TokenStream.fromString(
-                "a = fut_a => a + 1, b = create_fut() => { b }, complete => 0, default => -1",
-            ).getOrThrow()
+            TokenStream.fromString("a = fut_a => a + 1, b = create_fut() => { b }, complete => 0, default => -1").getOrThrow()
         val randomExpanded = selectInternal(input).toString()
         assertTrue(randomExpanded.contains("__PrivResult"))
         assertTrue(randomExpanded.contains("assert_fused_future"))
         assertTrue(randomExpanded.contains("shuffle"))
         assertTrue(randomExpanded.contains("Complete"))
 
-        val biasedInput =
-            TokenStream.fromString(
-                "a = fut_a => a + 1, complete => 0",
-            ).getOrThrow()
+        val biasedInput = TokenStream.fromString("a = fut_a => a + 1, complete => 0").getOrThrow()
         val biasedExpanded = selectBiasedInternal(biasedInput).toString()
         assertTrue(biasedExpanded.contains("__PrivResult"))
         assertTrue(!biasedExpanded.contains("shuffle"))
