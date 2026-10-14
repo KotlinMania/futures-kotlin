@@ -24,7 +24,7 @@ class IntoSinkTest {
         val flushRes1 = sink.pollFlush(context)
         assertEquals(Poll.Ready(SinkOutcome.Ready), flushRes1)
 
-        assertEquals(3L, cursor.position())
+        assertEquals(3uL, cursor.position())
         assertContentEquals(byteArrayOf(1, 2, 3), cursor.getRef().copyOfRange(0, 3))
 
         val ready2 = sink.pollReady(context)
@@ -36,7 +36,7 @@ class IntoSinkTest {
         val closeRes = sink.pollClose(context)
         assertEquals(Poll.Ready(SinkOutcome.Ready), closeRes)
 
-        assertEquals(5L, cursor.position())
+        assertEquals(5uL, cursor.position())
         assertContentEquals(byteArrayOf(1, 2, 3, 4, 5), cursor.getRef().copyOfRange(0, 5))
     }
 }

@@ -16,13 +16,13 @@ import kotlin.native.HiddenFromObjC
 public class Seek<out S : AsyncSeek>(
     public val seek: S,
     public val pos: SeekFrom,
-) : Future<Try<Long, IoError>> {
+) : Future<Try<ULong, IoError>> {
     public interface Output
 
     public companion object {
         public fun <S : AsyncSeek> new(seek: S, pos: SeekFrom): Seek<S> = Seek(seek, pos)
     }
 
-    override fun poll(context: TaskContext): Poll<Try<Long, IoError>> =
+    override fun poll(context: TaskContext): Poll<Try<ULong, IoError>> =
         seek.pollSeek(context, pos)
 }
