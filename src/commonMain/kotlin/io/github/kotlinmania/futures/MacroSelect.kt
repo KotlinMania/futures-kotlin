@@ -28,25 +28,28 @@ import io.github.kotlinmania.syn.parseWithEarlierBoundaryRule
 private val completeKeyword = customKeyword("complete")
 
 internal class Select(
-    var complete: Expr? = null,
-    var default: Expr? = null,
-    val normalFutExprs: MutableList<Expr> = mutableListOf(),
-    val normalFutHandlers: MutableList<Pair<Pat, Expr>> = mutableListOf(),
+    val complete: Expr? = null,
+    val default: Expr? = null,
+    val normalFutExprs: List<Expr> = emptyList(),
+    val normalFutHandlers: List<Pair<Pat, Expr>> = emptyList(),
 ) {
     companion object {
         fun parse(input: ParseStream): SynResult<Select> {
-            val select = Select()
+            var complete: Expr? = null
+            var default: Expr? = null
+            val normalFutExprs = mutableListOf<Expr>()
+            val normalFutHandlers = mutableListOf<Pair<Pat, Expr>>()
 
             while (!input.isEmpty()) {
                 val caseKind =
                     if (input.peek(completeKeyword.first)) {
-                        if (select.complete != null) {
+                        if (complete != null) {
                             return SynResult.failure(input.error("multiple `complete` cases found, only one allowed"))
                         }
                         completeKeyword.second.parse(input).getOrElse { return SynResult.failure(it) }
                         CaseKind.Complete
                     } else if (input.peek(DefaultPeek)) {
-                        if (select.default != null) {
+                        if (default != null) {
                             return SynResult.failure(input.error("multiple `default` cases found, only one allowed"))
                         }
                         IdentParse.parse(input).getOrElse { return SynResult.failure(it) }
@@ -71,16 +74,23 @@ internal class Select(
                 }
 
                 when (caseKind) {
-                    is CaseKind.Complete -> select.complete = expr
-                    is CaseKind.Default -> select.default = expr
+                    is CaseKind.Complete -> complete = expr
+                    is CaseKind.Default -> default = expr
                     is CaseKind.Normal -> {
-                        select.normalFutExprs.add(caseKind.expr)
-                        select.normalFutHandlers.add(caseKind.pat to expr)
+                        normalFutExprs.add(caseKind.expr)
+                        normalFutHandlers.add(caseKind.pat to expr)
                     }
                 }
             }
 
-            return SynResult.success(select)
+            return SynResult.success(
+                Select(
+                    complete = complete,
+                    default = default,
+                    normalFutExprs = normalFutExprs,
+                    normalFutHandlers = normalFutHandlers,
+                ),
+            )
         }
     }
 }
