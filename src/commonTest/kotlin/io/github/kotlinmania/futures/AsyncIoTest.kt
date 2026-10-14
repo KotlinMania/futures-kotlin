@@ -47,22 +47,22 @@ class AsyncIoTest {
         val data = byteArrayOf(1, 2, 3, 4, 5)
         val cursor = Cursor(data)
 
-        assertEquals(0L, cursor.position())
+        assertEquals(0uL, cursor.position())
         val buf = ByteArray(3)
         val readPoll = cursor.pollRead(context, buf)
         assertTrue(readPoll is Poll.Ready)
         val readVal = readPoll.value
         assertTrue(readVal is Try.Ok)
         assertEquals(3, readVal.value)
-        assertEquals(3L, cursor.position())
+        assertEquals(3uL, cursor.position())
         assertContentEquals(byteArrayOf(1, 2, 3), buf)
 
-        val seekPoll = cursor.pollSeek(context, SeekFrom.Start(1L))
+        val seekPoll = cursor.pollSeek(context, SeekFrom.Start(1uL))
         assertTrue(seekPoll is Poll.Ready)
         val seekVal = seekPoll.value
         assertTrue(seekVal is Try.Ok)
-        assertEquals(1L, seekVal.value)
-        assertEquals(1L, cursor.position())
+        assertEquals(1uL, seekVal.value)
+        assertEquals(1uL, cursor.position())
 
         val readPoll2 = cursor.pollRead(context, buf, 0, 2)
         assertTrue(readPoll2 is Poll.Ready)
@@ -82,7 +82,7 @@ class AsyncIoTest {
         val writeVal = writePoll.value
         assertTrue(writeVal is Try.Ok)
         assertEquals(3, writeVal.value)
-        assertEquals(3L, cursor.position())
+        assertEquals(3uL, cursor.position())
         assertContentEquals(data, cursor.intoInner())
     }
 

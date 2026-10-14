@@ -18,7 +18,7 @@ public class Cursor(
 ) : AsyncBufRead,
     AsyncSeek,
     AsyncWrite {
-    private var pos: Long = 0L
+    private var pos: ULong = 0uL
 
     public constructor() : this(ByteArray(0))
 
@@ -29,12 +29,12 @@ public class Cursor(
     /**
      * Gets the current position of this cursor.
      */
-    public fun position(): Long = pos
+    public fun position(): ULong = pos
 
     /**
      * Sets the position of this cursor.
      */
-    public fun setPosition(pos: Long) {
+    public fun setPosition(pos: ULong) {
         this.pos = pos
     }
 
@@ -59,42 +59,48 @@ public class Cursor(
         offset: Int,
         length: Int,
     ): Poll<Try<Int, IoError>> {
-        val currentPos = pos.toInt()
-        if (currentPos >= buffer.size) {
+        if (pos >= buffer.size.toULong() || length <= 0) {
             return Poll.Ready(Try.ok(0))
         }
+        val currentPos = pos.toInt()
         val available = buffer.size - currentPos
         val toRead = minOf(length, available, buf.size - offset)
+        if (toRead <= 0) {
+            return Poll.Ready(Try.ok(0))
+        }
         buffer.copyInto(buf, destinationOffset = offset, startIndex = currentPos, endIndex = currentPos + toRead)
-        pos += toRead
+        pos += toRead.toULong()
         return Poll.Ready(Try.ok(toRead))
     }
 
     override fun pollFillBuf(context: TaskContext): Poll<Try<ByteArray, IoError>> {
-        val currentPos = pos.toInt()
-        if (currentPos >= buffer.size) {
+        if (pos >= buffer.size.toULong()) {
             return Poll.Ready(Try.ok(ByteArray(0)))
         }
+        val currentPos = pos.toInt()
         val remaining = buffer.copyOfRange(currentPos, buffer.size)
         return Poll.Ready(Try.ok(remaining))
     }
 
     override fun consume(amt: Int) {
-        val maxConsume = (buffer.size - pos.toInt()).coerceAtLeast(0)
-        pos += minOf(amt, maxConsume)
+        if (amt <= 0) {
+            return
+        }
+        val delta = amt.toULong()
+        pos = if (ULong.MAX_VALUE - pos < delta) ULong.MAX_VALUE else pos + delta
     }
 
     override fun pollSeek(
         context: TaskContext,
         pos: SeekFrom,
-    ): Poll<Try<Long, IoError>> {
-        val newPos =
+    ): Poll<Try<ULong, IoError>> {
+        val newPos: ULong? =
             when (pos) {
                 is SeekFrom.Start -> pos.offset
-                is SeekFrom.End -> buffer.size.toLong() + pos.offset
-                is SeekFrom.Current -> this.pos + pos.offset
+                is SeekFrom.End -> checkedAddSigned(buffer.size.toULong(), pos.offset)
+                is SeekFrom.Current -> checkedAddSigned(this.pos, pos.offset)
             }
-        if (newPos < 0) {
+        if (newPos == null) {
             return Poll.Ready(Try.err(IoError(IoErrorKind.InvalidInput, "invalid seek to a negative or overflowing position")))
         }
         this.pos = newPos
@@ -107,8 +113,14 @@ public class Cursor(
         offset: Int,
         length: Int,
     ): Poll<Try<Int, IoError>> {
-        val currentPos = pos.toInt()
         val toWrite = minOf(length, buf.size - offset)
+        if (toWrite <= 0) {
+            return Poll.Ready(Try.ok(0))
+        }
+        if (pos > Int.MAX_VALUE.toULong() - toWrite.toULong()) {
+            return Poll.Ready(Try.err(IoError(IoErrorKind.InvalidInput, "cursor position exceeds maximum buffer size")))
+        }
+        val currentPos = pos.toInt()
         val requiredSize = currentPos + toWrite
         if (requiredSize > buffer.size) {
             val newBuf = ByteArray(requiredSize)
@@ -116,7 +128,7 @@ public class Cursor(
             buffer = newBuf
         }
         buf.copyInto(buffer, destinationOffset = currentPos, startIndex = offset, endIndex = offset + toWrite)
-        pos += toWrite
+        pos = requiredSize.toULong()
         return Poll.Ready(Try.ok(toWrite))
     }
 
@@ -128,3 +140,12 @@ public class Cursor(
 
     override fun toString(): String = "Cursor(pos=$pos, size=${buffer.size})"
 }
+
+private fun checkedAddSigned(base: ULong, delta: Long): ULong? =
+    if (delta >= 0L) {
+        val uDelta = delta.toULong()
+        if (ULong.MAX_VALUE - base < uDelta) null else base + uDelta
+    } else {
+        val magnitude = 0uL - delta.toULong()
+        if (base < magnitude) null else base - magnitude
+    }

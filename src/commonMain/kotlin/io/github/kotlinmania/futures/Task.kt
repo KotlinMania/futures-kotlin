@@ -7,33 +7,33 @@ import kotlin.native.HiddenFromObjC
 
 /**
  * Result of polling an asynchronous computation.
- *
- * Hidden from Swift Export: the generic sealed family otherwise emits
- * `Any?` → `T` unchecked-cast bridges in `KotlinStdlib.kt` that fail
- * compilation under `allWarningsAsErrors`. See `SWIFT_EXPORT_ROLLOUT.md`
- * gap #3 (first-choice fix) and gap #4.
  */
-@HiddenFromObjC
-public sealed interface Poll<out T> {
+public sealed class Poll<out T> {
     /**
      * The computation produced a value.
      */
-    @HiddenFromObjC
     public data class Ready<out T>(
         public val value: T,
-    ) : Poll<T>
+    ) : Poll<T>()
 
     /**
      * The computation is not ready yet.
      */
-    @HiddenFromObjC
-    public data object Pending : Poll<Nothing>
+    public data object Pending : Poll<Nothing>()
+
+    /**
+     * Returns `true` if this poll result is [Poll.Ready].
+     */
+    public fun isReady(): Boolean = this is Ready
+
+    /**
+     * Returns `true` if this poll result is [Poll.Pending].
+     */
+    public fun isPending(): Boolean = this is Pending
 
     public companion object {
-        @HiddenFromObjC
         public fun <T> ready(value: T): Poll<T> = Ready(value)
 
-        @HiddenFromObjC
         public fun <T> pending(): Poll<T> = Pending
     }
 }
@@ -53,10 +53,16 @@ public fun Waker.wake() {
  * Polling context passed to futures, streams, and sinks.
  */
 public class TaskContext(
-    public val waker: Waker = Waker {},
+    public val waker: Waker,
 ) {
+    public constructor() : this(Waker {})
+
     public fun wakeByRef() {
         waker.wakeByRef()
+    }
+
+    public companion object {
+        public fun fromWaker(waker: Waker): TaskContext = TaskContext(waker)
     }
 }
 
@@ -67,7 +73,6 @@ public inline fun <T, R> Poll<T>.fold(onReady: (T) -> R, onPending: () -> R): R 
         Poll.Pending -> onPending()
     }
 
-@HiddenFromObjC
 public fun <T> Poll<T>.readyOrNull(): T? =
     when (this) {
         is Poll.Ready -> value

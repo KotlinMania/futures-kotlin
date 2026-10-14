@@ -193,7 +193,7 @@ public class BufWriter<out W : AsyncWrite>(
     override fun pollSeek(
         context: TaskContext,
         pos: SeekFrom,
-    ): Poll<Try<Long, IoError>> {
+    ): Poll<Try<ULong, IoError>> {
         val flushRes = flushBuf(context)
         when (flushRes) {
             is Poll.Pending -> return Poll.Pending

@@ -284,7 +284,7 @@ public fun Either<AsyncSeek, AsyncSeek>.asAsyncSeek(): AsyncSeek =
         override fun pollSeek(
             context: TaskContext,
             pos: SeekFrom,
-        ): Poll<Try<Long, IoError>> =
+        ): Poll<Try<ULong, IoError>> =
             when (val e = this@asAsyncSeek) {
                 is Either.Left -> e.value.pollSeek(context, pos)
                 is Either.Right -> e.value.pollSeek(context, pos)

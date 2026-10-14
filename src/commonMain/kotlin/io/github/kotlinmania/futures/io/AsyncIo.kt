@@ -57,7 +57,7 @@ public class IoError(
 public sealed class SeekFrom {
     /** Sets the offset to the provided number of bytes from the start. */
     public data class Start(
-        public val offset: Long,
+        public val offset: ULong,
     ) : SeekFrom()
 
     /** Sets the offset to the size of this object plus the specified number of bytes. */
@@ -256,7 +256,7 @@ public interface AsyncSeek {
     public fun pollSeek(
         context: TaskContext,
         pos: SeekFrom,
-    ): Poll<Try<Long, IoError>>
+    ): Poll<Try<ULong, IoError>>
 }
 
 /**

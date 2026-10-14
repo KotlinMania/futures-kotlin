@@ -1,20 +1,15 @@
 // port-lint: source futures-test/src/task/wake_counter.rs
-@file:OptIn(
-    kotlin.experimental.ExperimentalObjCRefinement::class,
-    kotlin.concurrent.atomics.ExperimentalAtomicApi::class,
-)
+@file:OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
 
 package io.github.kotlinmania.futures
 
 import kotlin.concurrent.atomics.AtomicInt
-import kotlin.native.HiddenFromObjC
 
 /**
  * Number of times the waker was awoken.
  *
  * See [newCountWaker] for usage.
  */
-@HiddenFromObjC
 public class AwokenCount internal constructor(
     private val inner: WakerInner,
 ) {
@@ -46,7 +41,6 @@ internal class WakerInner(
 /**
  * Create a new [Waker] that counts the number of times it is awoken.
  */
-@HiddenFromObjC
 public fun newCountWaker(): Pair<Waker, AwokenCount> {
     val inner = WakerInner()
     return Pair(waker(inner), AwokenCount(inner))

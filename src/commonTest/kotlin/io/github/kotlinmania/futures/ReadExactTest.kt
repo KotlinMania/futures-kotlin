@@ -21,13 +21,13 @@ class ReadExactTest {
         assertTrue(res1 is Poll.Ready)
         assertTrue(res1.value is Try.Ok)
         assertContentEquals(byteArrayOf(1, 2, 3), out)
-        assertEquals(3L, reader.position())
+        assertEquals(3uL, reader.position())
 
         val res2 = reader.readExact(out).poll(context)
         assertTrue(res2 is Poll.Ready)
         val val2 = res2.value
         assertTrue(val2 is Try.Err)
         assertEquals(IoErrorKind.UnexpectedEof, val2.error.kind)
-        assertEquals(5L, reader.position())
+        assertEquals(5uL, reader.position())
     }
 }

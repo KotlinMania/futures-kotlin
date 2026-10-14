@@ -7,12 +7,7 @@ import kotlin.native.HiddenFromObjC
 
 /**
  * A single eventual value produced by an asynchronous computation.
- *
- * Hidden from Swift Export: depends on the generic `Poll<T>` carrier whose
- * bridge would emit `KotlinStdlib.kt` unchecked-cast warnings that fail
- * under `allWarningsAsErrors`. See `SWIFT_EXPORT_ROLLOUT.md` gap #3.
  */
-@HiddenFromObjC
 public fun interface Future<out T> {
     /**
      * Attempt to resolve this future to a final value, registering the current
@@ -42,7 +37,6 @@ public typealias LocalBoxFuture<T> = Future<T>
  * has become inactive and can no longer make progress and should be ignored
  * or dropped rather than being `poll`ed again.
  */
-@HiddenFromObjC
 public interface FusedFuture<out T> : Future<T> {
     /**
      * Returns `true` if the underlying future should no longer be polled.

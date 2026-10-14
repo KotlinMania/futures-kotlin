@@ -114,12 +114,12 @@ class BufWriterTest {
         val writer = BufWriter(cursor, capacity = 10)
 
         writer.pollWrite(context, byteArrayOf(1, 2, 3), 0, 3)
-        assertEquals(0L, cursor.position())
+        assertEquals(0uL, cursor.position())
 
-        val seekRes = writer.pollSeek(context, SeekFrom.Start(5L))
+        val seekRes = writer.pollSeek(context, SeekFrom.Start(5uL))
         assertTrue(seekRes is Poll.Ready)
-        assertEquals(5L, (seekRes.value as Try.Ok).value)
-        assertEquals(5L, cursor.position())
+        assertEquals(5uL, (seekRes.value as Try.Ok).value)
+        assertEquals(5uL, cursor.position())
         assertContentEquals(byteArrayOf(1, 2, 3), cursor.getRef().copyOfRange(0, 3))
     }
 }
