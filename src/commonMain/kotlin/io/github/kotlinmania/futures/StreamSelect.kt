@@ -1,147 +1,138 @@
-package io.github.kotlinmania.futures
-import io.github.kotlinmania.procmacro2.Delimiter
-import io.github.kotlinmania.procmacro2.Group
-import io.github.kotlinmania.procmacro2.Ident
-import io.github.kotlinmania.procmacro2.Literal
-import io.github.kotlinmania.procmacro2.Punct
-import io.github.kotlinmania.procmacro2.Spacing
+// port-lint: source futures-macro/src/stream_select.rs
+package io.github.kotlinmania.futures.macro
+
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.quote.append
+import io.github.kotlinmania.quote.formatIdent
+import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.syn.CommaParse
-import io.github.kotlinmania.syn.Expr
-import io.github.kotlinmania.syn.ExprList
+import io.github.kotlinmania.syn.Index
+import io.github.kotlinmania.syn.Punctuated
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.parseExpr
 
-// port-lint: source futures-macro/src/stream_select.rs
-
+/**
+ * Procedural macro implementation for `streamSelect`.
+ */
 internal fun streamSelect(input: TokenStream): SynResult<TokenStream> {
     val args =
-        parse2<ExprList>(
-            { stream -> parseStreamSelectArgs(stream) },
+        parse2(
+            { stream -> Punctuated.parseTerminated(stream, ::parseExpr, CommaParse::parse) },
             input,
         ).getOrElse { return SynResult.failure(it) }
-    val argList = args.toList()
-    if (argList.size < 2) {
-        return SynResult.success(compileErrorTokens("stream select macro needs at least two arguments."))
+    if (args.len() < 2) {
+        return SynResult.success(
+            quote("compile_error!(\"stream select macro needs at least two arguments.\")"),
+        )
     }
 
-    val count = argList.size
-    val genericIdents = (0 until count).map { i -> Ident.new("_$i", Span.callSite()) }
-    val tokens = TokenStream.new()
+    val genericIdents = (0 until args.len()).map { i -> formatIdent("_{}", i) }
+    val fieldIdents = (0 until args.len()).map { i -> formatIdent("__{}", i) }
+    val fieldIdents2 = (0 until args.len()).map { i -> formatIdent("___{}", i) }
+    val fieldIndices = (0 until args.len()).map { i -> Index(i.toUInt(), Span.callSite()) }
+    val argTokens = args.iter().asSequence().map { e -> e.toTokenStream() }.toList()
 
-    tokens.append(Ident.new("struct", Span.callSite()))
-    tokens.append(Ident.new("StreamSelect", Span.callSite()))
-    punct(tokens, '<')
-    appendSeparatedIdents(tokens, genericIdents)
-    punct(tokens, '>')
-    punct(tokens, '(')
-    val optionWrappers = genericIdents.map { ident -> optionWrapper(ident) }
-    appendSeparatedBoxed(tokens, optionWrappers)
-    punct(tokens, ')')
-    punct(tokens, ';')
+    val tokens =
+        quote(
+            """
+            {
+                #[derive(Debug)]
+                struct StreamSelect<`#`(`#`generic_idents),*> (`#`(Option<`#`generic_idents>),*);
 
-    tokens.append(Ident.new("enum", Span.callSite()))
-    tokens.append(Ident.new("StreamEnum", Span.callSite()))
-    punct(tokens, '<')
-    appendSeparatedIdents(tokens, genericIdents)
-    punct(tokens, '>')
-    punct(tokens, '{')
-    for (ident in genericIdents) {
-        tokens.append(ident)
-        punct(tokens, '(')
-        tokens.append(ident)
-        punct(tokens, ')')
-        punct(tokens, ',')
-    }
-    tokens.append(Ident.new("None", Span.callSite()))
-    punct(tokens, ',')
-    punct(tokens, '}')
+                enum StreamEnum<`#`(`#`generic_idents),*> {
+                    `#`(
+                        `#`generic_idents(`#`generic_idents)
+                    ),*,
+                    None,
+                }
 
-    tokens.append(Ident.new("StreamSelect", Span.callSite()))
-    punct(tokens, '(')
-    val someWrappers = argList.map { expr -> someWrapper(expr) }
-    appendSeparatedBoxed(tokens, someWrappers)
-    punct(tokens, ')')
+                impl<ITEM, `#`(`#`generic_idents),*> __futures_crate::stream::Stream for StreamEnum<`#`(`#`generic_idents),*>
+                where `#`(`#`generic_idents: __futures_crate::stream::Stream<Item=ITEM> + ::std::marker::Unpin,)*
+                {
+                    type Item = ITEM;
+
+                    fn poll_next(mut self: ::std::pin::Pin<&mut Self>, cx: &mut __futures_crate::task::Context<'_>) -> __futures_crate::task::Poll<Option<Self::Item>> {
+                        match self.get_mut() {
+                            `#`(
+                                Self::`#`generic_idents(`#`generic_idents) => ::std::pin::Pin::new(`#`generic_idents).poll_next(cx)
+                            ),*,
+                            Self::None => panic!("StreamEnum::None should never be polled!"),
+                        }
+                    }
+                }
+
+                impl<ITEM, `#`(`#`generic_idents),*> __futures_crate::stream::Stream for StreamSelect<`#`(`#`generic_idents),*>
+                where `#`(`#`generic_idents: __futures_crate::stream::Stream<Item=ITEM> + ::std::marker::Unpin,)*
+                {
+                    type Item = ITEM;
+
+                    fn poll_next(mut self: ::std::pin::Pin<&mut Self>, cx: &mut __futures_crate::task::Context<'_>) -> __futures_crate::task::Poll<Option<Self::Item>> {
+                        let Self(`#`(ref mut `#`field_idents),*) = self.get_mut();
+                        `#`(
+                            let mut `#`field_idents_2 = false;
+                        )*
+                        let mut any_pending = false;
+                        {
+                            let mut stream_array = [`#`(`#`field_idents.as_mut().map(|f| StreamEnum::`#`generic_idents(f)).unwrap_or(StreamEnum::None)),*];
+                            __futures_crate::async_await::shuffle(&mut stream_array);
+
+                            for mut s in stream_array {
+                                if let StreamEnum::None = s {
+                                    continue;
+                                } else {
+                                    match __futures_crate::stream::Stream::poll_next(::std::pin::Pin::new(&mut s), cx) {
+                                        r @ __futures_crate::task::Poll::Ready(Some(_)) => {
+                                            return r;
+                                        },
+                                        __futures_crate::task::Poll::Pending => {
+                                            any_pending = true;
+                                        },
+                                        __futures_crate::task::Poll::Ready(None) => {
+                                            match s {
+                                                `#`(
+                                                    StreamEnum::`#`generic_idents(_) => { `#`field_idents_2 = true; }
+                                                ),*,
+                                                StreamEnum::None => panic!("StreamEnum::None should never be polled!"),
+                                            }
+                                        },
+                                    }
+                                }
+                            }
+                        }
+                        `#`(
+                            if `#`field_idents_2 {
+                                *`#`field_idents = None;
+                            }
+                        )*
+                        if any_pending {
+                            __futures_crate::task::Poll::Pending
+                        } else {
+                            __futures_crate::task::Poll::Ready(None)
+                        }
+                    }
+
+                    fn size_hint(&self) -> (usize, Option<usize>) {
+                        let mut s = (0, Some(0));
+                        `#`(
+                            if let Some(new_hint) = self.`#`field_indices.as_ref().map(|s| s.size_hint()) {
+                                s.0 += new_hint.0;
+                                s.1 = s.1 .and_then(|a| new_hint.1 .map(|b| a + b));
+                            }
+                        )*
+                        s
+                    }
+                }
+
+                StreamSelect(`#`(Some(`#`args)),*)
+            }
+            """.trimIndent(),
+            "generic_idents" to genericIdents,
+            "field_idents" to fieldIdents,
+            "field_idents_2" to fieldIdents2,
+            "field_indices" to fieldIndices,
+            "args" to argTokens,
+        )
 
     return SynResult.success(tokens)
-}
-
-internal fun streamSelectInternal(input: TokenStream): TokenStream {
-    val result = streamSelect(input)
-    return when (result) {
-        is SynResult.Success<TokenStream> -> result.value
-        is SynResult.Failure<TokenStream> -> result.error.intoCompileError()
-    }
-}
-
-private fun parseStreamSelectArgs(input: io.github.kotlinmania.syn.ParseStream): SynResult<ExprList> {
-    val args = ExprList()
-    while (!input.isEmpty()) {
-        args.pushValue(parseExpr(input).getOrElse { return SynResult.failure(it) })
-        if (input.isEmpty()) break
-        args.pushPunct(CommaParse.parse(input).getOrElse { return SynResult.failure(it) })
-    }
-    return SynResult.success(args)
-}
-
-private fun compileErrorTokens(message: String): TokenStream {
-    val tokens = TokenStream.new()
-    tokens.append(Ident.new("compile_error", Span.callSite()))
-    punct(tokens, '!')
-    val messageStream = TokenStream.new()
-    messageStream.append(Literal.string(message))
-    tokens.append(Group(Delimiter.Parenthesis, messageStream))
-    return tokens
-}
-
-private fun punct(tokens: TokenStream, ch: Char) {
-    tokens.append(Punct(ch, Spacing.Alone))
-}
-
-private fun optionWrapper(ident: Ident): BoxedTokens {
-    val wrapper = TokenStream.new()
-    wrapper.append(Ident.new("Option", Span.callSite()))
-    punct(wrapper, '<')
-    wrapper.append(ident)
-    punct(wrapper, '>')
-    return BoxedTokens(wrapper)
-}
-
-private fun someWrapper(expr: Expr): BoxedTokens {
-    val wrapper = TokenStream.new()
-    wrapper.append(Ident.new("Some", Span.callSite()))
-    punct(wrapper, '(')
-    expr.toTokens(wrapper)
-    punct(wrapper, ')')
-    return BoxedTokens(wrapper)
-}
-
-private fun appendSeparatedIdents(tokens: TokenStream, idents: List<Ident>) {
-    var first = true
-    for (ident in idents) {
-        if (!first) punct(tokens, ',')
-        first = false
-        tokens.append(ident)
-    }
-}
-
-private fun appendSeparatedBoxed(tokens: TokenStream, items: List<BoxedTokens>) {
-    var first = true
-    for (item in items) {
-        if (!first) punct(tokens, ',')
-        first = false
-        item.toTokens(tokens)
-    }
-}
-
-private class BoxedTokens(
-    private val stream: TokenStream,
-) : ToTokens {
-    override fun toTokens(tokens: TokenStream) {
-        tokens.extendTokenStreams(listOf(stream))
-    }
 }
