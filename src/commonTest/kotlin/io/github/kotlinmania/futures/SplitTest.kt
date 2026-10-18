@@ -1,6 +1,7 @@
 // port-lint: tests futures/tests/stream_split.rs
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.sink.flush
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
