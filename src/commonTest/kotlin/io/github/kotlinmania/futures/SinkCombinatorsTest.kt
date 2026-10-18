@@ -1,24 +1,22 @@
 package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.sink.buffer
-
 import io.github.kotlinmania.futures.sink.close
-
-import io.github.kotlinmania.futures.sink.flush
-
-import io.github.kotlinmania.futures.sink.feed
-
-import io.github.kotlinmania.futures.sink.send
-
 import io.github.kotlinmania.futures.sink.fanout
-
+import io.github.kotlinmania.futures.sink.feed
+import io.github.kotlinmania.futures.sink.flush
+import io.github.kotlinmania.futures.sink.send
+import io.github.kotlinmania.futures.sink.sinkMapErr
+import io.github.kotlinmania.futures.sink.with
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SinkCombinatorsTest {
     @Test
     fun testDrainSink() {
-        val drain = io.github.kotlinmania.futures.sink.drain<String>()
+        val drain =
+            io.github.kotlinmania.futures.sink
+                .drain<String>()
         val ctx = TaskContext()
 
         assertEquals(Poll.Ready(SinkOutcome.Ready), drain.pollReady(ctx))

@@ -1,10 +1,6 @@
 // port-lint: tests futures-channel/tests/oneshot.rs
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.send
-
-import io.github.kotlinmania.futures.sink.close
-
 import io.github.kotlinmania.futures.channel.oneshot.oneshot
 import kotlin.test.Test
 import kotlin.test.assertEquals

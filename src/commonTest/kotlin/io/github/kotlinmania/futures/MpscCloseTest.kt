@@ -1,8 +1,6 @@
 // port-lint: tests futures-channel/tests/mpsc-close.rs
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.close
-
 import io.github.kotlinmania.futures.channel.mpsc.channel
 import io.github.kotlinmania.futures.channel.mpsc.unbounded
 import kotlin.test.Test

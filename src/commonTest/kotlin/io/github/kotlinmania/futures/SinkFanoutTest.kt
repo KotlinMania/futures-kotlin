@@ -1,9 +1,8 @@
 // port-lint: tests futures/tests/sink_fanout.rs
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.fanout
-
 import io.github.kotlinmania.futures.channel.mpsc.channel
+import io.github.kotlinmania.futures.sink.fanout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

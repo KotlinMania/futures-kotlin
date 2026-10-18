@@ -1,8 +1,6 @@
 // port-lint: tests futures/tests/stream_futures_ordered.rs
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.send
-
 import io.github.kotlinmania.futures.channel.oneshot.Canceled
 import io.github.kotlinmania.futures.channel.oneshot.oneshot
 import kotlin.test.Test

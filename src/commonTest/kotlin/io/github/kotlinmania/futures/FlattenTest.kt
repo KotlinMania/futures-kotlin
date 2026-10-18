@@ -2,7 +2,6 @@
 package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.sink.Drain
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

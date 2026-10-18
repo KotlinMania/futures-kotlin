@@ -1,9 +1,8 @@
 // port-lint: tests futures/tests/io_window.rs
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.buffer
-
 import io.github.kotlinmania.futures.io.Window
+import io.github.kotlinmania.futures.sink.buffer
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

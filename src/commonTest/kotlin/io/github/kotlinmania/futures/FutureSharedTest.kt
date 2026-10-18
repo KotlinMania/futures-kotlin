@@ -1,8 +1,6 @@
 // port-lint: tests futures/tests/future_shared.rs
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.send
-
 import io.github.kotlinmania.futures.channel.oneshot.channel
 import kotlin.test.Test
 import kotlin.test.assertEquals

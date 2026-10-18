@@ -6,8 +6,6 @@
 
 package io.github.kotlinmania.futures
 
-import io.github.kotlinmania.futures.sink.send
-
 import io.github.kotlinmania.futures.channel.oneshot.Receiver
 import io.github.kotlinmania.futures.channel.oneshot.Sender
 import io.github.kotlinmania.futures.channel.oneshot.channel

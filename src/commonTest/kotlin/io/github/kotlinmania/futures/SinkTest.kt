@@ -2,19 +2,14 @@
 package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.sink.buffer
-
-import io.github.kotlinmania.futures.sink.flush
-
-import io.github.kotlinmania.futures.sink.withFlatMap
-
-import io.github.kotlinmania.futures.sink.sinkMapErr
-
-import io.github.kotlinmania.futures.sink.sendAll
-
-import io.github.kotlinmania.futures.sink.send
-
 import io.github.kotlinmania.futures.sink.fanout
-
+import io.github.kotlinmania.futures.sink.flush
+import io.github.kotlinmania.futures.sink.send
+import io.github.kotlinmania.futures.sink.sendAll
+import io.github.kotlinmania.futures.sink.sinkErrInto
+import io.github.kotlinmania.futures.sink.sinkMapErr
+import io.github.kotlinmania.futures.sink.with
+import io.github.kotlinmania.futures.sink.withFlatMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
