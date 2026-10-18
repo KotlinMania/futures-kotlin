@@ -1,6 +1,20 @@
 // port-lint: tests futures/tests/sink.rs
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.sink.buffer
+
+import io.github.kotlinmania.futures.sink.flush
+
+import io.github.kotlinmania.futures.sink.withFlatMap
+
+import io.github.kotlinmania.futures.sink.sinkMapErr
+
+import io.github.kotlinmania.futures.sink.sendAll
+
+import io.github.kotlinmania.futures.sink.send
+
+import io.github.kotlinmania.futures.sink.fanout
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -312,7 +326,7 @@ class SinkTest {
             io.github.kotlinmania.futures.channel.mpsc
                 .channel<Int>(1)
         val unfold =
-            unfoldSink(Unit) { _, i: Int ->
+            io.github.kotlinmania.futures.sink.unfold(Unit) { _, i: Int ->
                 tx.send(i)
             }
         val cx = TaskContext()

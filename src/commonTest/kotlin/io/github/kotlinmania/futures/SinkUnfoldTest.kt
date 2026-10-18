@@ -11,7 +11,7 @@ class SinkUnfoldTest {
     fun testSinkUnfoldAccumulates() {
         var recordedSum = 0
         val sink =
-            unfoldSink<Int, Int, String>(0) { sum, item ->
+            io.github.kotlinmania.futures.sink.unfold<Int, Int, String>(0) { sum, item ->
                 val next = sum + item
                 recordedSum = next
                 ok(next)
@@ -41,7 +41,7 @@ class SinkUnfoldTest {
     @Test
     fun testSinkUnfoldError() {
         val sink =
-            unfoldSink<Int, Int, String>(0) { _, item ->
+            io.github.kotlinmania.futures.sink.unfold<Int, Int, String>(0) { _, item ->
                 if (item < 0) {
                     err("negative number")
                 } else {

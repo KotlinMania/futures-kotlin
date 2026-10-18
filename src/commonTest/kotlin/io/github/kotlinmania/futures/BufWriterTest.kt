@@ -1,6 +1,8 @@
 // port-lint: tests futures-util/tests/io_buf_writer.rs
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.sink.buffer
+
 import io.github.kotlinmania.futures.io.AsyncWrite
 import io.github.kotlinmania.futures.io.BufWriter
 import io.github.kotlinmania.futures.io.Cursor

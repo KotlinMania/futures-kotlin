@@ -1,6 +1,12 @@
 // port-lint: tests stream/mod.rs
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.sink.close
+
+import io.github.kotlinmania.futures.sink.flush
+
+import io.github.kotlinmania.futures.sink.send
+
 import io.github.kotlinmania.futures.channel.mpsc.unbounded
 import kotlin.test.Test
 import kotlin.test.assertEquals

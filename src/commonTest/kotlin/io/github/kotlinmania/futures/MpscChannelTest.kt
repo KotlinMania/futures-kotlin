@@ -1,6 +1,8 @@
 // port-lint: tests futures-channel/tests/channel.rs
 package io.github.kotlinmania.futures
 
+import io.github.kotlinmania.futures.sink.close
+
 import io.github.kotlinmania.futures.channel.mpsc.channel
 import kotlin.test.Test
 import kotlin.test.assertEquals
