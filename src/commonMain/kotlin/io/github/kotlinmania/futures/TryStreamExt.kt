@@ -1,4 +1,3 @@
-// port-lint: source stream/try_stream/mod.rs
 @file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.futures
@@ -147,3 +146,10 @@ public fun <T, E> TryStream<T, E>.inspectErr(action: (E) -> Unit): Stream<Try<T,
             action(item.error)
         }
     }
+
+/**
+ * Transforms this stream into an [io.github.kotlinmania.futures.io.AsyncBufRead].
+ */
+@HiddenFromObjC
+public fun <St : TryStream<ByteArray, io.github.kotlinmania.futures.io.IoError>> St.intoAsyncRead(): IntoAsyncRead<St> =
+    IntoAsyncRead.new(this)

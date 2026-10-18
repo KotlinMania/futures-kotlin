@@ -1,4 +1,3 @@
-// port-lint: source futures-channel/src/mpsc/mod.rs
 @file:OptIn(
     kotlin.experimental.ExperimentalObjCRefinement::class,
     kotlin.concurrent.atomics.ExperimentalAtomicApi::class,

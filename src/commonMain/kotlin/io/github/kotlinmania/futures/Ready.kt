@@ -10,10 +10,10 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class Ready<T>(
-    private var value: T?,
+    private var value: T,
     private var hasValue: Boolean = true,
 ) : FusedFuture<T> {
-    public constructor(value: T) : this(value, true)
+    public interface Output
 
     /**
      * Unwraps the value from this immediately ready future.
@@ -21,10 +21,7 @@ public class Ready<T>(
     public fun intoInner(): T {
         check(hasValue) { "Ready value already taken" }
         hasValue = false
-        val v = value
-        value = null
-        @Suppress("UNCHECKED_CAST")
-        return v as T
+        return value
     }
 
     override fun toString(): String = if (hasValue) "Ready(Some($value))" else "Ready(None)"
@@ -35,10 +32,7 @@ public class Ready<T>(
         context.waker.hashCode()
         check(hasValue) { "Ready polled after completion" }
         hasValue = false
-        val v = value
-        value = null
-        @Suppress("UNCHECKED_CAST")
-        return Poll.Ready(v as T)
+        return Poll.Ready(value)
     }
 
     public companion object {
