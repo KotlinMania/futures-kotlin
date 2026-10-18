@@ -1,4 +1,4 @@
-// port-lint: source async_await/poll.rs
+// port-lint: source futures-core/src/task/poll.rs
 package io.github.kotlinmania.futures
 
 /**

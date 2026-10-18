@@ -15,6 +15,14 @@ public fun AsyncRead.read(
 ): Read = Read(this, buf, offset, length)
 
 /**
+ * Creates a future which will read some bytes using vectored I/O into [bufs].
+ */
+@HiddenFromObjC
+public fun AsyncRead.readVectored(
+    bufs: List<IoSliceMut>,
+): ReadVectored = ReadVectored.new(this, bufs)
+
+/**
  * Creates a future which will read the exact number of bytes required to fill [buf].
  */
 @HiddenFromObjC
@@ -100,6 +108,14 @@ public fun AsyncWrite.writeAll(
     offset: Int = 0,
     length: Int = buf.size - offset,
 ): WriteAll = WriteAll(this, buf, offset, length)
+
+/**
+ * Creates a future which will write some bytes using vectored I/O from [bufs].
+ */
+@HiddenFromObjC
+public fun AsyncWrite.writeVectored(
+    bufs: List<IoSlice>,
+): WriteVectored = WriteVectored.new(this, bufs)
 
 /**
  * Creates a future which will write all bytes from [bufs] into this writer.

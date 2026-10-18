@@ -78,6 +78,10 @@ public sealed interface Try<out T, out E> {
  */
 @HiddenFromObjC
 public interface TryFuture<out T, out E> : Future<Try<T, E>> {
+    public interface Ok
+
+    public interface Error
+
     /**
      * Poll this `TryFuture` as if it were a `Future`.
      *
