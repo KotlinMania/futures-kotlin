@@ -25,8 +25,6 @@ public class ReuniteError(
     override fun toString(): String = "ReuniteError(...)"
 }
 
-public typealias BiLockReuniteError = ReuniteError
-
 /**
  * Returned RAII-like guard from the [BiLock.pollLock] method.
  */

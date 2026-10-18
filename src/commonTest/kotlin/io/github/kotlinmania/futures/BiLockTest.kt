@@ -55,7 +55,7 @@ class BiLockTest {
 
         val failReunite = a1.reunite(b2)
         assertTrue(failReunite.isFailure)
-        assertIs<BiLockReuniteError>(failReunite.exceptionOrNull())
+        assertIs<io.github.kotlinmania.futures.ReuniteError>(failReunite.exceptionOrNull())
         assertIs<ReuniteError>(failReunite.exceptionOrNull())
         assertEquals("ReuniteError(...)", failReunite.exceptionOrNull()?.toString())
     }
