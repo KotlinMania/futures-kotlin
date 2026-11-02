@@ -1,0 +1,194 @@
+{
+  "baseline": "9affec7",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "9affec7",
+    "7bd0e75",
+    "a5dfcde",
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/sink/map_err.rs",
+      "build/rust-kotlin-map-err-once/MapErrReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "0f68f444ef13fe7115164be855c3b7b1d269e1119e69fcdad1706988255641f1"
+  },
+  "red": {
+    "suite": {
+      "name": "SinkMapErrOnceParityTest[jvm]",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "7",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:21:42.471Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.025"
+    },
+    "failures": [
+      {
+        "case": "successAfterConsumptionStillDelegates[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "mapperPanicConsumesMapper[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<[polled MapErr after completion]> but was:<[mapper panic]>"
+      },
+      {
+        "case": "nullErrorAndNullResultAreErrors[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was java.lang.AssertionError: expected:<null> but was:<second>"
+      },
+      {
+        "case": "sendConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "closeConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "readyConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "flushConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      }
+    ]
+  },
+  "firstFullCheck": {
+    "jvmTest": {
+      "tests": 649,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 649,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 583,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/MapErr.kt",
+        "line": "30",
+        "column": "1",
+        "severity": "error",
+        "message": "Add a blank line between all when-conditions in case at least one multiline when-condition is found in the statement",
+        "source": "standard:blank-line-between-when-conditions"
+      }
+    ],
+    "detekt": 0
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 649,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 649,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "rust": {
+    "tests": 8,
+    "scenarios": 20,
+    "failures": 0,
+    "exit": 0
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*SinkMapErrOnceParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/map-err-once-oracle/Cargo.toml --target-dir build/rust-kotlin-map-err-once/rust-target"
+  },
+  "exitCodes": {
+    "red": 1,
+    "firstFullCheck": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "existingFixtureCorrection": {
+    "file": "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkCombinatorsTest.kt",
+    "originalInvalidAssumption": "one adapter maps four errors",
+    "sourceProof": "map_err.rs:25-26 takes Option<F>; :33 requires FnOnce. Actual Rust oracle covers all sixteen first/second operation pairs.",
+    "change": "four fresh failing sinks and adapters, one for each original operation",
+    "assertions": "All four original expected mapping values and operation arguments retained; only latter three receivers change. Assertion-line comparison normalizing those receivers is byte-identical.",
+    "otherEdits": false
+  },
+  "integrity": "New eight-case suite byte-identical since red. Public declarations unchanged. Existing SinkTest and separate ErrInto implementation byte-identical to baseline.",
+  "limits": [
+    "SinkErrInto duplicate reusable mapper and incomplete Into trait representation unchanged",
+    "Conditional Stream/FusedStream/Clone/accessor/Debug and Rust FnOnce/move/borrow/Pin/Drop/Send/Sync relationships remain incomplete",
+    "Prior shared takeValue/With identity-only conversion/Fanout cloning limitations retained",
+    "No downstream/Swift/other-platform/publication verification or general failed-sink recovery guarantee"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/MapErr.kt": "720c4f2a4bf10d628176745ab700813de9b01bf3f0b44a053524e29669a81383",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/ErrInto.kt": "a173d034b077079a2af6ff28bb00baf639d541416fe2c59b74a8d5279773b5cd",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkMapErrOnceParityTest.kt": "4f21c75aa657c047793b662f838a4857d65498fa5895f4d1528298ca3daaca2d",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkCombinatorsTest.kt": "f125d9d6fe39864530defa96c4740e74fc1594065329110ecef756e0b50ad8f0",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": "62e7bf6c31f1366788c36481c445b42a33b88d5b572de92d6ec1a47580ad904b",
+    "tmp/futures-util/src/sink/map_err.rs": "0f68f444ef13fe7115164be855c3b7b1d269e1119e69fcdad1706988255641f1",
+    "verification/map-err-once-oracle/src/lib.rs": "b1b988382d37bce814b6131e49dcd56a0dc8b5dc1a47398f8f397303b9b0f0a4",
+    "verification/map-err-once-oracle/Cargo.toml": "9de38d03e47010d7d390a6842e05ed909c3b7b49321f09284d588f2ad24ff6e1",
+    "verification/map-err-once-oracle/Cargo.lock": "24309305963c3bf1ed66a75ba1045a394f0aeee61ffff33116d3ea6cce2b393b",
+    "build/rust-kotlin-map-err-once/MapErrReview.kt": "f069f1659ee80f79d4ba91953b3f4b9f24b47022a9d671b64576277e8549534a",
+    "build/rust-kotlin-map-err-once/translation.log": "89d9e3aa1413aee9a84b27625e343149fd05ff5c540ae102636e7e5474e633e2",
+    "build/rust-kotlin-map-err-once/red-jvm.log": "9b07fe5035505e38d50cfabdfb818df20a671ab768d911b34db8ef8db8706483",
+    "build/rust-kotlin-map-err-once/red-test-sha256.txt": "33ff8fc6f6bfc17bdec1a83d0f88f8e119d8d7aa9e9310829e2927dcc38fb7bf",
+    "build/rust-kotlin-map-err-once/first-final-check.log": "2fedf2b6305a2ce3fb3f402c8709661b0dc17be503a22d42c2ae846cbb4060de",
+    "build/rust-kotlin-map-err-once/first-final-static-comparison.json": "c43512e826029774ad82a1ab62117fc6b96050fe67f0358753ccf5fe8eb597e5",
+    "build/rust-kotlin-map-err-once/final-check.log": "e5607ad0b9a1902a11b7b4880f5788554448db89c2806b1f587eb4cf8f9fa125",
+    "build/rust-kotlin-map-err-once/rust-oracle.log": "430ecbee0c67ff319ab886662f30eedfe6c430151c5a9b72dbc2c45914e0f614",
+    "build/rust-kotlin-map-err-once/verify_final.py": "06f2c0af9e05ab2d60563af441f2debb5d6fbab8d1d3182bff61989b558e930e"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "SinkMapErrOnceParityTest[jvm]",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:23:25.071Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.002"
+      },
+      "sha256": "1347b4a0a3a18e5bd7d3cac9b76ede6ea6fa1b0f1c927adfd9eb71bf0117c054"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.SinkMapErrOnceParityTest",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:23:34.172Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "93f34c972cd75c0078b5ae6a9e8911af65e2be7c482c7ba15ee6f42aa880e1ff"
+    }
+  }
+}

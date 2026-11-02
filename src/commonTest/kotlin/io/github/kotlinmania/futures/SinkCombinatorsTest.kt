@@ -93,7 +93,7 @@ class SinkCombinatorsTest {
 
     @Test
     fun testSinkMapErr() {
-        val failingSink =
+        fun failingSink(): Sink<Int, String> =
             object : Sink<Int, String> {
                 override fun pollReady(context: TaskContext): Poll<SinkOutcome<String>> =
                     Poll.ready(SinkOutcome.err("fail-ready"))
@@ -108,13 +108,16 @@ class SinkCombinatorsTest {
                     Poll.ready(SinkOutcome.err("fail-close"))
             }
 
-        val mapped = failingSink.sinkMapErr { "mapped:$it" }
+        val mapped = failingSink().sinkMapErr { "mapped:$it" }
+        val sendMapped = failingSink().sinkMapErr { "mapped:$it" }
+        val flushMapped = failingSink().sinkMapErr { "mapped:$it" }
+        val closeMapped = failingSink().sinkMapErr { "mapped:$it" }
         val ctx = TaskContext()
 
         assertEquals(Poll.Ready(SinkOutcome.Err("mapped:fail-ready")), mapped.pollReady(ctx))
-        assertEquals(SinkOutcome.Err("mapped:fail-send"), mapped.startSend(1))
-        assertEquals(Poll.Ready(SinkOutcome.Err("mapped:fail-flush")), mapped.pollFlush(ctx))
-        assertEquals(Poll.Ready(SinkOutcome.Err("mapped:fail-close")), mapped.pollClose(ctx))
+        assertEquals(SinkOutcome.Err("mapped:fail-send"), sendMapped.startSend(1))
+        assertEquals(Poll.Ready(SinkOutcome.Err("mapped:fail-flush")), flushMapped.pollFlush(ctx))
+        assertEquals(Poll.Ready(SinkOutcome.Err("mapped:fail-close")), closeMapped.pollClose(ctx))
     }
 
     @Test

@@ -15,8 +15,10 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class SinkMapErr<in Item, E, out E2>(
     private val sink: Sink<Item, E>,
-    private val transform: (E) -> E2,
+    transform: (E) -> E2,
 ) : Sink<Item, E2> {
+    private var mapper: ((E) -> E2)? = transform
+
     /**
      * Get a reference to the inner sink.
      */
@@ -24,8 +26,15 @@ public class SinkMapErr<in Item, E, out E2>(
 
     private fun mapOutcome(outcome: SinkOutcome<E>): SinkOutcome<E2> =
         when (outcome) {
-            SinkOutcome.Ready -> SinkOutcome.Ready
-            is SinkOutcome.Err -> SinkOutcome.Err(transform(outcome.error))
+            SinkOutcome.Ready -> {
+                SinkOutcome.Ready
+            }
+
+            is SinkOutcome.Err -> {
+                val transform = mapper ?: error("polled MapErr after completion")
+                mapper = null
+                SinkOutcome.Err(transform(outcome.error))
+            }
         }
 
     override fun pollReady(context: TaskContext): Poll<SinkOutcome<E2>> =
