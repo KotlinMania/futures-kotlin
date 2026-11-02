@@ -1,0 +1,139 @@
+{
+  "baseline": "a5dfcde",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "a5dfcde",
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/sink/unfold.rs",
+      "build/rust-kotlin-unfold-state/UnfoldReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "5febcfb9295a79fe1187284d0d45055c787e399b00d73c0e85a0446ae2246d18"
+  },
+  "red": {
+    "suite": {
+      "name": "SinkUnfoldStateParityTest[jvm]",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "3",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:10:50.052Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.033"
+    },
+    "failures": [
+      {
+        "case": "nullableReturnedState[jvm]",
+        "message": "java.lang.IllegalStateException: startSend called without pollReady returning Ready first"
+      },
+      {
+        "case": "nullableInitialState[jvm]",
+        "message": "java.lang.IllegalStateException: startSend called without pollReady returning Ready first"
+      },
+      {
+        "case": "callbackPanicConsumesState[jvm]",
+        "message": "java.lang.AssertionError: expected:<[call:7:1]> but was:<[call:7:1, call:7:2]>"
+      }
+    ]
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 632,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 632,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "rust": {
+    "tests": 8,
+    "failures": 0,
+    "exit": 0
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*SinkUnfoldStateParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/sink-unfold-state-oracle/Cargo.toml --target-dir build/rust-kotlin-unfold-state/rust-target"
+  },
+  "exitCodes": {
+    "red": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "integrity": "New tests byte-identical since red; existing SinkTest and shared UnfoldState source byte-identical to baseline; public declarations unchanged.",
+  "remainingHelperGap": "Shared takeValue remains a nullable, non-consuming lookup, unchanged by this sink caller repair. No remaining commonMain call site found.",
+  "priorWithLimit": "Identity-only same-error-type conversion remains; no full From conversion claim.",
+  "limits": [
+    "Kotlin borrow/Pin/Unpin/Drop/Send/Sync not established",
+    "Panic/error probes observe implementation state, not general recovery guarantees",
+    "Shared helper/stream unfolds/Debug/other traits not certified",
+    "No downstream/Swift/other-platform/publication verification"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/Unfold.kt": "9b454f807dcc2a30ea1e10338765bce19c7ce1b36d81b1767c1e5faf110645f3",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/UnfoldState.kt": "dabd5810350bf9a002e7d76adae2cdfa5c40d4165665abd65e42778be68b926e",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkUnfoldStateParityTest.kt": "c7a1310aaca35061e390aa2606b695bdd5ebde8df6d15a82ae2d33ddaea02c68",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": "62e7bf6c31f1366788c36481c445b42a33b88d5b572de92d6ec1a47580ad904b",
+    "tmp/futures-util/src/sink/unfold.rs": "5febcfb9295a79fe1187284d0d45055c787e399b00d73c0e85a0446ae2246d18",
+    "tmp/futures-util/src/unfold_state.rs": "3e2ffb91c3db8d938af7365da4b91dc6ef6eb21c5a26bfbb4a4a882e4d2c28bc",
+    "verification/sink-unfold-state-oracle/src/lib.rs": "cf17020fd66c51a08e39218191ca16ab5af999432dd78e3a6205b15a7837d3c8",
+    "verification/sink-unfold-state-oracle/Cargo.toml": "a3ed77caaf9c0224ff52c5aabdf7ea5ad427cac2a0aef038a357b7f575ef286d",
+    "verification/sink-unfold-state-oracle/Cargo.lock": "70d86c5eb96935cabc3486b68f65de466cac8e33e619936f4ae9f9b6329ecbc6",
+    "build/rust-kotlin-unfold-state/UnfoldReview.kt": "f08e053b8b2e40cb1452d80369374a9f1032398c11d168acae5254f37ea3a9dc",
+    "build/rust-kotlin-unfold-state/translation.log": "fa069ad4f2abda1453d1da80fc39fcdbaf752fb1db8a04f3c1bf50983f467c4f",
+    "build/rust-kotlin-unfold-state/red-jvm.log": "c30261cb53b43ad619d47dda298c5ee5a13e8d8091921bf59a2c27143022098b",
+    "build/rust-kotlin-unfold-state/red-test-sha256.txt": "83f99191893fc36571e6d70f5566e0ba6c9261905af237d4815dbf8654c03ea8",
+    "build/rust-kotlin-unfold-state/final-check.log": "994ee82e5324ba7f4dcfabd42e33f5a742ea9e6f0d507faa3b5cdf1f5dcf5ff8",
+    "build/rust-kotlin-unfold-state/rust-oracle.log": "736406fc25c81581f8decafd5cc733a371f145cd798486a022717faa3a763cf2",
+    "build/rust-kotlin-unfold-state/verify_final.py": "0cd5e1895e082e391ffd56668b030aa3dec56197a31c632a6f27e8b4aa31dd67"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "SinkUnfoldStateParityTest[jvm]",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:11:26.339Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.03"
+      },
+      "sha256": "834bcc17a6dbc5a9e00faa0e94b9f2c4a3a308e253855662335f8096c561b0aa"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.SinkUnfoldStateParityTest",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:11:35.702Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      },
+      "sha256": "3aaa21fbef55c7cb49c902b4f0ef8af5537b07a4bbf58c82db5a352f1565f216"
+    }
+  }
+}

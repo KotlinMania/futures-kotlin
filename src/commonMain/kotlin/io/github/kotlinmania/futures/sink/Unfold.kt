@@ -27,8 +27,11 @@ public class Unfold<T, in Item, out E>(
 
     override fun startSend(item: Item): SinkOutcome<E> {
         val value =
-            state.takeValue()
-                ?: error("startSend called without pollReady returning Ready first")
+            when (val current = state) {
+                is UnfoldState.Value -> current.value
+                else -> error("startSend called without pollReady returning Ready first")
+            }
+        state = UnfoldState.Empty
         val future = function(value, item)
         state = UnfoldState.InProgress(future)
         return SinkOutcome.ready()
