@@ -8,6 +8,7 @@ import io.github.kotlinmania.futures.Poll
 import io.github.kotlinmania.futures.Sink
 import io.github.kotlinmania.futures.SinkOutcome
 import io.github.kotlinmania.futures.Stream
+import io.github.kotlinmania.futures.StreamFuse
 import io.github.kotlinmania.futures.TaskContext
 import io.github.kotlinmania.futures.Try
 import io.github.kotlinmania.futures.Yield
@@ -19,16 +20,16 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class SendAll<Item, E>(
     private val sink: Sink<Item, E>,
-    private val stream: Stream<Try<Item, E>>,
+    stream: Stream<Try<Item, E>>,
 ) : Future<Try<Unit, E>> {
-    private var buffered: Item? = null
-    private var streamExhausted: Boolean = false
+    private val stream: StreamFuse<Try<Item, E>> = StreamFuse.new(stream)
+    private var buffered: Try.Ok<Item>? = null
 
     private fun tryStartSend(context: TaskContext, item: Item): Poll<SinkOutcome<E>> {
         check(buffered == null)
         return when (val p = sink.pollReady(context)) {
             is Poll.Pending -> {
-                buffered = item
+                buffered = Try.Ok(item)
                 Poll.pending()
             }
             is Poll.Ready -> {
@@ -41,66 +42,77 @@ public class SendAll<Item, E>(
     }
 
     override fun poll(context: TaskContext): Poll<Try<Unit, E>> {
+        // Write a previously buffered item before doing anything else.
         val item = buffered
         if (item != null) {
             buffered = null
-            when (val p = tryStartSend(context, item)) {
-                is Poll.Pending -> return Poll.pending()
+            when (val result = tryStartSend(context, item.value)) {
+                is Poll.Pending -> {
+                    return Poll.Pending
+                }
+
                 is Poll.Ready -> {
-                    val outcome = p.value
-                    if (outcome is SinkOutcome.Err) {
-                        return Poll.ready(Try.err(outcome.error))
-                    }
+                    val outcome = result.value
+                    if (outcome is SinkOutcome.Err) return Poll.Ready(Try.Err(outcome.error))
                 }
             }
         }
 
-        while (!streamExhausted) {
-            when (val itemPoll = stream.pollNext(context)) {
+        while (true) {
+            when (val result = stream.pollNext(context)) {
                 is Poll.Pending -> {
-                    when (val flushPoll = sink.pollFlush(context)) {
-                        is Poll.Pending -> return Poll.pending()
+                    when (val flush = sink.pollFlush(context)) {
+                        is Poll.Pending -> {
+                            return Poll.Pending
+                        }
+
                         is Poll.Ready -> {
-                            when (val outcome = flushPoll.value) {
-                                is SinkOutcome.Err -> return Poll.ready(Try.err(outcome.error))
-                                SinkOutcome.Ready -> return Poll.pending()
+                            return when (val outcome = flush.value) {
+                                is SinkOutcome.Err -> Poll.Ready(Try.Err(outcome.error))
+                                SinkOutcome.Ready -> Poll.Pending
                             }
                         }
                     }
                 }
+
                 is Poll.Ready -> {
-                    when (val y = itemPoll.value) {
-                        Yield.End -> {
-                            streamExhausted = true
-                            break
-                        }
+                    when (val item = result.value) {
                         is Yield.Value -> {
-                            when (val tryVal = y.value) {
-                                is Try.Err -> return Poll.ready(Try.err(tryVal.error))
+                            when (val outcome = item.value) {
+                                is Try.Err -> {
+                                    return Poll.Ready(Try.Err(outcome.error))
+                                }
+
                                 is Try.Ok -> {
-                                    when (val sendPoll = tryStartSend(context, tryVal.value)) {
-                                        is Poll.Pending -> return Poll.pending()
+                                    when (val send = tryStartSend(context, outcome.value)) {
+                                        is Poll.Pending -> {
+                                            return Poll.Pending
+                                        }
+
                                         is Poll.Ready -> {
-                                            val sendOutcome = sendPoll.value
-                                            if (sendOutcome is SinkOutcome.Err) {
-                                                return Poll.ready(Try.err(sendOutcome.error))
-                                            }
+                                            val sendOutcome = send.value
+                                            if (sendOutcome is SinkOutcome.Err) return Poll.Ready(Try.Err(sendOutcome.error))
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
 
-        return when (val flushPoll = sink.pollFlush(context)) {
-            is Poll.Pending -> Poll.pending()
-            is Poll.Ready -> {
-                when (val outcome = flushPoll.value) {
-                    is SinkOutcome.Err -> Poll.ready(Try.err(outcome.error))
-                    SinkOutcome.Ready -> Poll.ready(Try.ok(Unit))
+                        Yield.End -> {
+                            return when (val flush = sink.pollFlush(context)) {
+                                is Poll.Pending -> {
+                                    Poll.Pending
+                                }
+
+                                is Poll.Ready -> {
+                                    when (val outcome = flush.value) {
+                                        is SinkOutcome.Err -> Poll.Ready(Try.Err(outcome.error))
+                                        SinkOutcome.Ready -> Poll.Ready(Try.Ok(Unit))
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
