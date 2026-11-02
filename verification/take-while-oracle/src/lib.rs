@@ -7,7 +7,7 @@ mod tests {
     fn waker()->Waker {Waker::from(Arc::new(Noop))}
     struct Input {events:VecDeque<Poll<Option<Option<i32>>>>,polls:Rc<Cell<usize>>}
     fn input(events:Vec<Poll<Option<Option<i32>>>>)->(Input,Rc<Cell<usize>>) {let polls=Rc::new(Cell::new(0));(Input{events:events.into(),polls:polls.clone()},polls)}
-    impl Stream for Input {type Item=Option<i32>;fn poll_next(mut self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Option<Self::Item>> {self.polls.set(self.polls.get()+1);let e=self.events.pop_front().unwrap_or(Poll::Ready(None));if e.is_pending() {cx.waker().wake_by_ref();}e}fn size_hint(&self)->(usize,Option<usize>){let n=self.events.iter().take_while(|e|matches!(e,Poll::Ready(Some(_)))).count();(n,Some(n))}}
+    impl Stream for Input {type Item=Option<i32>;fn poll_next(mut self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Option<Self::Item>> {self.polls.set(self.polls.get()+1);let e=self.events.pop_front().unwrap_or(Poll::Ready(None));if e.is_pending() {cx.waker().wake_by_ref();}e}fn size_hint(&self)->(usize,Option<usize>){let n=self.events.iter().filter(|e|matches!(e,Poll::Ready(Some(_)))).count();(n,Some(n))}}
     impl FusedStream for Input {fn is_terminated(&self)->bool {self.events.is_empty()}}
     #[derive(Clone)] struct Control {released:Rc<Cell<bool>>,waker:Rc<RefCell<Option<Waker>>>,polls:Rc<Cell<usize>>,value:bool}
     fn control(value:bool)->Control {Control{released:Rc::new(Cell::new(false)),waker:Rc::new(RefCell::new(None)),polls:Rc::new(Cell::new(0)),value}}

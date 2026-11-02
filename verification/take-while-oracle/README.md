@@ -92,3 +92,14 @@ unchanged baseline 34b6f89 line; none is on an authored line. After correcting
 test formatting, Kotlin runtime/static checks were rerun on the actual final
 source. Final source hashes and baseline-line comparison receipts remain under
 build/rust-kotlin-take-while, with translator/API-red/oracle/Gradle logs.
+
+## Producer-fixture correction discovered during SkipWhile review
+
+The Rust input producer's size_hint accidentally used Iterator::take_while
+when adapting the previous fixture. It now counts all queued value events with
+Iterator::filter, matching the Kotlin producer. No assertion or adapter code
+changed. All seven actual upstream TakeWhile cases pass again with the corrected
+fixture. The rerun log is build/rust-kotlin-skip-while/take-while-fixture-recheck.log.
+Earlier Kotlin runtime results are unchanged; this correction does not change
+production Kotlin. Historical source-hash receipts refer to the original Rust
+fixture; this newer oracle verification supersedes that fixture receipt only.
