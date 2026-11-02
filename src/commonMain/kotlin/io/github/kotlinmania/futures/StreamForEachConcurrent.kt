@@ -10,17 +10,18 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class ForEachConcurrent<T>(
-    private val stream: Stream<T>,
-    private val limit: Int?,
+    stream: Stream<T>,
+    limit: Int?,
     private val action: (T) -> Future<Unit>,
 ) : FusedFuture<Unit> {
-    private val futures = mutableListOf<Future<Unit>>()
-    private var streamDone: Boolean = false
+    private var stream: Stream<T>? = stream
+    private val futures = FuturesUnordered<Unit>()
+
+    // Note: `limit` = 0 gets ignored.
+    private val limit: Int? = limit?.takeIf { it != 0 }
 
     init {
-        if (limit != null) {
-            require(limit > 0) { "limit must be greater than 0" }
-        }
+        require(limit == null || limit >= 0) { "limit must not be negative" }
     }
 
     public companion object {
@@ -31,48 +32,52 @@ public class ForEachConcurrent<T>(
         ): ForEachConcurrent<T> = ForEachConcurrent(stream, limit, action)
     }
 
-    override fun isTerminated(): Boolean = streamDone && futures.isEmpty()
+    override fun isTerminated(): Boolean = stream == null && futures.isEmpty()
 
     override fun poll(context: TaskContext): Poll<Unit> {
         while (true) {
-            var madeProgress = false
+            var madeProgressThisIter = false
 
-            while (!streamDone && (limit == null || futures.size < limit)) {
-                when (val p = stream.pollNext(context)) {
-                    is Poll.Ready -> {
-                        when (val y = p.value) {
-                            is Yield.Value -> {
-                                futures.add(action(y.value))
-                                madeProgress = true
-                            }
-                            Yield.End -> {
-                                streamDone = true
-                                madeProgress = true
+            // Check if we've already created a number of futures greater than `limit`.
+            if (limit == null || limit > futures.len()) {
+                val input = stream
+                if (input != null) {
+                    when (val result = input.pollNext(context)) {
+                        is Poll.Ready -> {
+                            when (val item = result.value) {
+                                is Yield.Value -> {
+                                    madeProgressThisIter = true
+                                    futures.push(action(item.value))
+                                }
+
+                                Yield.End -> {
+                                    stream = null
+                                }
                             }
                         }
+
+                        Poll.Pending -> {}
                     }
-                    Poll.Pending -> break
                 }
             }
 
-            var i = 0
-            while (i < futures.size) {
-                when (futures[i].poll(context)) {
-                    is Poll.Ready -> {
-                        futures.removeAt(i)
-                        madeProgress = true
+            when (val result = futures.pollNext(context)) {
+                is Poll.Ready -> {
+                    when (result.value) {
+                        is Yield.Value -> {
+                            madeProgressThisIter = true
+                        }
+
+                        Yield.End -> {
+                            if (stream == null) return Poll.Ready(Unit)
+                        }
                     }
-                    Poll.Pending -> i++
                 }
+
+                Poll.Pending -> {}
             }
 
-            if (streamDone && futures.isEmpty()) {
-                return Poll.Ready(Unit)
-            }
-
-            if (!madeProgress) {
-                return Poll.Pending
-            }
+            if (!madeProgressThisIter) return Poll.Pending
         }
     }
 }
