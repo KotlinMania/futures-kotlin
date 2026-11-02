@@ -141,7 +141,7 @@ class StreamCombinatorsTest {
             listOf(1, 2, 3, 4, 5, 6)
                 .asStream()
                 .skip(2)
-                .takeWhile { it < 5 }
+                .takeWhile { ready(it < 5) }
 
         val res = stream.collect().poll(cx)
         assertIs<Poll.Ready<List<Int>>>(res)
