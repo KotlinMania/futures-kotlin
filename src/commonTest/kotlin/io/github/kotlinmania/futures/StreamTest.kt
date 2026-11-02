@@ -218,7 +218,7 @@ class StreamTest {
         val stream1 = streamIter((1..10).toList())
         val stopFut1 = makeStopFut(5)
         val takeUntil1 = stream1.takeUntil(stopFut1)
-        val folded1 = takeUntil1.fold(0) { _, i -> i }
+        val folded1 = takeUntil1.fold(0) { _, i -> ready(i) }
         assertEquals(Poll.Ready(5), folded1.poll(cx))
 
         // Verify takeFuture() works
@@ -228,7 +228,7 @@ class StreamTest {
         assertEquals(Poll.Ready(Yield.Value(1)), takeUntil2.pollNext(cx))
         assertEquals(Poll.Ready(Yield.Value(2)), takeUntil2.pollNext(cx))
         assertNotNull(takeUntil2.takeFuture())
-        val folded2 = takeUntil2.fold(0) { _, i -> i }
+        val folded2 = takeUntil2.fold(0) { _, i -> ready(i) }
         assertEquals(Poll.Ready(10), folded2.poll(cx))
 
         // Verify takeFuture() returns null if stream is stopped

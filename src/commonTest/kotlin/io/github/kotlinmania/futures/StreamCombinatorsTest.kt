@@ -111,7 +111,7 @@ class StreamCombinatorsTest {
                 .asStream()
                 .filterMap { it.toIntOrNull() }
 
-        val foldFut = stream.fold(0) { acc, elem -> acc + elem }
+        val foldFut = stream.fold(0) { acc, elem -> ready(acc + elem) }
         val sum = foldFut.poll(cx)
         assertIs<Poll.Ready<Int>>(sum)
         assertEquals(9, sum.value)

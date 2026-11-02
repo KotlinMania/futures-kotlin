@@ -11,46 +11,67 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class Fold<T, R>(
     private val stream: Stream<T>,
-    private var accum: R?,
-    private val operation: (R, T) -> R,
+    accum: R,
+    private val operation: (R, T) -> Future<R>,
 ) : FusedFuture<R> {
-    private var done: Boolean = false
+    private var accum: R? = accum
+    private var hasAccum = true
+    private var pendingFuture: Future<R>? = null
 
     public companion object {
-        internal fun <T, R> new(stream: Stream<T>, initial: R, operation: (R, T) -> R): Fold<T, R> =
+        internal fun <T, R> new(stream: Stream<T>, initial: R, operation: (R, T) -> Future<R>): Fold<T, R> =
             Fold(stream, initial, operation)
     }
 
-    override fun isTerminated(): Boolean = done
+    override fun isTerminated(): Boolean = !hasAccum && pendingFuture == null
 
     @Suppress("UNCHECKED_CAST")
     override fun poll(context: TaskContext): Poll<R> {
-        if (done) throw RuntimeException("Fold polled after completion")
         while (true) {
-            when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> {
-                    when (val y = p.value) {
-                        is Yield.Value -> {
-                            val cur = accum as R
-                            accum = operation(cur, y.value)
-                        }
-                        Yield.End -> {
-                            done = true
-                            val result = accum as R
-                            accum = null
-                            return Poll.Ready(result)
-                        }
+            val future = pendingFuture
+            if (future != null) {
+                when (val polled = future.poll(context)) {
+                    is Poll.Ready -> {
+                        accum = polled.value
+                        hasAccum = true
+                        pendingFuture = null
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
                     }
                 }
-                Poll.Pending -> return Poll.Pending
+            } else if (hasAccum) {
+                when (val polled = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        val current = accum as R
+                        accum = null
+                        hasAccum = false
+                        when (val item = polled.value) {
+                            is Yield.Value -> {
+                                pendingFuture = operation(current, item.value)
+                            }
+
+                            Yield.End -> {
+                                return Poll.Ready(current)
+                            }
+                        }
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
+                }
+            } else {
+                throw RuntimeException("Fold polled after completion")
             }
         }
     }
 }
 
 /**
- * Executes an accumulating operation over a stream, evaluating to the final value.
+ * Executes asynchronous accumulating operations in order, evaluating to the final accumulator.
  */
 @HiddenFromObjC
-public fun <T, R> Stream<T>.fold(initial: R, operation: (R, T) -> R): Fold<T, R> =
+public fun <T, R> Stream<T>.fold(initial: R, operation: (R, T) -> Future<R>): Fold<T, R> =
     Fold.new(this, initial, operation)
