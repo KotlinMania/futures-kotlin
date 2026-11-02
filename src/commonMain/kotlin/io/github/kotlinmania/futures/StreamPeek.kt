@@ -10,8 +10,9 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class Peekable<T>(
-    private val stream: Stream<T>,
+    stream: Stream<T>,
 ) : FusedStream<T> {
+    private val stream: StreamFuse<T> = stream.fuse()
     private var peeked: T? = null
     private var hasPeeked: Boolean = false
 
@@ -20,7 +21,7 @@ public class Peekable<T>(
     }
 
     override fun isTerminated(): Boolean =
-        !hasPeeked && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
+        !hasPeeked && stream.isTerminated()
 
     public fun pollPeek(context: TaskContext): Poll<T?> {
         if (hasPeeked) {
@@ -51,21 +52,40 @@ public class Peekable<T>(
         }
 
     public fun nextIf(predicate: (T) -> Boolean): Future<T?> =
-        object : Future<T?> {
-            override fun poll(context: TaskContext): Poll<T?> =
-                when (val p = pollPeek(context)) {
+        object : FusedFuture<T?> {
+            private var completed = false
+
+            override fun isTerminated(): Boolean = completed
+
+            override fun poll(context: TaskContext): Poll<T?> {
+                check(!completed) { "NextIf polled after completion" }
+                return when (val p = this@Peekable.pollNext(context)) {
+                    Poll.Pending -> {
+                        Poll.Pending
+                    }
+
                     is Poll.Ready -> {
-                        val item = p.value
-                        if (item != null && predicate(item)) {
-                            hasPeeked = false
-                            peeked = null
-                            Poll.Ready(item)
-                        } else {
-                            Poll.Ready(null)
+                        completed = true
+                        when (val item = p.value) {
+                            is Yield.Value -> {
+                                if (predicate(item.value)) {
+                                    Poll.Ready(item.value)
+                                } else {
+                                    check(!hasPeeked)
+                                    peeked = item.value
+                                    hasPeeked = true
+                                    Poll.Ready(null)
+                                }
+                            }
+
+                            Yield.End -> {
+                                check(!hasPeeked)
+                                Poll.Ready(null)
+                            }
                         }
                     }
-                    Poll.Pending -> Poll.Pending
                 }
+            }
         }
 
     public fun nextIfEq(expected: T): Future<T?> = nextIf { it == expected }
@@ -85,7 +105,7 @@ public class Peekable<T>(
         val peekLen = if (hasPeeked) 1 else 0
         val hint = stream.sizeHint()
         val lower = (hint.lower.toLong() + peekLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-        val upper = hint.upper?.let { (it.toLong() + peekLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt() }
+        val upper = hint.upper?.let { if (it > Int.MAX_VALUE - peekLen) null else it + peekLen }
         return SizeHint(lower, upper)
     }
 }
