@@ -28,8 +28,12 @@ public class SelectAll<Fut>(
             when (val p = inner[i].poll(context)) {
                 is Poll.Ready -> {
                     val readyValue = p.value
-                    inner.removeAt(i)
+                    val last = inner.removeAt(inner.lastIndex)
+                    if (i < inner.size) {
+                        inner[i] = last
+                    }
                     val rest = inner.toList()
+                    inner.clear()
                     return Poll.Ready(Triple(readyValue, i, rest))
                 }
                 is Poll.Pending -> {}
