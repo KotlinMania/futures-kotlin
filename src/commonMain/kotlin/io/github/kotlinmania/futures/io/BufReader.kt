@@ -144,6 +144,44 @@ public class BufReader(
         }
     }
 
+    override fun pollReadVectored(
+        context: TaskContext,
+        bufs: List<IoSliceMut>,
+    ): Poll<Try<Int, IoError>> {
+        val totalLength = bufs.sumOf { it.length.toLong() }
+        if (pos == cap && totalLength >= buffer.size.toLong()) {
+            val result = inner.pollReadVectored(context, bufs)
+            if (result is Poll.Pending) return Poll.Pending
+            discardBuffer()
+            return result
+        }
+        return when (val filled = pollFillBuf(context)) {
+            Poll.Pending -> {
+                Poll.Pending
+            }
+
+            is Poll.Ready -> {
+                when (val result = filled.value) {
+                    is Try.Err -> {
+                        Poll.Ready(result)
+                    }
+
+                    is Try.Ok -> {
+                        var copied = 0
+                        for (slice in bufs) {
+                            val count = minOf(cap - pos - copied, slice.length)
+                            buffer.copyInto(slice.buffer, slice.offset, pos + copied, pos + copied + count)
+                            copied += count
+                            if (copied == cap - pos) break
+                        }
+                        consume(copied)
+                        Poll.Ready(Try.Ok(copied))
+                    }
+                }
+            }
+        }
+    }
+
     override fun pollSeek(
         context: TaskContext,
         pos: SeekFrom,
