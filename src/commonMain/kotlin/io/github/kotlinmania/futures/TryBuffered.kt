@@ -10,14 +10,14 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class TryBuffered<T, E>(
-    private val stream: Stream<Try<Future<Try<T, E>>, E>>,
+    stream: Stream<Try<Future<Try<T, E>>, E>>,
     private val capacity: Int,
 ) : FusedStream<Try<T, E>> {
-    private val inProgressQueue = mutableListOf<Future<Try<T, E>>>()
-    private var streamDone: Boolean = false
+    private val stream: StreamFuse<Try<Future<Try<T, E>>, E>> = stream.fuse()
+    private val inProgressQueue = FuturesOrdered<Try<T, E>>()
 
     init {
-        require(capacity > 0) { "capacity must be greater than 0" }
+        require(capacity >= 0) { "capacity must not be negative" }
     }
 
     public companion object {
@@ -27,49 +27,50 @@ public class TryBuffered<T, E>(
         ): TryBuffered<T, E> = TryBuffered(stream, capacity)
     }
 
-    override fun isTerminated(): Boolean = streamDone && inProgressQueue.isEmpty()
+    override fun isTerminated(): Boolean = stream.isDone() && inProgressQueue.isEmpty()
 
     override fun pollNext(context: TaskContext): Poll<Yield<Try<T, E>>> {
-        while (!streamDone && inProgressQueue.size < capacity) {
+        // Fill the queue first, propagating input-stream errors immediately.
+        while (inProgressQueue.len() < capacity) {
             when (val p = stream.pollNext(context)) {
                 is Poll.Ready -> {
                     when (val y = p.value) {
                         is Yield.Value -> {
                             when (val item = y.value) {
-                                is Try.Ok -> inProgressQueue.add(item.value)
-                                is Try.Err -> return Poll.Ready(Yield.Value(Try.Err(item.error)))
+                                is Try.Ok -> {
+                                    inProgressQueue.pushBack(item.value)
+                                }
+
+                                is Try.Err -> {
+                                    return Poll.Ready(Yield.Value(Try.Err(item.error)))
+                                }
                             }
                         }
-                        Yield.End -> streamDone = true
+
+                        Yield.End -> {
+                            break
+                        }
                     }
                 }
-                Poll.Pending -> break
-            }
-        }
 
-        if (inProgressQueue.isNotEmpty()) {
-            when (val p = inProgressQueue.first().poll(context)) {
-                is Poll.Ready -> {
-                    inProgressQueue.removeAt(0)
-                    return Poll.Ready(Yield.Value(p.value))
+                Poll.Pending -> {
+                    break
                 }
-                Poll.Pending -> return Poll.Pending
             }
         }
 
-        return if (streamDone && inProgressQueue.isEmpty()) {
-            Poll.Ready(Yield.End)
-        } else {
-            Poll.Pending
-        }
-    }
+        when (val result = inProgressQueue.pollNext(context)) {
+            is Poll.Ready -> {
+                if (result.value is Yield.Value) return result
+            }
 
-    override fun sizeHint(): SizeHint {
-        val qLen = inProgressQueue.size
-        val hint = stream.sizeHint()
-        val lower = (hint.lower.toLong() + qLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-        val upper = hint.upper?.let { (it.toLong() + qLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt() }
-        return SizeHint(lower, upper)
+            Poll.Pending -> {
+                return Poll.Pending
+            }
+        }
+
+        // An empty queue is not terminal while the input can supply more futures.
+        return if (stream.isDone()) Poll.Ready(Yield.End) else Poll.Pending
     }
 }
 
