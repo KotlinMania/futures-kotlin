@@ -145,6 +145,70 @@ public class LineWriter<out W : AsyncWrite>(
         return Poll.Ready(Try.ok(flushed + buffered))
     }
 
+    override fun pollWriteVectored(
+        context: TaskContext,
+        bufs: List<IoSlice>,
+    ): Poll<Try<Int, IoError>> {
+        val lastNewlineBuffer =
+            bufs.indexOfLast { slice ->
+                (slice.offset until slice.offset + slice.length).any { slice.buffer[it] == '\n'.code.toByte() }
+            }
+        if (lastNewlineBuffer < 0) {
+            when (val flushed = flushIfCompletedLine(context)) {
+                Poll.Pending -> {
+                    return Poll.Pending
+                }
+
+                is Poll.Ready -> {
+                    val result = flushed.value
+                    if (result is Try.Err) return Poll.Ready(result)
+                }
+            }
+            return bufWriter.pollWriteVectored(context, bufs)
+        }
+        when (val flushed = bufWriter.pollFlush(context)) {
+            Poll.Pending -> {
+                return Poll.Pending
+            }
+
+            is Poll.Ready -> {
+                val result = flushed.value
+                if (result is Try.Err) return Poll.Ready(result)
+            }
+        }
+        val lines = bufs.subList(0, lastNewlineBuffer + 1)
+        val flushed =
+            when (val polled = inner.pollWriteVectored(context, lines)) {
+                Poll.Pending -> {
+                    return Poll.Pending
+                }
+
+                is Poll.Ready -> {
+                    when (val result = polled.value) {
+                        is Try.Err -> {
+                            return Poll.Ready(result)
+                        }
+
+                        is Try.Ok -> {
+                            result.value
+                        }
+                    }
+                }
+            }
+        if (flushed == 0) return Poll.Ready(Try.Ok(0))
+        val linesLength = lines.sumOf { it.length.toLong() }
+        if (flushed.toLong() < linesLength) return Poll.Ready(Try.Ok(flushed))
+        var buffered = 0
+        for (i in lastNewlineBuffer + 1 until bufs.size) {
+            val slice = bufs[i]
+            if (slice.isEmpty) continue
+            val copied = bufWriter.writeToBuf(slice.buffer, slice.offset, slice.length)
+            if (copied == 0) break
+            buffered += copied
+        }
+        return Poll.Ready(Try.Ok(flushed + buffered))
+    }
+
     override fun pollFlush(context: TaskContext): Poll<Try<Unit, IoError>> =
         bufWriter.pollFlush(context)
 
