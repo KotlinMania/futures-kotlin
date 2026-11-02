@@ -27,6 +27,7 @@ public class SelectOk<Fut, E>(
                         is Try.Ok -> {
                             inner.removeAt(i)
                             val rest = inner.toList()
+                            inner.clear()
                             return Poll.Ready(Try.Ok(Pair(v.value, rest)))
                         }
                         is Try.Err -> {
@@ -34,6 +35,7 @@ public class SelectOk<Fut, E>(
                             if (inner.isEmpty()) {
                                 return Poll.Ready(Try.Err(v.error))
                             }
+                            i = 0
                         }
                     }
                 }
