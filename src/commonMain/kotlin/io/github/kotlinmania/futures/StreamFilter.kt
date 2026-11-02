@@ -11,10 +11,13 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class Filter<T>(
     private val stream: Stream<T>,
-    private val predicate: (T) -> Boolean,
+    private val predicate: (T) -> Future<Boolean>,
 ) : FusedStream<T> {
+    private var pendingFuture: Future<Boolean>? = null
+    private var pendingItem: Yield.Value<T>? = null
+
     public companion object {
-        internal fun <T> new(stream: Stream<T>, predicate: (T) -> Boolean): Filter<T> = Filter(stream, predicate)
+        internal fun <T> new(stream: Stream<T>, predicate: (T) -> Future<Boolean>): Filter<T> = Filter(stream, predicate)
     }
 
     /**
@@ -28,29 +31,52 @@ public class Filter<T>(
     public fun intoInner(): Stream<T> = stream
 
     override fun isTerminated(): Boolean =
-        (stream as? FusedStream<*>)?.isTerminated() ?: false
+        pendingFuture == null && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> {
         while (true) {
-            when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> {
-                    when (val y = p.value) {
-                        is Yield.Value -> {
-                            if (predicate(y.value)) {
-                                return Poll.Ready(Yield.Value(y.value))
-                            }
-                        }
-                        Yield.End -> return Poll.Ready(Yield.End)
+            val future = pendingFuture
+            if (future != null) {
+                when (val result = future.poll(context)) {
+                    is Poll.Ready -> {
+                        pendingFuture = null
+                        val item = pendingItem
+                        pendingItem = null
+                        if (result.value) return Poll.Ready(item ?: Yield.End)
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
                     }
                 }
-                Poll.Pending -> return Poll.Pending
+            } else {
+                when (val result = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val item = result.value) {
+                            is Yield.Value -> {
+                                pendingFuture = predicate(item.value)
+                                pendingItem = item
+                            }
+
+                            Yield.End -> {
+                                return Poll.Ready(Yield.End)
+                            }
+                        }
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
+                }
             }
         }
     }
 
     override fun sizeHint(): SizeHint {
         val (_, upper) = stream.sizeHint()
-        return SizeHint(0, upper)
+        val pendingLength = if (pendingItem == null) 0 else 1
+        val adjustedUpper = upper?.let { if (it > Int.MAX_VALUE - pendingLength) null else it + pendingLength }
+        return SizeHint(0, adjustedUpper)
     }
 }
 
@@ -58,4 +84,4 @@ public class Filter<T>(
  * Filters the items produced by this stream according to the provided predicate.
  */
 @HiddenFromObjC
-public fun <T> Stream<T>.filter(predicate: (T) -> Boolean): Filter<T> = Filter.new(this, predicate)
+public fun <T> Stream<T>.filter(predicate: (T) -> Future<Boolean>): Filter<T> = Filter.new(this, predicate)

@@ -95,7 +95,7 @@ class StreamCombinatorsTest {
         val stream =
             listOf(1, 2, 3, 4, 5)
                 .asStream()
-                .filter { it % 2 != 0 }
+                .filter { ready(it % 2 != 0) }
                 .map { it * 10 }
 
         val collected = stream.collect().poll(cx)

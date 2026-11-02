@@ -174,7 +174,7 @@ class StreamTest {
                 ),
             )
 
-        val flat = st.flatMap { s -> s.filter { v -> v % 2 == 0 } }
+        val flat = st.flatMap { s -> s.filter { v -> ready(v % 2 == 0) } }
         val cx = TaskContext()
         val collected = flat.collect().poll(cx)
         assertEquals(Poll.Ready(listOf(0, 2, 4, 6, 8, 10, 0, 2)), collected)
