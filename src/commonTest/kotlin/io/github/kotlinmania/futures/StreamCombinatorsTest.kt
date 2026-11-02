@@ -154,7 +154,7 @@ class StreamCombinatorsTest {
         val stream =
             listOf(1, 2, 3, 4, 5)
                 .asStream()
-                .skipWhile { it < 4 }
+                .skipWhile { ready(it < 4) }
                 .enumerate()
 
         val res = stream.collect().poll(cx)
