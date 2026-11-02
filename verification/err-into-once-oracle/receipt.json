@@ -1,0 +1,169 @@
+{
+  "baseline": "9abbf2f",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "9abbf2f",
+    "9affec7",
+    "7bd0e75",
+    "a5dfcde",
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/sink/err_into.rs",
+      "build/rust-kotlin-err-into-once/ErrIntoReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "ced2998b2b0b792d80f7543523c9e07e8f5d20a4336cae93084b995e46671b15"
+  },
+  "red": {
+    "suite": {
+      "name": "SinkErrIntoOnceParityTest[jvm]",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "7",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:27:30.073Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.025"
+    },
+    "failures": [
+      {
+        "case": "successAfterConsumptionStillDelegates[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "mapperPanicConsumesMapper[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<[polled MapErr after completion]> but was:<[mapper panic]>"
+      },
+      {
+        "case": "nullErrorAndNullResultAreErrors[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was java.lang.AssertionError: expected:<null> but was:<second>"
+      },
+      {
+        "case": "sendConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "closeConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "readyConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      },
+      {
+        "case": "flushConsumesMapper[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Err(error=mapped))>."
+      }
+    ]
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 658,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 658,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "rust": {
+    "tests": 9,
+    "scenarios": 21,
+    "failures": 0,
+    "exit": 0,
+    "actualApi": "SinkExt::sink_err_into::<Converted>() using actual From<SourceError> for distinct Converted; no fixture sink_map_err calls"
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*SinkErrIntoOnceParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/err-into-once-oracle/Cargo.toml --target-dir build/rust-kotlin-err-into-once/rust-target"
+  },
+  "exitCodes": {
+    "red": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "integrity": {
+    "newSuite": "byte-identical since red",
+    "publicSignatures": "constructor parameter names/types, public function headers unchanged",
+    "canonicalOwnerAndExistingTestsByteIdentical": [
+      "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/MapErr.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkCombinatorsTest.kt"
+    ],
+    "priorFixtureCorrection": "Four fresh adapters and all expected values from 9abbf2f unchanged and still justified by actual upstream FnOnce semantics."
+  },
+  "limits": [
+    "Explicit conversion callback API remains; full Into/From/static FnOnce/move relationships not represented",
+    "Conditional Stream/FusedStream/accessor/Debug, borrow/Pin/Unpin/Drop/Send/Sync remain incomplete",
+    "Getter object identity and display assertions are Kotlin binding controls, not Rust ownership/Debug parity",
+    "Prior shared takeValue/With distinct error conversion/Fanout clone gaps unchanged",
+    "No downstream/Swift/other-platform/publication verification or general failed-sink recovery guarantee"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/ErrInto.kt": "1c8b71952576f9df9337a90182a4b794d7452f569511840b93b3d4ec8253707b",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/MapErr.kt": "720c4f2a4bf10d628176745ab700813de9b01bf3f0b44a053524e29669a81383",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkErrIntoOnceParityTest.kt": "4c37ebf38c598ccf32755dc559af68f9a0069fef0ac16464bcc6c7bd62c98a39",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkCombinatorsTest.kt": "f125d9d6fe39864530defa96c4740e74fc1594065329110ecef756e0b50ad8f0",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": "62e7bf6c31f1366788c36481c445b42a33b88d5b572de92d6ec1a47580ad904b",
+    "tmp/futures-util/src/sink/err_into.rs": "ced2998b2b0b792d80f7543523c9e07e8f5d20a4336cae93084b995e46671b15",
+    "tmp/futures-util/src/sink/map_err.rs": "0f68f444ef13fe7115164be855c3b7b1d269e1119e69fcdad1706988255641f1",
+    "verification/err-into-once-oracle/src/lib.rs": "c122036a679a2e971e4f38a1b390d67558e47a741bb9f87f511715aaa58891a6",
+    "verification/err-into-once-oracle/Cargo.toml": "9af4a8dfabd82d0657e5f6ca76376636eb82e8c948daa6d9faf86589ced8c801",
+    "verification/err-into-once-oracle/Cargo.lock": "490879a745a9c9de8b508685f0375f1de03b1cf58d0fe39ba950ffff1ff719a9",
+    "build/rust-kotlin-err-into-once/ErrIntoReview.kt": "1d934789879280a244edd4373ec0ee826e4f5823fabd410335b1825d6df7faae",
+    "build/rust-kotlin-err-into-once/translation.log": "a900e88ac845191a37bafc4918fb1e2147f5dcc66441962145bb07eb4e85dcc9",
+    "build/rust-kotlin-err-into-once/red-jvm.log": "0cbb3b71086b83c00fc88f59e85ea8463e34a232a2835310a69b6896790fcbc0",
+    "build/rust-kotlin-err-into-once/red-test-sha256.txt": "f743ed9c2fac0f81d7b789a0681ea2597e0f4a2284a4d254a1640f2d392ba745",
+    "build/rust-kotlin-err-into-once/final-check.log": "0a2247c30607289a34883b9d2f79830ec5fd848e292854f01ade2c2c3ee44e0a",
+    "build/rust-kotlin-err-into-once/rust-oracle.log": "61ecd4e82d93e663c446e40f1d73cacff4dd9b26c46ea09d45a98962f3b0d7eb",
+    "build/rust-kotlin-err-into-once/verify_final.py": "74342dace2219b24faa4d690beef0370fb50259464fc8555c7466f42e034d901"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "SinkErrIntoOnceParityTest[jvm]",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:28:17.578Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.023"
+      },
+      "sha256": "7d8aae5653ac087a5d235543b317832aa24cff8f727e827932c21db12b026883"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.SinkErrIntoOnceParityTest",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:28:18.910Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      },
+      "sha256": "525759f12e764a07875f8962a5f8560b3fa2a71a4983a534a5b376ec1db5e871"
+    }
+  }
+}

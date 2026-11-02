@@ -14,42 +14,29 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class SinkErrInto<in Item, E, out E2>(
-    private val sink: Sink<Item, E>,
-    private val transform: (E) -> E2,
+    sink: Sink<Item, E>,
+    transform: (E) -> E2,
 ) : Sink<Item, E2> {
+    private val mapped: SinkMapErr<Item, E, E2> = SinkMapErr.new(sink, transform)
+
     /**
      * Get a reference to the inner sink.
      */
-    public fun getRef(): Sink<Item, E> = sink
-
-    private fun mapOutcome(outcome: SinkOutcome<E>): SinkOutcome<E2> =
-        when (outcome) {
-            SinkOutcome.Ready -> SinkOutcome.Ready
-            is SinkOutcome.Err -> SinkOutcome.Err(transform(outcome.error))
-        }
+    public fun getRef(): Sink<Item, E> = mapped.getRef()
 
     override fun pollReady(context: TaskContext): Poll<SinkOutcome<E2>> =
-        when (val p = sink.pollReady(context)) {
-            is Poll.Ready -> Poll.ready(mapOutcome(p.value))
-            Poll.Pending -> Poll.pending()
-        }
+        mapped.pollReady(context)
 
     override fun startSend(item: Item): SinkOutcome<E2> =
-        mapOutcome(sink.startSend(item))
+        mapped.startSend(item)
 
     override fun pollFlush(context: TaskContext): Poll<SinkOutcome<E2>> =
-        when (val p = sink.pollFlush(context)) {
-            is Poll.Ready -> Poll.ready(mapOutcome(p.value))
-            Poll.Pending -> Poll.pending()
-        }
+        mapped.pollFlush(context)
 
     override fun pollClose(context: TaskContext): Poll<SinkOutcome<E2>> =
-        when (val p = sink.pollClose(context)) {
-            is Poll.Ready -> Poll.ready(mapOutcome(p.value))
-            Poll.Pending -> Poll.pending()
-        }
+        mapped.pollClose(context)
 
-    override fun toString(): String = "SinkErrInto(sink=$sink)"
+    override fun toString(): String = "SinkErrInto(sink=${mapped.getRef()})"
 
     public companion object {
         public fun <Item, E, E2> new(sink: Sink<Item, E>, transform: (E) -> E2): SinkErrInto<Item, E, E2> =
