@@ -1,0 +1,262 @@
+{
+  "baseline": "c614f77",
+  "preExistingDirtyWorkIncluded": false,
+  "priorFeedCheckpoint": {
+    "commit": "c614f77",
+    "baseline": "09c4126",
+    "preExistingDirtyWorkIncluded": false,
+    "files": [
+      "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/Feed.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/FeedStateParityTest.kt",
+      "verification/feed-state-oracle/Cargo.toml",
+      "verification/feed-state-oracle/README.md",
+      "verification/feed-state-oracle/receipt.json",
+      "verification/feed-state-oracle/src/lib.rs"
+    ]
+  },
+  "separateEarlierCheckpoint": "e2a8c62",
+  "graphReverseDependents": {
+    "serde-kotlin": 56,
+    "futures-kotlin": 30,
+    "rand-kotlin": 30,
+    "serde-json-kotlin": 21
+  },
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/sink/with_flat_map.rs",
+      "build/rust-kotlin-with-flat-map/WithFlatMapReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "5e0f527b33ee8f1cc6a6a46d45b6d74dad5c735d88b2cb24e1cb34fdc6ef501b"
+  },
+  "red": {
+    "suite": {
+      "name": "WithFlatMapStateParityTest[jvm]",
+      "tests": "12",
+      "skipped": "0",
+      "failures": "10",
+      "errors": "0",
+      "timestamp": "2026-11-02T20:53:47.398Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.036"
+    },
+    "failures": [
+      {
+        "case": "freshReadinessErrorDropsItem[jvm]",
+        "message": "java.lang.AssertionError: expected:<[transform:1, next, ready, next, ready, send:8, next]> but was:<[transform:1, next, ready, ready, send:7, next, ready, send:8, next, ready]>"
+      },
+      {
+        "case": "nullableItemSurvivesRepeatedPending[jvm]",
+        "message": "java.lang.AssertionError: expected:<[transform:1, next, ready, ready, ready, send:null, next]> but was:<[transform:1, next, next, ready, ready, ready]>"
+      },
+      {
+        "case": "bufferedItemDelaysClose[jvm]",
+        "message": "java.lang.AssertionError: expected same:<Pending> was not:<Ready(value=Ready)>"
+      },
+      {
+        "case": "idleReadinessDoesNotPollInner[jvm]",
+        "message": "java.lang.AssertionError: expected:<Ready(value=Ready)> but was:<Pending>"
+      },
+      {
+        "case": "overlappingStartSendPanicsBeforeTransform[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready>."
+      },
+      {
+        "case": "bufferedReadinessErrorRetainsItem[jvm]",
+        "message": "java.lang.AssertionError: expected:<[transform:1, next, ready, ready, ready, send:null, next]> but was:<[transform:1, next, next, ready, ready, ready]>"
+      },
+      {
+        "case": "transformPanicLeavesNoActiveStream[jvm]",
+        "message": "java.lang.AssertionError: expected:<[panic:1]> but was:<[panic:1, ready]>"
+      },
+      {
+        "case": "streamPendingDelaysFlush[jvm]",
+        "message": "java.lang.AssertionError: expected:<[transform:1, next, next, ready, send:null, next, flush]> but was:<[transform:1, next, next, next, flush]>"
+      },
+      {
+        "case": "bufferedSendErrorConsumesItem[jvm]",
+        "message": "java.lang.AssertionError: expected:<[transform:1, next, ready, ready, send:null, next, ready, send:8, next, flush]> but was:<[transform:1, next, next, ready, ready, send:8, next, flush]>"
+      },
+      {
+        "case": "nonnullDrainHasNoExtraReadinessPoll[jvm]",
+        "message": "java.lang.AssertionError: expected:<[transform:1, next, ready, send:7, next]> but was:<[transform:1, next, ready, send:7, next, ready]>"
+      }
+    ]
+  },
+  "firstFullCheck": {
+    "jvmTest": {
+      "tests": 612,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 612,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 597,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "40",
+        "column": "33",
+        "severity": "error",
+        "message": "Body of when entry should be surrounded by braces if any when entry body is surrounded by braces or has a multiline body",
+        "source": "standard:when-entry-bracing"
+      },
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "41",
+        "column": "1",
+        "severity": "error",
+        "message": "Add a blank line between all when-conditions in case at least one multiline when-condition is found in the statement",
+        "source": "standard:blank-line-between-when-conditions"
+      },
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "43",
+        "column": "47",
+        "severity": "error",
+        "message": "Body of when entry should be surrounded by braces if any when entry body is surrounded by braces or has a multiline body",
+        "source": "standard:when-entry-bracing"
+      },
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "44",
+        "column": "1",
+        "severity": "error",
+        "message": "Add a blank line between all when-conditions in case at least one multiline when-condition is found in the statement",
+        "source": "standard:blank-line-between-when-conditions"
+      },
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "74",
+        "column": "1",
+        "severity": "error",
+        "message": "Add a blank line between all when-conditions in case at least one multiline when-condition is found in the statement",
+        "source": "standard:blank-line-between-when-conditions"
+      },
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "76",
+        "column": "71",
+        "severity": "error",
+        "message": "Body of when entry should be surrounded by braces if any when entry body is surrounded by braces or has a multiline body",
+        "source": "standard:when-entry-bracing"
+      },
+      {
+        "path": "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt",
+        "line": "77",
+        "column": "1",
+        "severity": "error",
+        "message": "Add a blank line between all when-conditions in case at least one multiline when-condition is found in the statement",
+        "source": "standard:blank-line-between-when-conditions"
+      }
+    ],
+    "detekt": 0
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 612,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 612,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 585,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "rust": {
+    "tests": 12,
+    "failures": 0,
+    "exit": 0,
+    "command": "cargo test --offline --manifest-path verification/with-flat-map-state-oracle/Cargo.toml --target-dir build/rust-kotlin-with-flat-map/rust-target"
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*WithFlatMapStateParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain"
+  },
+  "exitCodes": {
+    "red": 1,
+    "firstFullCheck": 1,
+    "final": 1
+  },
+  "testAssertions": "New test source byte-identical between red and final; existing SinkTest byte-identical to baseline.",
+  "callerReview": {
+    "signatureChanges": false,
+    "exactImportMatches": [
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/WithFlatMapStateParityTest.kt"
+    ],
+    "scope": "read-only workspace *-kotlin/src Kotlin import search; no downstream build or binary compatibility claim"
+  },
+  "limits": [
+    "Conditional Stream/FusedStream/accessor/Debug gaps remain",
+    "Kotlin borrow/Pin/Drop/Send/Sync equivalence unverified",
+    "Repolls after error or panic observe upstream implementation, not general recovery guarantees",
+    "Other platforms, Swift, downstream builds and publication unverified"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/WithFlatMap.kt": "d204ec660cfdf428506651f502673542a1377987f1448d5edd1f7b42ec47df10",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/WithFlatMapStateParityTest.kt": "aa50a2eacb21d3f9fc3d2a00a4790a3f78bab0a834e9978736e27808399db811",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": "e4eff47bd62c2282dc0629372a3b53287a80d13f0063ed2480274717f21354a9",
+    "tmp/futures-util/src/sink/with_flat_map.rs": "5e0f527b33ee8f1cc6a6a46d45b6d74dad5c735d88b2cb24e1cb34fdc6ef501b",
+    "verification/with-flat-map-state-oracle/src/lib.rs": "70e0ecca6b0be9a1fd095fde2882ea814119a9cf22ca20f30a0417aef5dae618",
+    "verification/with-flat-map-state-oracle/Cargo.toml": "c68bf875173748f479fa715c2a77ab94d55bad117ca0493f98ae43e5e2454dda",
+    "verification/with-flat-map-state-oracle/Cargo.lock": "d24deeb9ed7a78de369749b874fb4d6390ccc40adcdd188a4ebe6dfaab094285",
+    "build/rust-kotlin-with-flat-map/WithFlatMapReview.kt": "20176e9387294b4f9751b3542a9545fe101b0d95b807c2ad989e4ace3179dae1",
+    "build/rust-kotlin-with-flat-map/red-jvm.log": "40426988df587b184d4a428cd1337a79c6180a7824ff0659881f742e39c025e2",
+    "build/rust-kotlin-with-flat-map/red-test-sha256.txt": "41bafb66ca8b81a0d33a4a17fcb738fec96ec7cc96dcfb719021a35b3779e0ea",
+    "build/rust-kotlin-with-flat-map/first-final-check.log": "ca7059b09382d10a082c231841cbfa0d4d84b6e1ac68f41e632fd259d0fce8ae",
+    "build/rust-kotlin-with-flat-map/first-final-static-comparison.json": "754e00fe72d2b031b7eb762cb39cf5e134ec7ffcc1e7bca3e0dd37ebcc010a27",
+    "build/rust-kotlin-with-flat-map/final-check.log": "298407515beff44c9ab8b8e89b6cb87d72aed09bb41cbd714696b72dfcdad007",
+    "build/rust-kotlin-with-flat-map/rust-oracle.log": "432420d1c879479e6ab966d504cf596ba8f7be3909c0962abed65dc9f960c920",
+    "build/rust-kotlin-with-flat-map/translation.log": "da13500173079cef21fb8a376a71c4359ec7c08bd0268fa3906723243171475d",
+    "build/rust-kotlin-with-flat-map/verify_final.py": "65672d57fb268b8e73ee8e9970d0a7591465abd9be9ef7ea27de2f8797ec2575"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "WithFlatMapStateParityTest[jvm]",
+        "tests": "12",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T20:55:21.193Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "8b49c408e0d713ee620a377b95682a037e61931effa28e5fbcdb6b48f5aa7806"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.WithFlatMapStateParityTest",
+        "tests": "12",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T20:55:29.359Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "3a61c928c99573182efef07bcbac297788a48ab27866b75d245066ab07c6f373"
+    }
+  }
+}

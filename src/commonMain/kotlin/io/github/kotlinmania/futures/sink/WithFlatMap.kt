@@ -21,7 +21,7 @@ public class WithFlatMap<Item, in InItem, out E>(
     private val transform: (InItem) -> Stream<Try<Item, E>>,
 ) : Sink<InItem, E> {
     private var currentStream: Stream<Try<Item, E>>? = null
-    private var pendingItem: Item? = null
+    private var pendingItem: Try.Ok<Item>? = null
 
     /**
      * Get a reference to the inner sink.
@@ -34,39 +34,72 @@ public class WithFlatMap<Item, in InItem, out E>(
     public fun getMut(): Sink<Item, E> = sink
 
     private fun tryDrain(context: TaskContext): Poll<SinkOutcome<E>> {
-        while (true) {
-            val item = pendingItem
-            if (item != null) {
-                when (val readyPoll = sink.pollReady(context)) {
-                    Poll.Pending -> return Poll.pending()
-                    is Poll.Ready -> {
-                        when (val outcome = readyPoll.value) {
-                            is SinkOutcome.Err -> return Poll.ready(outcome)
-                            SinkOutcome.Ready -> {
-                                pendingItem = null
-                                val sendOutcome = sink.startSend(item)
-                                if (sendOutcome is SinkOutcome.Err) {
-                                    return Poll.ready(sendOutcome)
-                                }
+        val buffered = pendingItem
+        if (buffered != null) {
+            when (val readyPoll = sink.pollReady(context)) {
+                Poll.Pending -> {
+                    return Poll.pending()
+                }
+
+                is Poll.Ready -> {
+                    when (val outcome = readyPoll.value) {
+                        is SinkOutcome.Err -> {
+                            return Poll.ready(outcome)
+                        }
+
+                        SinkOutcome.Ready -> {
+                            pendingItem = null
+                            val sendOutcome = sink.startSend(buffered.value)
+                            if (sendOutcome is SinkOutcome.Err) {
+                                return Poll.ready(sendOutcome)
                             }
                         }
                     }
                 }
             }
-            val st = currentStream ?: return Poll.ready(SinkOutcome.ready())
+        }
+        val st = currentStream ?: return Poll.ready(SinkOutcome.ready())
+        while (true) {
             when (val itemPoll = st.pollNext(context)) {
-                Poll.Pending -> return Poll.pending()
+                Poll.Pending -> {
+                    return Poll.pending()
+                }
+
                 is Poll.Ready -> {
                     when (val y = itemPoll.value) {
                         Yield.End -> {
                             currentStream = null
                             return Poll.ready(SinkOutcome.ready())
                         }
+
                         is Yield.Value -> {
                             when (val t = y.value) {
-                                is Try.Err -> return Poll.ready(SinkOutcome.err(t.error))
+                                is Try.Err -> {
+                                    return Poll.ready(SinkOutcome.err(t.error))
+                                }
+
                                 is Try.Ok -> {
-                                    pendingItem = t.value
+                                    when (val readyPoll = sink.pollReady(context)) {
+                                        Poll.Pending -> {
+                                            pendingItem = t
+                                            return Poll.pending()
+                                        }
+
+                                        is Poll.Ready -> {
+                                            when (val outcome = readyPoll.value) {
+                                                is SinkOutcome.Err -> {
+                                                    return Poll.ready(outcome)
+                                                }
+
+                                                SinkOutcome.Ready -> {
+                                                    val sendOutcome = sink.startSend(t.value)
+                                                    if (sendOutcome is SinkOutcome.Err) {
+                                                        return Poll.ready(sendOutcome)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -76,21 +109,10 @@ public class WithFlatMap<Item, in InItem, out E>(
         }
     }
 
-    override fun pollReady(context: TaskContext): Poll<SinkOutcome<E>> {
-        when (val drainPoll = tryDrain(context)) {
-            Poll.Pending -> return Poll.pending()
-            is Poll.Ready -> {
-                if (drainPoll.value is SinkOutcome.Err) return drainPoll
-            }
-        }
-        return if (currentStream != null || pendingItem != null) {
-            Poll.pending()
-        } else {
-            sink.pollReady(context)
-        }
-    }
+    override fun pollReady(context: TaskContext): Poll<SinkOutcome<E>> = tryDrain(context)
 
     override fun startSend(item: InItem): SinkOutcome<E> {
+        check(currentStream == null)
         currentStream = transform(item)
         return SinkOutcome.ready()
     }
