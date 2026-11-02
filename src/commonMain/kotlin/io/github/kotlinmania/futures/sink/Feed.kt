@@ -19,7 +19,7 @@ public class Feed<Item, out E>(
     private val sink: Sink<Item, E>,
     item: Item,
 ) : Future<Try<Unit, E>> {
-    private var pendingItem: Item? = item
+    private var pendingItem: Try.Ok<Item>? = Try.Ok(item)
 
     /**
      * Returns true if the item is still pending to be sent.
@@ -27,15 +27,15 @@ public class Feed<Item, out E>(
     public fun isItemPending(): Boolean = pendingItem != null
 
     override fun poll(context: TaskContext): Poll<Try<Unit, E>> {
-        val current = pendingItem ?: return Poll.ready(Try.ok(Unit))
         when (val p = sink.pollReady(context)) {
             is Poll.Pending -> return Poll.pending()
             is Poll.Ready -> {
                 when (val outcome = p.value) {
                     is SinkOutcome.Err -> return Poll.ready(Try.err(outcome.error))
                     SinkOutcome.Ready -> {
+                        val current = pendingItem ?: error("polled Feed after completion")
                         pendingItem = null
-                        return when (val sendOutcome = sink.startSend(current)) {
+                        return when (val sendOutcome = sink.startSend(current.value)) {
                             SinkOutcome.Ready -> Poll.ready(Try.ok(Unit))
                             is SinkOutcome.Err -> Poll.ready(Try.err(sendOutcome.error))
                         }
