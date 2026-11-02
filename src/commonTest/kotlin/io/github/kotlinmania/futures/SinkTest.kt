@@ -251,7 +251,7 @@ class SinkTest {
         val v = mutableListOf<Int>()
         val sink =
             v.asSink().with<Int, Int, Nothing> { item ->
-                ready(item * 2)
+                ready(Try.Ok(item * 2))
             }
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(0).poll(TaskContext()))
         assertEquals(Poll.Ready(Try.Ok(Unit)), sink.send(1).poll(TaskContext()))
@@ -344,7 +344,7 @@ class SinkTest {
                 .channel<Int>(0)
         val withSink =
             tx.with<Int, Int, io.github.kotlinmania.futures.channel.mpsc.SendError> { item ->
-                ready(item + 10)
+                ready(Try.Ok(item + 10))
             }
         val cx = TaskContext()
         assertEquals(Poll.Ready(SinkOutcome.ready()), withSink.pollReady(cx))

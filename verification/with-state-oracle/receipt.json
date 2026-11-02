@@ -1,0 +1,191 @@
+{
+  "baseline": "90730e5",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/sink/with.rs",
+      "build/rust-kotlin-with-state/WithReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "850cd3b96304df1f38360a0bc60b02d485535e399ef7642acdd9add7876867d8"
+  },
+  "redBehavior": {
+    "suite": {
+      "name": "WithStateParityTest[jvm]",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "6",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:00:17.873Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.027"
+    },
+    "failures": [
+      {
+        "case": "sendErrorConsumesFuture[jvm]",
+        "message": "java.lang.AssertionError: expected:<[ready, transform:1, future, send:7, flush]> but was:<[ready, transform:1, future, ready, send:7, flush]>"
+      },
+      {
+        "case": "overlappingSendPanicsBeforeTransform[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready>."
+      },
+      {
+        "case": "nullOutputIsSent[jvm]",
+        "message": "java.lang.AssertionError: expected:<[ready, transform:1, future, send:null, flush]> but was:<[ready, transform:1, future, ready, send:null, flush]>"
+      },
+      {
+        "case": "flushDoesNotReserveAgain[jvm]",
+        "message": "java.lang.AssertionError: expected:<Ready(value=Ready)> but was:<Pending>"
+      },
+      {
+        "case": "pendingFutureIsRetained[jvm]",
+        "message": "java.lang.AssertionError: expected:<[ready, transform:1, future, future, future, send:7, flush]> but was:<[ready, transform:1, future, future, future, ready, send:7, flush]>"
+      },
+      {
+        "case": "readySendsBeforeNextReservation[jvm]",
+        "message": "java.lang.AssertionError: expected:<[ready, transform:1, future, send:7, ready]> but was:<[ready, transform:1, future, ready, send:7, ready]>"
+      }
+    ]
+  },
+  "redCallbackCompile": {
+    "exit": 1,
+    "runtimeExecuted": false,
+    "reason": "Return type mismatch: expected Future<Int?>, actual TransformFuture returning Try",
+    "command": "./gradlew compileTestKotlinJvm --console=plain"
+  },
+  "firstFullCheck": {
+    "runtimeExecuted": false,
+    "blocker": "Third existing call site SinkTest.kt:347 still returned Ready<Int>; corrected callback wrapper only.",
+    "detekt": 0,
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 624,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 624,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "commands": {
+    "redBehavior": "./gradlew jvmTest --tests '*WithStateParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/with-state-oracle/Cargo.toml --target-dir build/rust-kotlin-with-state/rust-target"
+  },
+  "exitCodes": {
+    "redBehavior": 1,
+    "firstFullCheck": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "rustCases": 12,
+  "callerReview": {
+    "adaptations": {
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": {
+        "adaptations": [
+          [
+            "ready(item * 2)",
+            "ready(Try.Ok(item * 2))"
+          ],
+          [
+            "ready(item + 10)",
+            "ready(Try.Ok(item + 10))"
+          ]
+        ],
+        "allAssertionsUnchanged": true,
+        "otherEdits": false
+      },
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkCombinatorsTest.kt": {
+        "adaptations": [
+          [
+            "ready(str.length)",
+            "ready(Try.Ok(str.length))"
+          ]
+        ],
+        "allAssertionsUnchanged": true,
+        "otherEdits": false
+      }
+    },
+    "totalExistingCallSites": 3,
+    "existingFiles": 2,
+    "externalExactApiCallersFound": false,
+    "scope": "workspace Kotlin/Java/Swift sources excluding build and upstream tmp; exact names/imports, wildcard imports and WithKt; local imported names resolved by call review",
+    "binaryCompatibility": "Not established. Existing callbacks return wrong payload shape; adapt/rebuild consumers."
+  },
+  "assertionIntegrity": "All assertions from seven original behavior cases retained; final typed twelve-case suite byte-identical after pre-repair compile failure; existing assertions unchanged.",
+  "typeLimits": "Same sink/transform E identity-conversion subset only. Distinct E:From<Si::Error>, conditional Stream/Clone/accessor/Debug, borrow/Pin/Drop/Send/Sync remain unresolved.",
+  "coverageLimits": "No downstream builds, Swift/other platforms or fresh publication metadata; no general failed-sink recovery guarantee.",
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/With.kt": "8d3b0e878b3e08774318dad307a213e51d7b1e53915a80eba2b3a30b870c5c71",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/WithStateParityTest.kt": "2fd49d22e80dc186aeb0be26f52cb62252f3a2c52d02c01951c5c7059bdeab04",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": "62e7bf6c31f1366788c36481c445b42a33b88d5b572de92d6ec1a47580ad904b",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkCombinatorsTest.kt": "76e505742749baaca070053adbf3dd5e32751b348c6e4999644335317a8268bf",
+    "tmp/futures-util/src/sink/with.rs": "850cd3b96304df1f38360a0bc60b02d485535e399ef7642acdd9add7876867d8",
+    "verification/with-state-oracle/src/lib.rs": "694d2aacccdc0586dc29d40adc483a0dc5f183ca681d302ea10dd41c73eb0c19",
+    "verification/with-state-oracle/Cargo.toml": "40e764c54bda03e3633be6b175e6c82285b6a8af7b59b9c0c315737a7f623d23",
+    "verification/with-state-oracle/Cargo.lock": "c2295fa0f9b02e8a460bb583c2c8c210b7764daf29ba51014fefd38982cf5b0c",
+    "build/rust-kotlin-with-state/WithReview.kt": "936e9e6ddab564222b5d21de98a4b658a3d175b3f35c6d50a82c57b9aeb5b4a6",
+    "build/rust-kotlin-with-state/red-behavior-jvm.log": "124ffbe9274614379505f4aa75cbaacbf26c852d5236c2b1544d0e25c64f87d4",
+    "build/rust-kotlin-with-state/BeforeTypedCallbackTest.kt.txt": "795aa90d2f7b880d53ed5814f6abceae8a910b18bd184730c9b17a0cdaf88594",
+    "build/rust-kotlin-with-state/red-callback-compile.log": "22ca6d6352d5ddec592e87bdecf9d80ca209cc929394465444dd0444c8e31791",
+    "build/rust-kotlin-with-state/first-full-check.log": "b86de12d2be57189164de9fc0929ddd54bce39f447d6d59d1f0c19a8a6eda6c7",
+    "build/rust-kotlin-with-state/first-full-check-receipt.json": "424c5b40ec146612175e9a3e7e52a3cbf7f6ac32b1c2ca748d22a827d5ef0e19",
+    "build/rust-kotlin-with-state/final-check.log": "32ae05ecb36ea9fa840257b4bc7e3512b944cbf9623f702d6f1fcbbc320fbe54",
+    "build/rust-kotlin-with-state/rust-oracle.log": "b2c106c3655ccf233ee7d79fa1453cc7f324335eb590a6aa69f44972632a2c7f",
+    "build/rust-kotlin-with-state/translation.log": "c7b0a20b0c65fc680e79a8c10a46f914f01da17bf48c13bf992810e8a13da943",
+    "build/rust-kotlin-with-state/caller-search.txt": "a5ab46be3ca89d64c11d69f36b46980b12082915af3c82e63be013a9c8d5cf69",
+    "build/rust-kotlin-with-state/exact-caller-search.txt": "10ad6758c45eec61dca50d66f9d777e04e067a37192e47dfd046619b4d18e4fb",
+    "build/rust-kotlin-with-state/verify_final.py": "17bdd46a7fb68bc4d0bf39de73873e031813535f765247d4e353dd13a4718407"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "WithStateParityTest[jvm]",
+        "tests": "12",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:03:11.762Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.03"
+      },
+      "sha256": "1fade3dd184a8fb6d1769dd3f59147a0cbb26a86bd19b2ee9a03094e962d0708"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.WithStateParityTest",
+        "tests": "12",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:03:12.950Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "b62072f2270f24fcd7b98afe4d93c409c9807e3e9219cd104048a8e483d264f1"
+    }
+  }
+}

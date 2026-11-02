@@ -8,6 +8,7 @@ import io.github.kotlinmania.futures.Poll
 import io.github.kotlinmania.futures.Sink
 import io.github.kotlinmania.futures.SinkOutcome
 import io.github.kotlinmania.futures.TaskContext
+import io.github.kotlinmania.futures.Try
 import kotlin.native.HiddenFromObjC
 
 /**
@@ -16,9 +17,9 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class With<Item, in InItem, out E>(
     private val sink: Sink<Item, E>,
-    private val transform: (InItem) -> Future<Item>,
+    private val transform: (InItem) -> Future<Try<Item, E>>,
 ) : Sink<InItem, E> {
-    private var pendingFuture: Future<Item>? = null
+    private var pendingFuture: Future<Try<Item, E>>? = null
 
     /**
      * Get a reference to the inner sink.
@@ -33,15 +34,19 @@ public class With<Item, in InItem, out E>(
     private fun completePending(context: TaskContext): Poll<SinkOutcome<E>> {
         val fut = pendingFuture ?: return Poll.ready(SinkOutcome.ready())
         return when (val p = fut.poll(context)) {
-            Poll.Pending -> Poll.pending()
+            Poll.Pending -> {
+                Poll.pending()
+            }
+
             is Poll.Ready -> {
-                pendingFuture = null
-                when (val readyPoll = sink.pollReady(context)) {
-                    Poll.Pending -> Poll.pending()
-                    is Poll.Ready -> {
-                        if (readyPoll.value is SinkOutcome.Err) return readyPoll
-                        val sendRes = sink.startSend(p.value)
-                        Poll.ready(sendRes)
+                when (val result = p.value) {
+                    is Try.Err -> {
+                        Poll.ready(SinkOutcome.err(result.error))
+                    }
+
+                    is Try.Ok -> {
+                        pendingFuture = null
+                        Poll.ready(sink.startSend(result.value))
                     }
                 }
             }
@@ -59,6 +64,7 @@ public class With<Item, in InItem, out E>(
     }
 
     override fun startSend(item: InItem): SinkOutcome<E> {
+        check(pendingFuture == null)
         pendingFuture = transform(item)
         return SinkOutcome.ready()
     }
@@ -88,7 +94,7 @@ public class With<Item, in InItem, out E>(
     public companion object {
         public fun <Item, InItem, E> new(
             sink: Sink<Item, E>,
-            transform: (InItem) -> Future<Item>,
+            transform: (InItem) -> Future<Try<Item, E>>,
         ): With<Item, InItem, E> = With(sink, transform)
     }
 }
@@ -97,5 +103,5 @@ public class With<Item, in InItem, out E>(
  * Composes a function in front of the sink.
  */
 @HiddenFromObjC
-public fun <Item, InItem, E> Sink<Item, E>.with(transform: (InItem) -> Future<Item>): With<Item, InItem, E> =
+public fun <Item, InItem, E> Sink<Item, E>.with(transform: (InItem) -> Future<Try<Item, E>>): With<Item, InItem, E> =
     With(this, transform)

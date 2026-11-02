@@ -122,7 +122,7 @@ class SinkCombinatorsTest {
         val list = mutableListOf<Int>()
         val sink =
             list.asSink().with { str: String ->
-                ready(str.length)
+                ready(Try.Ok(str.length))
             }
         val ctx = TaskContext()
 
