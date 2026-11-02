@@ -12,7 +12,7 @@ import kotlin.native.HiddenFromObjC
 public class TryCollect<T, E>(
     private val stream: TryStream<T, E>,
 ) : FusedFuture<Try<List<T>, E>> {
-    private val items = mutableListOf<T>()
+    private var items = mutableListOf<T>()
 
     public companion object {
         internal fun <T, E> new(stream: TryStream<T, E>): TryCollect<T, E> = TryCollect(stream)
@@ -23,19 +23,32 @@ public class TryCollect<T, E>(
 
     override fun poll(context: TaskContext): Poll<Try<List<T>, E>> {
         while (true) {
-            when (val p = stream.tryPollNext(context)) {
+            when (val result = stream.tryPollNext(context)) {
                 is Poll.Ready -> {
-                    when (val y = p.value) {
+                    when (val item = result.value) {
                         is Yield.Value -> {
-                            when (val res = y.value) {
-                                is Try.Ok -> items.add(res.value)
-                                is Try.Err -> return Poll.Ready(Try.Err(res.error))
+                            when (val outcome = item.value) {
+                                is Try.Ok -> {
+                                    items.add(outcome.value)
+                                }
+
+                                is Try.Err -> {
+                                    return Poll.Ready(Try.Err(outcome.error))
+                                }
                             }
                         }
-                        Yield.End -> return Poll.Ready(Try.Ok(items.toList()))
+
+                        Yield.End -> {
+                            val completed = items
+                            items = mutableListOf()
+                            return Poll.Ready(Try.Ok(completed))
+                        }
                     }
                 }
-                Poll.Pending -> return Poll.Pending
+
+                Poll.Pending -> {
+                    return Poll.Pending
+                }
             }
         }
     }
