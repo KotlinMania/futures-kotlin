@@ -11,42 +11,62 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class StreamAny<T>(
     private val stream: Stream<T>,
-    private val predicate: (T) -> Boolean,
+    private val predicate: (T) -> Future<Boolean>,
 ) : FusedFuture<Boolean> {
     private var done = false
+    private var pendingFuture: Future<Boolean>? = null
 
     public companion object {
-        internal fun <T> new(stream: Stream<T>, predicate: (T) -> Boolean): StreamAny<T> = StreamAny(stream, predicate)
+        internal fun <T> new(stream: Stream<T>, predicate: (T) -> Future<Boolean>): StreamAny<T> = StreamAny(stream, predicate)
     }
 
-    override fun isTerminated(): Boolean = done
+    override fun isTerminated(): Boolean = done && pendingFuture == null
 
     override fun poll(context: TaskContext): Poll<Boolean> {
-        if (done) throw RuntimeException("Any polled after completion")
         while (true) {
-            when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> {
-                    when (val y = p.value) {
-                        is Yield.Value -> {
-                            if (predicate(y.value)) {
-                                done = true
-                                return Poll.Ready(true)
-                            }
-                        }
-                        Yield.End -> {
+            val future = pendingFuture
+            if (future != null) {
+                when (val polled = future.poll(context)) {
+                    is Poll.Ready -> {
+                        pendingFuture = null
+                        if (polled.value) {
                             done = true
-                            return Poll.Ready(false)
+                            return Poll.Ready(true)
                         }
                     }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
                 }
-                Poll.Pending -> return Poll.Pending
+            } else if (!done) {
+                when (val polled = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val item = polled.value) {
+                            is Yield.Value -> {
+                                pendingFuture = predicate(item.value)
+                            }
+
+                            Yield.End -> {
+                                done = true
+                                return Poll.Ready(false)
+                            }
+                        }
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
+                }
+            } else {
+                throw RuntimeException("Any polled after completion")
             }
         }
     }
 }
 
 /**
- * Tests if any element of the stream matches a predicate.
+ * Tests if any element of the stream matches an asynchronous predicate.
  */
 @HiddenFromObjC
-public fun <T> Stream<T>.any(predicate: (T) -> Boolean): StreamAny<T> = StreamAny.new(this, predicate)
+public fun <T> Stream<T>.any(predicate: (T) -> Future<Boolean>): StreamAny<T> = StreamAny.new(this, predicate)

@@ -121,11 +121,11 @@ class StreamCombinatorsTest {
     fun countAndPredicates() {
         val cx = TaskContext()
         val stream = listOf(2, 4, 6, 8).asStream()
-        val allEven = stream.forAll { it % 2 == 0 }.poll(cx)
+        val allEven = stream.forAll { ready(it % 2 == 0) }.poll(cx)
         assertIs<Poll.Ready<Boolean>>(allEven)
         assertTrue(allEven.value)
 
-        val anyGreaterThan5 = listOf(2, 4, 6, 8).asStream().any { it > 5 }.poll(cx)
+        val anyGreaterThan5 = listOf(2, 4, 6, 8).asStream().any { ready(it > 5) }.poll(cx)
         assertIs<Poll.Ready<Boolean>>(anyGreaterThan5)
         assertTrue(anyGreaterThan5.value)
 

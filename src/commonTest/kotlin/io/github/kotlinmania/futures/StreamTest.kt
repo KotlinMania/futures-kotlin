@@ -311,7 +311,7 @@ class StreamTest {
 
     @Test
     fun all() {
-        fun isEven(n: Int): Boolean = n % 2 == 0
+        fun isEven(n: Int): Future<Boolean> = ready(n % 2 == 0)
         val cx = TaskContext()
 
         val empty = streamIter(emptyList<Int>())
@@ -326,7 +326,7 @@ class StreamTest {
 
     @Test
     fun any() {
-        fun isEven(n: Int): Boolean = n % 2 == 0
+        fun isEven(n: Int): Future<Boolean> = ready(n % 2 == 0)
         val cx = TaskContext()
 
         val empty = streamIter(emptyList<Int>())
