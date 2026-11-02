@@ -11,11 +11,11 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class Forward<Item, E>(
     stream: Stream<Try<Item, E>>,
-    private val sink: Sink<Item, E>?,
+    sink: Sink<Item, E>?,
 ) : FusedFuture<Try<Unit, E>> {
     private var activeSink: Sink<Item, E>? = sink
     private val stream: StreamFuse<Try<Item, E>> = StreamFuse.new(stream)
-    private var bufferedItem: Item? = null
+    private var bufferedItem: Try.Ok<Item>? = null
 
     public companion object {
         internal fun <Item, E> new(
@@ -30,6 +30,7 @@ public class Forward<Item, E>(
         val si = activeSink ?: error("polled `Forward` after completion")
 
         while (true) {
+            // If we have an item buffered, write it to the sink before doing anything else.
             val buffered = bufferedItem
             if (buffered != null) {
                 when (val readyPoll = si.pollReady(context)) {
@@ -39,7 +40,7 @@ public class Forward<Item, E>(
                             is SinkOutcome.Err -> return Poll.ready(Try.err(outcome.error))
                             SinkOutcome.Ready -> {
                                 bufferedItem = null
-                                val sendOutcome = si.startSend(buffered)
+                                val sendOutcome = si.startSend(buffered.value)
                                 if (sendOutcome is SinkOutcome.Err) {
                                     return Poll.ready(Try.err(sendOutcome.error))
                                 }
@@ -67,7 +68,7 @@ public class Forward<Item, E>(
                             when (val tryVal = y.value) {
                                 is Try.Err -> return Poll.ready(Try.err(tryVal.error))
                                 is Try.Ok -> {
-                                    bufferedItem = tryVal.value
+                                    bufferedItem = tryVal
                                 }
                             }
                         }
@@ -75,10 +76,15 @@ public class Forward<Item, E>(
                             when (val closePoll = si.pollClose(context)) {
                                 Poll.Pending -> return Poll.pending()
                                 is Poll.Ready -> {
-                                    activeSink = null
                                     return when (val outcome = closePoll.value) {
-                                        is SinkOutcome.Err -> Poll.ready(Try.err(outcome.error))
-                                        SinkOutcome.Ready -> Poll.ready(Try.ok(Unit))
+                                        is SinkOutcome.Err -> {
+                                            Poll.ready(Try.err(outcome.error))
+                                        }
+
+                                        SinkOutcome.Ready -> {
+                                            activeSink = null
+                                            Poll.ready(Try.ok(Unit))
+                                        }
                                     }
                                 }
                             }
