@@ -143,6 +143,34 @@ public class BufWriter<out W : AsyncWrite>(
         }
     }
 
+    override fun pollWriteVectored(
+        context: TaskContext,
+        bufs: List<IoSlice>,
+    ): Poll<Try<Int, IoError>> {
+        val totalLength = bufs.sumOf { it.length.toLong() }
+        if (bufLen.toLong() + totalLength > buf.size.toLong()) {
+            when (val flushed = flushBuf(context)) {
+                Poll.Pending -> {
+                    return Poll.Pending
+                }
+
+                is Poll.Ready -> {
+                    val result = flushed.value
+                    if (result is Try.Err) {
+                        return Poll.Ready(result)
+                    }
+                }
+            }
+        }
+        if (totalLength >= buf.size.toLong()) {
+            return inner.pollWriteVectored(context, bufs)
+        }
+        for (slice in bufs) {
+            writeToBuf(slice.buffer, slice.offset, slice.length)
+        }
+        return Poll.Ready(Try.Ok(totalLength.toInt()))
+    }
+
     override fun pollFlush(context: TaskContext): Poll<Try<Unit, IoError>> {
         val flushRes = flushBuf(context)
         when (flushRes) {
