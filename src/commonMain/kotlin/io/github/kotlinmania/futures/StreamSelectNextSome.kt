@@ -10,14 +10,14 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class SelectNextSome<T>(
-    private val stream: Stream<T>,
+    private val stream: FusedStream<T>,
 ) : FusedFuture<T> {
     public companion object {
-        internal fun <T> new(stream: Stream<T>): SelectNextSome<T> = SelectNextSome(stream)
+        internal fun <T> new(stream: FusedStream<T>): SelectNextSome<T> = SelectNextSome(stream)
     }
 
     override fun isTerminated(): Boolean =
-        (stream as? FusedStream<*>)?.isTerminated() ?: false
+        stream.isTerminated()
 
     override fun poll(context: TaskContext): Poll<T> {
         check(!isTerminated()) { "SelectNextSome polled after terminated" }
@@ -41,4 +41,4 @@ public class SelectNextSome<T>(
  * Creates a future that yields the next element produced by this stream when matched with select.
  */
 @HiddenFromObjC
-public fun <T> Stream<T>.selectNextSome(): SelectNextSome<T> = SelectNextSome.new(this)
+public fun <T> FusedStream<T>.selectNextSome(): SelectNextSome<T> = SelectNextSome.new(this)

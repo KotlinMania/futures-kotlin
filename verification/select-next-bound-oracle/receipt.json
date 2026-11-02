@@ -1,0 +1,223 @@
+{
+  "baseline": {
+    "commit": "89f84e6",
+    "kotlin": {
+      "suite": {
+        "name": "SelectNextSomeBoundParityTest[jvm]",
+        "tests": "4",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:44:52.596Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.02"
+      },
+      "exit": 0,
+      "plainExtensionAndConstructorAccepted": true
+    },
+    "defect": "Both unsupported plain-Stream calls compiled; no runtime red case is claimed."
+  },
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "89f84e6",
+    "1349070",
+    "61725c4",
+    "9abbf2f",
+    "9affec7",
+    "7bd0e75",
+    "a5dfcde",
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/stream/stream/select_next_some.rs",
+      "build/rust-kotlin-select-next-bound/SelectNextSomeReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "0094eccc96cfe78d9b6d0a9bdb82cada8fb7929770a3ac00ffcb5441d7dc4f51"
+  },
+  "kotlinNegativeAfterFix": {
+    "command": "./gradlew compileTestKotlinJvm --console=plain",
+    "exit": 1,
+    "expectedFailure": "Plain Stream extension receiver and constructor argument rejected",
+    "compilerDiagnostics": [
+      "e: file:///Volumes/stuff/Projects/kotlinmania/futures-kotlin/src/commonTest/kotlin/io/github/kotlinmania/futures/SelectNextSomePlainStreamCompileProbe.kt:4:12 Cannot infer type for type parameter 'T'. Specify it explicitly.",
+      "e: file:///Volumes/stuff/Projects/kotlinmania/futures-kotlin/src/commonTest/kotlin/io/github/kotlinmania/futures/SelectNextSomePlainStreamCompileProbe.kt:4:12 Candidate 'fun <T> FusedStream<T>.selectNextSome(): SelectNextSome<T>' is inapplicable because of a receiver type mismatch.",
+      "e: file:///Volumes/stuff/Projects/kotlinmania/futures-kotlin/src/commonTest/kotlin/io/github/kotlinmania/futures/SelectNextSomePlainStreamCompileProbe.kt:7:20 Argument type mismatch: actual type is 'Stream<Int>', but 'FusedStream<Int>' was expected."
+    ],
+    "fixtureMovedIntactTo": "verification/select-next-bound-oracle/rejected/SelectNextSomePlainStreamCompileProbe.kt",
+    "sha256": "99e53459caed449201f928f8c5332401b95bf008bc875b379025c5b3b509f077"
+  },
+  "rustNegative": {
+    "command": [
+      "cargo",
+      "check",
+      "--offline",
+      "--manifest-path",
+      "verification/select-next-bound-oracle/Cargo.toml",
+      "--bin",
+      "reject-non-fused",
+      "--target-dir",
+      "build/rust-kotlin-select-next-bound/rust-target"
+    ],
+    "exit": 101,
+    "expectedFailure": "Plain stream lacks FusedStream"
+  },
+  "rustRuntime": {
+    "tests": 4,
+    "failures": 0,
+    "exit": 0,
+    "actualApi": "unchanged upstream SelectNextSome on actual FusedStream implementors"
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 678,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 678,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "commands": {
+    "baseline": "./gradlew jvmTest --tests '*SelectNextSomeBoundParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rustRuntime": "cargo test --lib --offline --manifest-path verification/select-next-bound-oracle/Cargo.toml --target-dir build/rust-kotlin-select-next-bound/rust-target"
+  },
+  "exitCodes": {
+    "baselineAcceptedPlain": 0,
+    "kotlinRejectPlain": 1,
+    "rustRejectPlain": 101,
+    "rustRuntime": 0,
+    "final": 1
+  },
+  "callerReview": {
+    "search": {
+      "command": [
+        "rg",
+        "--no-ignore",
+        "--hidden",
+        "-n",
+        "-g",
+        "*.kt",
+        "-g",
+        "*.java",
+        "-g",
+        "*.swift",
+        "-g",
+        "!**/tmp/**",
+        "-g",
+        "!**/build/**",
+        "-g",
+        "!**/.build/**",
+        "-g",
+        "!**/.git/**",
+        "-g",
+        "!**/.gradle/**",
+        "-g",
+        "!**/.kotlin/**",
+        "-g",
+        "!**/node_modules/**",
+        "-g",
+        "!**/.venv/**",
+        "\\b(selectNextSome|SelectNextSome|StreamSelectNextSomeKt)\\b|import[^\\n]*io\\.github\\.kotlinmania\\.futures\\.\\*",
+        "<all workspace *-kotlin repositories>"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "scope": "Kotlin/Java/Swift, including ignored/hidden sources outside excluded upstream/build/dependency caches; bare constructor/method names include aliases and fully qualified references; root wildcard imports"
+    },
+    "existingCallSites": 5,
+    "file": "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamSelectNextSomeTest.kt",
+    "lines": [
+      16,
+      23,
+      38,
+      46,
+      71
+    ],
+    "type": "FuturesUnordered<Int> implements canonical FusedStream<T>",
+    "adaptations": 0,
+    "existingAssertions": "byte-identical",
+    "externalAffectedOwnersFound": false
+  },
+  "apiImpact": "Constructor/internal factory require FusedStream; extension receiver narrowed from Stream to FusedStream. Current javap descriptors confirm FusedStream. Consumers require rebuild/possible declared-type adaptation; downstream compatibility unverified.",
+  "integrity": "Runtime suite unchanged since baseline; negative Kotlin fixture moved intact after both compile observations; existing caller and FuturesUnordered files unchanged; poll algorithm unchanged.",
+  "limits": [
+    "Rust Unpin/borrow/Pin/Drop/Send/Sync representation and debug-only malformed-fused-producer check remain unimplemented",
+    "No downstream/Swift/other-platform/publication verification",
+    "Prior extra TryUnfold FusedStream/shared takeValue/explicit callback conversion/With distinct-error/Fanout clone limits retained",
+    "Scan async mutable-state and TakeUntil typed nullable-result gaps assessed but untouched"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/StreamSelectNextSome.kt": "e1985f6a58941231047211cb59592d338f0e0595a65cc206951138dff6821307",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/FuturesUnordered.kt": "8cc8364e2c7f297e8bbeefbc513ba4d550d86769d85afe6e36161672850b2f63",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SelectNextSomeBoundParityTest.kt": "47b7d93d1dd88f54950a1d0a4fdeccc8d79b12b4525b8f54f48699c0db5f1818",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamSelectNextSomeTest.kt": "08062cb6a36f95aa6f99c2ec50541175ea0221b0eb12e4460712799405b6d272",
+    "tmp/futures-util/src/stream/stream/select_next_some.rs": "0094eccc96cfe78d9b6d0a9bdb82cada8fb7929770a3ac00ffcb5441d7dc4f51",
+    "verification/select-next-bound-oracle/src/lib.rs": "d97dcbc4c0edb2bf1f311b81ee78ce2c16f7ad9e7643da87177d1bcf9214cbfa",
+    "verification/select-next-bound-oracle/Cargo.toml": "47428e3a84d5335c5aa1d06c39cd73a270829031034b931125aaba59dad17fb5",
+    "verification/select-next-bound-oracle/Cargo.lock": "30968743e124df8c11dc5fef4111bc1d4b1a772c8a27d744e00d022080c014e4",
+    "verification/select-next-bound-oracle/rejected/non_fused.rs": "d63935dcd4d33f31f41c56adbf16a0c0c19ab8edde31e2450410588a3d2c1d9e",
+    "verification/select-next-bound-oracle/rejected/SelectNextSomePlainStreamCompileProbe.kt": "99e53459caed449201f928f8c5332401b95bf008bc875b379025c5b3b509f077",
+    "build/rust-kotlin-select-next-bound/SelectNextSomeReview.kt": "a9f9b1adaca5ddb148a8486b756ca8f44417ef206ce8fecba6f4f960e1aa2557",
+    "build/rust-kotlin-select-next-bound/translation.log": "58b2634a7ad54ee5d423ff6ac334081d22ba906695e2d770d9d44ed6818e06f5",
+    "build/rust-kotlin-select-next-bound/baseline-accepted-plain.log": "ee1365bef4b7bece1105d1fba8dd0939dbbb8e18fea51831e634fbf9c83703dc",
+    "build/rust-kotlin-select-next-bound/baseline-accepted-receipt.json": "69dc3ae07767b15276df787941030ef9803234d8cfc700d762fcd3f18c87a52f",
+    "build/rust-kotlin-select-next-bound/reject-plain-after-fix.log": "d917bb87169eae6a55ad5db6492146c128d427c4730ee9bb9c671f2bf5a8a356",
+    "build/rust-kotlin-select-next-bound/kotlin-negative-receipt.json": "f29128c7ccb661a5c24d4da985c0ad760e6c354fdf4b358c887a192e11ebea50",
+    "build/rust-kotlin-select-next-bound/rust-oracle.log": "fe0463cbc02bfa31151b4a6747540c5b4e9ae4518b3742da2f19bac14e1f9072",
+    "build/rust-kotlin-select-next-bound/rust-reject-non-fused.log": "a3ebfe6d3adf17730edb85e307557e85413cc87250a194d5a6089f5567d2e72d",
+    "build/rust-kotlin-select-next-bound/rust-negative-receipt.json": "05e59ad6a574ea92af71efe7ec80372022d3cf21fb4aebe872c49b4ff2b457a3",
+    "build/rust-kotlin-select-next-bound/caller-search.txt": "4c70050b5c02de396d0cdfc2692c61ff7876d4680e963f63d06d9ca022b6db69",
+    "build/rust-kotlin-select-next-bound/caller-search-receipt.json": "44bc16620ed4883ca65f155b9c7a9bfd4bb6803aee769f1ad4f91d0a336d3d62",
+    "build/rust-kotlin-select-next-bound/final-check.log": "4a68d983d3ec38ac432d0a1723690f573b0fa9b7b14b2d96f14d117b42feebee",
+    "build/rust-kotlin-select-next-bound/javap-final.txt": "410a8879cece9858efc7eba66e24306e1dac1528f2f4916f257d89f3c66fef17",
+    "build/rust-kotlin-select-next-bound/verify_final.py": "c195ba4a8f2c593978303a3234d57a2ca3c0db3c86a13b98b4590c4f0593b450"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "SelectNextSomeBoundParityTest[jvm]",
+        "tests": "4",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:48:31.366Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "65dccecf2bd4157c1265507ff6cb398f6cb74e0ae25afec56585e344362e993f"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.SelectNextSomeBoundParityTest",
+        "tests": "4",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:48:41.049Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "884afb2da3667fa85f1064654cf3fdf2e90a68be91339c832d2db9246662481e"
+    }
+  }
+}
