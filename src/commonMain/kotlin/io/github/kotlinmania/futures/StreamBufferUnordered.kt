@@ -10,14 +10,14 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class BufferUnordered<T>(
-    private val stream: Stream<Future<T>>,
+    stream: Stream<Future<T>>,
     private val capacity: Int,
 ) : FusedStream<T> {
-    private val inFlight = mutableListOf<Future<T>>()
-    private var streamDone: Boolean = false
+    private val stream: StreamFuse<Future<T>> = stream.fuse()
+    private val queue = FuturesUnordered<T>()
 
     init {
-        require(capacity > 0) { "capacity must be greater than 0" }
+        require(capacity >= 0) { "capacity must not be negative" }
     }
 
     public companion object {
@@ -25,44 +25,42 @@ public class BufferUnordered<T>(
             BufferUnordered(stream, capacity)
     }
 
-    override fun isTerminated(): Boolean = streamDone && inFlight.isEmpty()
+    override fun isTerminated(): Boolean = queue.isTerminated() && stream.isTerminated()
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> {
-        while (!streamDone && inFlight.size < capacity) {
+        // Fill the in-progress queue before attempting to yield its next output.
+        while (queue.len() < capacity) {
             when (val p = stream.pollNext(context)) {
                 is Poll.Ready -> {
                     when (val y = p.value) {
-                        is Yield.Value -> inFlight.add(y.value)
-                        Yield.End -> streamDone = true
+                        is Yield.Value -> queue.push(y.value)
+                        Yield.End -> break
                     }
                 }
+
                 Poll.Pending -> break
             }
         }
 
-        var i = 0
-        while (i < inFlight.size) {
-            when (val p = inFlight[i].poll(context)) {
-                is Poll.Ready -> {
-                    inFlight.removeAt(i)
-                    return Poll.Ready(Yield.Value(p.value))
-                }
-                Poll.Pending -> i++
+        when (val result = queue.pollNext(context)) {
+            is Poll.Ready -> {
+                if (result.value is Yield.Value) return result
+            }
+
+            Poll.Pending -> {
+                return Poll.Pending
             }
         }
 
-        return if (streamDone && inFlight.isEmpty()) {
-            Poll.Ready(Yield.End)
-        } else {
-            Poll.Pending
-        }
+        // An empty queue does not end this stream while more futures may arrive.
+        return if (stream.isDone()) Poll.Ready(Yield.End) else Poll.Pending
     }
 
     override fun sizeHint(): SizeHint {
-        val flightLen = inFlight.size
+        val qLen = queue.len()
         val hint = stream.sizeHint()
-        val lower = (hint.lower.toLong() + flightLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-        val upper = hint.upper?.let { (it.toLong() + flightLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt() }
+        val lower = (hint.lower.toLong() + qLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        val upper = hint.upper?.let { if (it > Int.MAX_VALUE - qLen) null else it + qLen }
         return SizeHint(lower, upper)
     }
 }
@@ -71,5 +69,4 @@ public class BufferUnordered<T>(
  * Runs up to [capacity] futures concurrently and yields their results in order of completion.
  */
 @HiddenFromObjC
-public fun <T> Stream<Future<T>>.bufferUnordered(capacity: Int): BufferUnordered<T> =
-    BufferUnordered.new(this, capacity)
+public fun <T> Stream<Future<T>>.bufferUnordered(capacity: Int): BufferUnordered<T> = BufferUnordered.new(this, capacity)
