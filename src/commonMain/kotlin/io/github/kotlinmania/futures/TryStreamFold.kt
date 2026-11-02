@@ -15,6 +15,7 @@ public class TryFold<T, E, Acc>(
     initial: Acc,
 ) : FusedFuture<Try<Acc, E>> {
     private var accum: Acc? = initial
+    private var hasAccum = true
     private var pendingFuture: Future<Try<Acc, E>>? = null
 
     public companion object {
@@ -26,51 +27,63 @@ public class TryFold<T, E, Acc>(
     }
 
     override fun isTerminated(): Boolean =
-        accum == null && pendingFuture == null
+        !hasAccum && pendingFuture == null
 
+    @Suppress("UNCHECKED_CAST")
     override fun poll(context: TaskContext): Poll<Try<Acc, E>> {
         while (true) {
-            val fut = pendingFuture
-            if (fut != null) {
-                when (val p = fut.poll(context)) {
+            val future = pendingFuture
+            if (future != null) {
+                when (val polled = future.poll(context)) {
                     is Poll.Ready -> {
                         pendingFuture = null
-                        when (val res = p.value) {
-                            is Try.Ok -> accum = res.value
+                        when (val result = polled.value) {
+                            is Try.Ok -> {
+                                accum = result.value
+                                hasAccum = true
+                            }
+
                             is Try.Err -> {
-                                accum = null
-                                return Poll.Ready(Try.Err(res.error))
+                                return Poll.Ready(Try.Err(result.error))
                             }
                         }
                     }
-                    Poll.Pending -> return Poll.Pending
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
                 }
-            } else {
-                val acc = accum
-                if (acc != null) {
-                    when (val p = stream.tryPollNext(context)) {
-                        is Poll.Ready -> {
-                            when (val y = p.value) {
-                                is Yield.Value -> {
-                                    when (val res = y.value) {
-                                        is Try.Ok -> pendingFuture = fold(acc, res.value)
-                                        is Try.Err -> {
-                                            accum = null
-                                            return Poll.Ready(Try.Err(res.error))
-                                        }
+            } else if (hasAccum) {
+                when (val polled = stream.tryPollNext(context)) {
+                    is Poll.Ready -> {
+                        val current = accum as Acc
+                        accum = null
+                        hasAccum = false
+                        when (val item = polled.value) {
+                            is Yield.Value -> {
+                                when (val result = item.value) {
+                                    is Try.Ok -> {
+                                        pendingFuture = fold(current, result.value)
+                                    }
+
+                                    is Try.Err -> {
+                                        return Poll.Ready(Try.Err(result.error))
                                     }
                                 }
-                                Yield.End -> {
-                                    accum = null
-                                    return Poll.Ready(Try.Ok(acc))
-                                }
+                            }
+
+                            Yield.End -> {
+                                return Poll.Ready(Try.Ok(current))
                             }
                         }
-                        Poll.Pending -> return Poll.Pending
                     }
-                } else {
-                    return Poll.Pending
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
                 }
+            } else {
+                throw RuntimeException("Fold polled after completion")
             }
         }
     }
