@@ -10,18 +10,18 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class TryForEachConcurrent<T, E>(
-    private val stream: Stream<Try<T, E>>,
-    private val limit: Int?,
+    stream: Stream<Try<T, E>>,
+    limit: Int?,
     private val action: (T) -> Future<Try<Unit, E>>,
 ) : FusedFuture<Try<Unit, E>> {
-    private val inFlight = mutableListOf<Future<Try<Unit, E>>>()
-    private var streamDone: Boolean = false
-    private var isFutureTerminated: Boolean = false
+    private var stream: Stream<Try<T, E>>? = stream
+    private var futures = FuturesUnordered<Try<Unit, E>>()
+
+    // Note: `limit` = 0 gets ignored.
+    private val limit: Int? = limit?.takeIf { it != 0 }
 
     init {
-        if (limit != null) {
-            require(limit > 0) { "limit must be greater than 0 if specified" }
-        }
+        require(limit == null || limit >= 0) { "limit must not be negative" }
     }
 
     public companion object {
@@ -32,74 +32,73 @@ public class TryForEachConcurrent<T, E>(
         ): TryForEachConcurrent<T, E> = TryForEachConcurrent(stream, limit, action)
     }
 
-    override fun isTerminated(): Boolean = isFutureTerminated
+    override fun isTerminated(): Boolean = stream == null && futures.isEmpty()
 
     override fun poll(context: TaskContext): Poll<Try<Unit, E>> {
-        if (isFutureTerminated) {
-            return Poll.ready(Try.ok(Unit))
-        }
-
         while (true) {
             var madeProgressThisIter = false
 
-            if (limit == null || inFlight.size < limit) {
-                if (!streamDone) {
-                    when (val pollResult = stream.pollNext(context)) {
-                        is Poll.Ready -> {
-                            when (val y = pollResult.value) {
-                                is Yield.Value -> {
-                                    when (val item = y.value) {
-                                        is Try.Ok -> {
-                                            madeProgressThisIter = true
-                                            inFlight.add(action(item.value))
-                                        }
-                                        is Try.Err -> {
-                                            streamDone = true
-                                            inFlight.clear()
-                                            isFutureTerminated = true
-                                            return Poll.ready(Try.err(item.error))
-                                        }
+            // Check if we've already created a number of futures greater than `limit`.
+            if (limit == null || limit > futures.len()) {
+                val input = stream
+                val result = input?.pollNext(context) ?: Poll.Ready(Yield.End)
+                when (result) {
+                    is Poll.Ready -> {
+                        when (val item = result.value) {
+                            is Yield.Value -> {
+                                when (val outcome = item.value) {
+                                    is Try.Ok -> {
+                                        madeProgressThisIter = true
+                                        futures.push(action(outcome.value))
+                                    }
+
+                                    is Try.Err -> {
+                                        // Empty the stream and futures so that we know the future has completed.
+                                        stream = null
+                                        futures = FuturesUnordered()
+                                        return Poll.Ready(Try.Err(outcome.error))
                                     }
                                 }
-                                Yield.End -> {
-                                    streamDone = true
+                            }
+
+                            Yield.End -> {
+                                stream = null
+                            }
+                        }
+                    }
+
+                    Poll.Pending -> {}
+                }
+            }
+
+            when (val result = futures.pollNext(context)) {
+                is Poll.Ready -> {
+                    when (val item = result.value) {
+                        is Yield.Value -> {
+                            when (val outcome = item.value) {
+                                is Try.Ok -> {
+                                    madeProgressThisIter = true
+                                }
+
+                                is Try.Err -> {
+                                    // Empty the stream and futures so that we know the future has completed.
+                                    stream = null
+                                    futures = FuturesUnordered()
+                                    return Poll.Ready(Try.Err(outcome.error))
                                 }
                             }
                         }
-                        Poll.Pending -> {}
-                    }
-                }
-            }
 
-            var i = 0
-            while (i < inFlight.size) {
-                when (val p = inFlight[i].poll(context)) {
-                    is Poll.Ready -> {
-                        inFlight.removeAt(i)
-                        when (val res = p.value) {
-                            is Try.Ok -> {
-                                madeProgressThisIter = true
-                            }
-                            is Try.Err -> {
-                                streamDone = true
-                                inFlight.clear()
-                                isFutureTerminated = true
-                                return Poll.ready(Try.err(res.error))
-                            }
+                        Yield.End -> {
+                            if (stream == null) return Poll.Ready(Try.Ok(Unit))
                         }
                     }
-                    Poll.Pending -> i++
                 }
+
+                Poll.Pending -> {}
             }
 
-            if (streamDone && inFlight.isEmpty()) {
-                isFutureTerminated = true
-                return Poll.ready(Try.ok(Unit))
-            }
-
-            if (!madeProgressThisIter) {
-                return Poll.pending()
-            }
+            if (!madeProgressThisIter) return Poll.Pending
         }
     }
 }
