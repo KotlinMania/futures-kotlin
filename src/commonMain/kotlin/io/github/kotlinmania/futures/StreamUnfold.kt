@@ -18,12 +18,13 @@ public class Unfold<State, Item>(
     override fun pollNext(context: TaskContext): Poll<Yield<Item>> {
         val curState = state
         if (curState is UnfoldState.Value) {
+            state = UnfoldState.Empty
             state = UnfoldState.InProgress(f(curState.value))
         }
 
         val inProg = state
         if (inProg !is UnfoldState.InProgress) {
-            return Poll.ready(Yield.end())
+            error("Unfold must not be polled after it returned `Poll::Ready(None)`")
         }
 
         return when (val p = inProg.future.poll(context)) {
