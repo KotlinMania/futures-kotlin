@@ -18,6 +18,7 @@ public class TryUnfold<State, Item, E>(
     override fun pollNext(context: TaskContext): Poll<Yield<Try<Item, E>>> {
         val curState = state
         if (curState is UnfoldState.Value) {
+            state = UnfoldState.Empty
             state = UnfoldState.InProgress(f(curState.value))
         }
 

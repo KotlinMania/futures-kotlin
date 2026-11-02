@@ -1,0 +1,159 @@
+{
+  "baseline": "1349070",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "1349070",
+    "61725c4",
+    "9abbf2f",
+    "9affec7",
+    "7bd0e75",
+    "a5dfcde",
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/stream/try_stream/try_unfold.rs",
+      "build/rust-kotlin-try-unfold-state/TryUnfoldReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "aaf0f4857a4ec8233ac842ae509f29e5a210827a0bb40cfc0dc3e858f153d2b4"
+  },
+  "red": {
+    "suite": {
+      "name": "TryUnfoldStateParityTest[jvm]",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "3",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:38:20.716Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.032"
+    },
+    "failures": [
+      {
+        "case": "nullableCallbackPanicConsumesSeed[jvm]",
+        "message": "java.lang.IllegalStateException: callback panic"
+      },
+      {
+        "case": "callbackPanicConsumesSeed[jvm]",
+        "message": "java.lang.IllegalStateException: callback panic"
+      },
+      {
+        "case": "callbackPanicAfterItemConsumesNextSeed[jvm]",
+        "message": "java.lang.IllegalStateException: callback panic"
+      }
+    ]
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 674,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 674,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "rust": {
+    "tests": 8,
+    "failures": 0,
+    "exit": 0,
+    "actualApi": "unchanged stream::try_unfold; side-by-side stream::unfold terminal distinction"
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*TryUnfoldStateParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/try-unfold-state-oracle/Cargo.toml --target-dir build/rust-kotlin-try-unfold-state/rust-target"
+  },
+  "exitCodes": {
+    "red": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "integrity": {
+    "newSuite": "byte-identical since red",
+    "publicDeclarations": "unchanged",
+    "productionChange": "One added state = Empty before closure invocation; existing EOF/error/pending handling unchanged",
+    "adjacentSourcesAndExistingTestsUnchanged": [
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamTryStreamTest.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamUnfoldStateParityTest.kt",
+      "src/commonMain/kotlin/io/github/kotlinmania/futures/StreamUnfold.kt",
+      "src/commonMain/kotlin/io/github/kotlinmania/futures/StreamFuse.kt",
+      "src/commonMain/kotlin/io/github/kotlinmania/futures/UnfoldState.kt"
+    ]
+  },
+  "terminalDistinction": "Ordinary Unfold panics when polled after EOF; TryUnfold returns repeated EOF. Actual Rust and Kotlin controls preserve both. Canonical Fuse unchanged.",
+  "limits": [
+    "Rust TryUnfold implements Stream, not FusedStream; Kotlin extra FusedStream/isTerminated API unchanged and not certified by this behavior repair",
+    "Post-panic probes observe implementation, not generic Future recovery/reuse guarantees",
+    "Shared nullable/non-consuming takeValue unchanged",
+    "Kotlin move/borrow/Pin/Unpin/Drop/Send/Sync and Debug/accessor/comment/trait completeness not claimed",
+    "Prior explicit-callback conversion/With distinct-error/Fanout cloning limits retained",
+    "No downstream/Swift/other-platform/publication verification"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/TryStreamUnfold.kt": "f6d86138b386bdf82e5ad3b70347df9b0313950139ab66c2759bd1e305e7b6e3",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/StreamUnfold.kt": "0bc5901085f71553c8536ef192c72e9f9edecfc622c00b74e88173c6de8b8d98",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/UnfoldState.kt": "dabd5810350bf9a002e7d76adae2cdfa5c40d4165665abd65e42778be68b926e",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/StreamFuse.kt": "f83b98e491837d12b8539aaca0fc36970cdf567008cb32a4ba5ee7915644fc31",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/TryUnfoldStateParityTest.kt": "18e0d2a630166bcaa55e77cc01ec2edc14cf82e895641b8bd6ee6099c2117dda",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamTryStreamTest.kt": "1d71c21a1adf63ef6afeca9da688a27507c393675c2767d721a7555aff01a71e",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamUnfoldStateParityTest.kt": "2e1007cae7520263e0823d2305ab5485e11054a4789a95df16b7dba8ab702685",
+    "tmp/futures-util/src/stream/try_stream/try_unfold.rs": "aaf0f4857a4ec8233ac842ae509f29e5a210827a0bb40cfc0dc3e858f153d2b4",
+    "verification/try-unfold-state-oracle/src/lib.rs": "3b4d1b9b65fcc93aa25aea30b9cc6dbf86292470a14e89af35eefa8471805923",
+    "verification/try-unfold-state-oracle/Cargo.toml": "8616af030858933d5ec1eb6e2c52687817752640e9b989c81d2aab565f753f24",
+    "verification/try-unfold-state-oracle/Cargo.lock": "79edf2aad7047dffdccdce97943f062de59537845d8c86ccf1f6a207c423dce7",
+    "build/rust-kotlin-try-unfold-state/TryUnfoldReview.kt": "752fc6368debd71913291dd395e00d3ec860e8b46daae58eba1ca782e17f1616",
+    "build/rust-kotlin-try-unfold-state/translation.log": "55cceb755b645d39fe29bb90629ba064fb9c26c66931e745291b6b3908cea39e",
+    "build/rust-kotlin-try-unfold-state/red-jvm.log": "9f3e12e3bd82e9d4021b88b34668380d7a4fc628cf0c5138f4706d67b8826178",
+    "build/rust-kotlin-try-unfold-state/red-test-sha256.txt": "216bc0db75cc5ca574ade39e3599a0ef9840c0ff1d70f44ab5ff7ecb0d69e599",
+    "build/rust-kotlin-try-unfold-state/final-check.log": "9448803bb684d2b858bdf57787d4420ad5db9f801ccada1a467ace8351453c32",
+    "build/rust-kotlin-try-unfold-state/rust-oracle.log": "bd5bf64ecc8f2c1d0bbee3cd5fd9a6044196f93a7eef95e2995d2de8b367e8f2",
+    "build/rust-kotlin-try-unfold-state/verify_final.py": "065e4922eedb900562e3ae311ee331ca910adc5ebee76c9e14d5f6b981c42495"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "TryUnfoldStateParityTest[jvm]",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:38:58.686Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.032"
+      },
+      "sha256": "14e34ae2b3a582f54b82db2e45f3532f94f2329abc920524041176aedbec86ca"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.TryUnfoldStateParityTest",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:39:08.199Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      },
+      "sha256": "6ae221d46943e54facfda7a216f4748b25c6a68fa4ae2d85bdb35b6ec2b63348"
+    }
+  }
+}

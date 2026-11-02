@@ -1,0 +1,8 @@
+[package]
+name = "futures-try-unfold-state-oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+futures-util = { path = "../../tmp/futures-util", default-features = false, features = ["std"] }
