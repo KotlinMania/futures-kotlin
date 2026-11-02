@@ -11,14 +11,15 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class Zip<A, B>(
-    private val stream1: Stream<A>,
-    private val stream2: Stream<B>,
+    stream1: Stream<A>,
+    stream2: Stream<B>,
 ) : FusedStream<Pair<A, B>> {
+    private val stream1: StreamFuse<A> = stream1.fuse()
+    private val stream2: StreamFuse<B> = stream2.fuse()
     private var queued1: A? = null
     private var hasQueued1: Boolean = false
     private var queued2: B? = null
     private var hasQueued2: Boolean = false
-    private var done: Boolean = false
 
     public companion object {
         internal fun <A, B> new(stream1: Stream<A>, stream2: Stream<B>): Zip<A, B> = Zip(stream1, stream2)
@@ -27,20 +28,18 @@ public class Zip<A, B>(
     /**
      * Acquires references to the underlying streams that this combinator is pulling from.
      */
-    public fun getRef(): Pair<Stream<A>, Stream<B>> = Pair(stream1, stream2)
+    public fun getRef(): Pair<Stream<A>, Stream<B>> = Pair(stream1.getRef(), stream2.getRef())
 
     /**
      * Consumes this combinator, returning the underlying streams.
      */
-    public fun intoInner(): Pair<Stream<A>, Stream<B>> = Pair(stream1, stream2)
+    public fun intoInner(): Pair<Stream<A>, Stream<B>> = Pair(stream1.intoInner(), stream2.intoInner())
 
     override fun isTerminated(): Boolean =
-        done || (!hasQueued1 && !hasQueued2 && (((stream1 as? FusedStream<*>)?.isTerminated() ?: false) || ((stream2 as? FusedStream<*>)?.isTerminated() ?: false)))
+        stream1.isTerminated() && stream2.isTerminated()
 
     @Suppress("UNCHECKED_CAST")
     override fun pollNext(context: TaskContext): Poll<Yield<Pair<A, B>>> {
-        if (done) return Poll.Ready(Yield.End)
-
         if (!hasQueued1) {
             when (val p1 = stream1.pollNext(context)) {
                 is Poll.Ready -> {
@@ -49,10 +48,8 @@ public class Zip<A, B>(
                             queued1 = y1.value
                             hasQueued1 = true
                         }
-                        Yield.End -> {
-                            done = true
-                            return Poll.Ready(Yield.End)
-                        }
+
+                        Yield.End -> {}
                     }
                 }
                 Poll.Pending -> {}
@@ -67,10 +64,8 @@ public class Zip<A, B>(
                             queued2 = y2.value
                             hasQueued2 = true
                         }
-                        Yield.End -> {
-                            done = true
-                            return Poll.Ready(Yield.End)
-                        }
+
+                        Yield.End -> {}
                     }
                 }
                 Poll.Pending -> {}
@@ -87,11 +82,10 @@ public class Zip<A, B>(
             return Poll.Ready(Yield.Value(Pair(a, b)))
         }
 
-        return Poll.Pending
+        return if (stream1.isDone() || stream2.isDone()) Poll.Ready(Yield.End) else Poll.Pending
     }
 
     override fun sizeHint(): SizeHint {
-        if (done) return SizeHint(0, 0)
         val hint1 = stream1.sizeHint()
         val hint2 = stream2.sizeHint()
         val lower1 = hint1.lower + (if (hasQueued1) 1 else 0)
