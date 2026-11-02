@@ -23,11 +23,11 @@ public data class TryChunksError<out T, out E>(
  */
 @HiddenFromObjC
 public class TryChunks<T, E>(
-    private val stream: Stream<Try<T, E>>,
+    stream: Stream<Try<T, E>>,
     private val capacity: Int,
 ) : FusedStream<Try<List<T>, TryChunksError<T, E>>> {
     private val items = mutableListOf<T>()
-    private var isStreamTerminated: Boolean = false
+    private val stream: StreamFuse<Try<T, E>> = stream.fuse()
 
     init {
         require(capacity > 0) { "capacity must be greater than 0" }
@@ -44,7 +44,7 @@ public class TryChunks<T, E>(
         return copy
     }
 
-    override fun isTerminated(): Boolean = isStreamTerminated && items.isEmpty()
+    override fun isTerminated(): Boolean = stream.isTerminated() && items.isEmpty()
 
     override fun pollNext(context: TaskContext): Poll<Yield<Try<List<T>, TryChunksError<T, E>>>> {
         while (true) {
@@ -65,7 +65,6 @@ public class TryChunks<T, E>(
                             }
                         }
                         Yield.End -> {
-                            isStreamTerminated = true
                             return if (items.isNotEmpty()) {
                                 Poll.Ready(Yield.Value(Try.Ok(takeItems())))
                             } else {
@@ -85,7 +84,7 @@ public class TryChunks<T, E>(
         val chunkLen = if (items.isNotEmpty()) 1 else 0
         val hint = stream.sizeHint()
         val lower = (hint.lower / capacity).coerceAtMost(Int.MAX_VALUE - chunkLen) + chunkLen
-        val upper = hint.upper?.let { (it / capacity).coerceAtMost(Int.MAX_VALUE - chunkLen) + chunkLen }
+        val upper = hint.upper?.let { if (it > Int.MAX_VALUE - chunkLen) null else it + chunkLen }
         return SizeHint(lower, upper)
     }
 }
