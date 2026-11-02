@@ -14,7 +14,7 @@ public class TrySkipWhile<T, E>(
     private val predicate: (T) -> Future<Try<Boolean, E>>,
 ) : FusedStream<Try<T, E>> {
     private var pendingFuture: Future<Try<Boolean, E>>? = null
-    private var pendingItem: T? = null
+    private var pendingItem: Try.Ok<T>? = null
     private var doneSkipping: Boolean = false
 
     public companion object {
@@ -35,7 +35,7 @@ public class TrySkipWhile<T, E>(
     public fun intoInner(): TryStream<T, E> = stream
 
     override fun isTerminated(): Boolean =
-        pendingFuture == null && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
+        pendingItem == null && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
 
     override fun pollNext(context: TaskContext): Poll<Yield<Try<T, E>>> {
         if (doneSkipping) {
@@ -43,46 +43,57 @@ public class TrySkipWhile<T, E>(
         }
 
         while (true) {
-            val fut = pendingFuture
-            if (fut != null) {
-                when (val p = fut.poll(context)) {
+            val future = pendingFuture
+            if (future != null) {
+                when (val result = future.poll(context)) {
                     is Poll.Ready -> {
                         pendingFuture = null
-                        when (val res = p.value) {
+                        when (val outcome = result.value) {
                             is Try.Ok -> {
                                 val item = pendingItem
                                 pendingItem = null
-                                if (!res.value) {
+                                if (!outcome.value) {
                                     doneSkipping = true
-                                    @Suppress("UNCHECKED_CAST")
-                                    return Poll.Ready(Yield.Value(Try.Ok(item as T)))
+                                    return Poll.Ready(if (item == null) Yield.End else Yield.Value(item))
                                 }
                             }
+
                             is Try.Err -> {
-                                pendingItem = null
-                                return Poll.Ready(Yield.Value(Try.Err(res.error)))
+                                return Poll.Ready(Yield.Value(Try.Err(outcome.error)))
                             }
                         }
                     }
-                    Poll.Pending -> return Poll.Pending
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
                 }
             } else {
-                when (val p = stream.tryPollNext(context)) {
+                when (val result = stream.tryPollNext(context)) {
                     is Poll.Ready -> {
-                        when (val y = p.value) {
+                        when (val item = result.value) {
                             is Yield.Value -> {
-                                when (val res = y.value) {
+                                when (val outcome = item.value) {
                                     is Try.Ok -> {
-                                        pendingItem = res.value
-                                        pendingFuture = predicate(res.value)
+                                        pendingFuture = predicate(outcome.value)
+                                        pendingItem = outcome
                                     }
-                                    is Try.Err -> return Poll.Ready(Yield.Value(Try.Err(res.error)))
+
+                                    is Try.Err -> {
+                                        return Poll.Ready(Yield.Value(Try.Err(outcome.error)))
+                                    }
                                 }
                             }
-                            Yield.End -> return Poll.Ready(Yield.End)
+
+                            Yield.End -> {
+                                return Poll.Ready(Yield.End)
+                            }
                         }
                     }
-                    Poll.Pending -> return Poll.Pending
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
                 }
             }
         }
@@ -91,7 +102,7 @@ public class TrySkipWhile<T, E>(
     override fun sizeHint(): SizeHint {
         val pendingLen = if (pendingItem != null) 1 else 0
         val hint = stream.sizeHint()
-        val upper = hint.upper?.let { (it.toLong() + pendingLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt() }
+        val upper = hint.upper?.let { if (it > Int.MAX_VALUE - pendingLen) null else it + pendingLen }
         return SizeHint(0, upper)
     }
 }
