@@ -118,13 +118,29 @@ public class LineWriter<out W : AsyncWrite>(
         }
 
         val tailOffset = offset + flushed
-        val tailLen = length - flushed
-        val buffered =
-            if (tailLen > 0) {
-                bufWriter.writeToBuf(buf, tailOffset, tailLen)
-            } else {
-                0
+        val tailEnd =
+            when {
+                flushed >= newlineIndex -> {
+                    offset + length
+                }
+
+                newlineIndex - flushed <= bufWriter.capacity() -> {
+                    offset + newlineIndex
+                }
+
+                else -> {
+                    val scanEnd = tailOffset + bufWriter.capacity()
+                    var lastNewlineInWindow = -1
+                    for (i in (scanEnd - 1) downTo tailOffset) {
+                        if (buf[i] == '\n'.code.toByte()) {
+                            lastNewlineInWindow = i
+                            break
+                        }
+                    }
+                    if (lastNewlineInWindow >= 0) lastNewlineInWindow + 1 else scanEnd
+                }
             }
+        val buffered = bufWriter.writeToBuf(buf, tailOffset, tailEnd - tailOffset)
 
         return Poll.Ready(Try.ok(flushed + buffered))
     }
