@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 coroutines = "1.11.0"
 serialization = "1.11.0"
 datetime = "0.8.0"
@@ -9,7 +9,6 @@ detekt = "2.0.0-alpha.6"
 ktlint = "14.2.0"
 ktlintEngine = "1.8.0"
 kotlinxBenchmark = "0.5.0"
-
 procMacro = "0.1.4"
 procMacro2 = "0.1.6"
 quote = "0.2.5"
@@ -39,8 +38,6 @@ syn-kotlin = { module = "io.github.kotlinmania:syn-kotlin", version.ref = "syn" 
 [bundles]
 futures-commonMain = [
   "kotlinx-coroutines-core",
-  "kotlinx-serialization-core",
-  "kotlinx-serialization-json",
   "kotlinx-datetime",
   "collections-immutable",
   "proc-macro-kotlin",
@@ -48,4 +45,3 @@ futures-commonMain = [
   "quote-kotlin",
   "syn-kotlin",
 ]
-
