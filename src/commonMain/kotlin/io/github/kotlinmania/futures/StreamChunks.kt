@@ -10,11 +10,11 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class Chunks<T>(
-    private val stream: Stream<T>,
+    stream: Stream<T>,
     private val capacity: Int,
 ) : FusedStream<List<T>> {
     private val items = mutableListOf<T>()
-    private var streamDone = false
+    private val stream: StreamFuse<T> = stream.fuse()
 
     init {
         require(capacity > 0) { "capacity must be greater than 0" }
@@ -31,22 +31,22 @@ public class Chunks<T>(
     /**
      * Acquires a reference to the underlying stream that this combinator is pulling from.
      */
-    public fun getRef(): Stream<T> = stream
+    public fun getRef(): Stream<T> = stream.getRef()
 
     /**
      * Acquires a mutable reference to the underlying stream.
      */
-    public fun getMut(): Stream<T> = stream
+    public fun getMut(): Stream<T> = stream.getRef()
 
     /**
      * Acquires a pinned mutable reference to the underlying stream.
      */
-    public fun getPinMut(): Stream<T> = stream
+    public fun getPinMut(): Stream<T> = stream.getRef()
 
     /**
      * Consumes this combinator, returning the underlying stream.
      */
-    public fun intoInner(): Stream<T> = stream
+    public fun intoInner(): Stream<T> = stream.intoInner()
 
     public fun fmt(): String = "Chunks"
 
@@ -58,7 +58,7 @@ public class Chunks<T>(
         return chunk
     }
 
-    override fun isTerminated(): Boolean = streamDone && items.isEmpty()
+    override fun isTerminated(): Boolean = stream.isTerminated() && items.isEmpty()
 
     override fun pollNext(context: TaskContext): Poll<Yield<List<T>>> {
         while (true) {
@@ -74,7 +74,6 @@ public class Chunks<T>(
                             }
                         }
                         Yield.End -> {
-                            streamDone = true
                             return if (items.isNotEmpty()) {
                                 val chunk = items.toList()
                                 items.clear()
@@ -93,8 +92,8 @@ public class Chunks<T>(
     override fun sizeHint(): SizeHint {
         val chunkLen = if (items.isNotEmpty()) 1 else 0
         val hint = stream.sizeHint()
-        val lower = (hint.lower / capacity) + chunkLen
-        val upper = hint.upper?.let { (it / capacity) + chunkLen }
+        val lower = minOf(Int.MAX_VALUE.toLong(), (hint.lower / capacity).toLong() + chunkLen).toInt()
+        val upper = hint.upper?.let { if (it > Int.MAX_VALUE - chunkLen) null else it + chunkLen }
         return SizeHint(lower, upper)
     }
 }

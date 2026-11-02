@@ -10,10 +10,10 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class ReadyChunks<T>(
-    private val stream: Stream<T>,
+    stream: Stream<T>,
     private val capacity: Int,
 ) : FusedStream<List<T>> {
-    private var streamDone = false
+    private val stream: StreamFuse<T> = stream.fuse()
 
     init {
         require(capacity > 0) { "capacity must be greater than 0" }
@@ -26,14 +26,14 @@ public class ReadyChunks<T>(
     /**
      * Acquires a reference to the underlying stream that this combinator is pulling from.
      */
-    public fun getRef(): Stream<T> = stream
+    public fun getRef(): Stream<T> = stream.getRef()
 
     /**
      * Consumes this combinator, returning the underlying stream.
      */
-    public fun intoInner(): Stream<T> = stream
+    public fun intoInner(): Stream<T> = stream.intoInner()
 
-    override fun isTerminated(): Boolean = streamDone
+    override fun isTerminated(): Boolean = stream.isTerminated()
 
     override fun pollNext(context: TaskContext): Poll<Yield<List<T>>> {
         val items = mutableListOf<T>()
@@ -45,7 +45,6 @@ public class ReadyChunks<T>(
                             items.add(y.value)
                         }
                         Yield.End -> {
-                            streamDone = true
                             return if (items.isNotEmpty()) {
                                 Poll.Ready(Yield.Value(items))
                             } else {
