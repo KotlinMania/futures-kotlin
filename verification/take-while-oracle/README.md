@@ -103,3 +103,41 @@ fixture. The rerun log is build/rust-kotlin-skip-while/take-while-fixture-rechec
 Earlier Kotlin runtime results are unchanged; this correction does not change
 production Kotlin. Historical source-hash receipts refer to the original Rust
 fixture; this newer oracle verification supersedes that fixture receipt only.
+
+## Closing the after-Pending producer-hint coverage gap
+
+A separate test-only addition after 91276c9 now scripts Value(1), Pending,
+Value(2), End. It checks the producer hint (2, Some(2)) initially, then
+(1, Some(1)) before and after the Pending poll, and (0, Some(0)) after the
+second value. The actual Rust TakeWhile upper hints are checked through the
+same sequence, with lower bound zero and exactly four input polls. The
+corresponding Kotlin test checks the same producer/adapter hints, yielded
+values, Pending and final End. All pre-existing assertions are unchanged.
+
+The original seven successful cases did not cover a value after Pending at
+a hint query. An isolated negative control under
+build/rust-kotlin-take-while-producer-hint restores only the former producer
+Iterator::take_while call in a copy of the current Rust test source. It links
+the already-built, unchanged futures-util library. The original seven tests
+still pass; the newly added case fails immediately: actual (1, Some(1)) versus
+expected (2, Some(2)), exit 101. This is deliberately broken fixture evidence,
+not the real oracle run or a modified upstream algorithm. Its source, compile
+command/receipt and failure log are retained separately. The corrected real
+oracle runs all eight cases successfully with the same assertions.
+
+Original seven-case logs remain unchanged in build/rust-kotlin-take-while and
+the corrected seven-case rerun remains in build/rust-kotlin-skip-while. New
+oracle, negative-control and final Kotlin/static logs are stored under
+build/rust-kotlin-take-while-producer-hint. No production source, dependency,
+API signature or existing assertion changed in this test-only step.
+
+Final checks for this test-only addition: all eight Rust oracle cases pass,
+545 JVM tests and 545 macOS ARM tests pass, and Detekt has zero findings.
+Ktlint remains blocked by 645 common-main plus 31 common-test findings, all
+mapped to unchanged baseline 91276c9 lines; none is on an authored line.
+The test formatting was corrected before final runtime/static checks were
+rerun. Source hashes and static comparison are in the new receipt directory.
+Read-only comparisons confirm the original seven Rust/Kotlin test bodies,
+production TakeWhile and upstream source are unchanged; the previous corrected
+seven-case execution log still matches its recorded SHA-256. This closes only
+the explicit after-Pending fixture contract, not broader parity limitations.

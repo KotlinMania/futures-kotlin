@@ -164,4 +164,31 @@ class StreamTakeWhileFutureParityTest {
         assertEquals(Yield.Value(1), assertIs<Poll.Ready<Yield<Int>>>(stream.pollNext(TaskContext())).value)
         assertEquals(2, polls)
     }
+
+    @Test
+    fun producerAndTakeWhileHintsCountAValueAfterPending() {
+        val input =
+            Input(
+                listOf(
+                    Poll.Ready(Yield.Value(1)),
+                    Poll.Pending,
+                    Poll.Ready(Yield.Value(2)),
+                    Poll.Ready(Yield.End),
+                ),
+            )
+        assertEquals(SizeHint(2, 2), input.sizeHint())
+        val stream = input.takeWhile { ready(true) }
+        assertEquals(SizeHint(0, 2), stream.sizeHint())
+        assertEquals(1, item(stream.pollNext(TaskContext())))
+        assertEquals(SizeHint(1, 1), input.sizeHint())
+        assertEquals(SizeHint(0, 1), stream.sizeHint())
+        assertSame(Poll.Pending, stream.pollNext(TaskContext()))
+        assertEquals(SizeHint(1, 1), input.sizeHint())
+        assertEquals(SizeHint(0, 1), stream.sizeHint())
+        assertEquals(2, item(stream.pollNext(TaskContext())))
+        assertEquals(SizeHint(0, 0), input.sizeHint())
+        assertEquals(SizeHint(0, 0), stream.sizeHint())
+        assertSame(Yield.End, assertIs<Poll.Ready<Yield<Int?>>>(stream.pollNext(TaskContext())).value)
+        assertEquals(4, input.polls)
+    }
 }

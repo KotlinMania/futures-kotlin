@@ -45,4 +45,30 @@ mod tests {
         assert_eq!(Pin::new(&mut f).poll_next(&mut cx),Poll::Ready(None));assert_eq!(Pin::new(&mut f).poll_next(&mut cx),Poll::Ready(Some(1)));assert_eq!(polls.get(),2);
     }
 
+    #[test]
+    fn producer_and_take_while_hints_count_a_value_after_pending() {
+        let (s, polls) = input(vec![
+            Poll::Ready(Some(Some(1))),
+            Poll::Pending,
+            Poll::Ready(Some(Some(2))),
+            Poll::Ready(None),
+        ]);
+        assert_eq!(s.size_hint(), (2, Some(2)));
+        let mut f = s.take_while(|_| future::ready(true));
+        let w = waker();
+        let mut cx = Context::from_waker(&w);
+        assert_eq!(f.size_hint(), (0, Some(2)));
+        assert_eq!(Pin::new(&mut f).poll_next(&mut cx), Poll::Ready(Some(Some(1))));
+        assert_eq!(f.get_ref().size_hint(), (1, Some(1)));
+        assert_eq!(f.size_hint(), (0, Some(1)));
+        assert!(Pin::new(&mut f).poll_next(&mut cx).is_pending());
+        assert_eq!(f.get_ref().size_hint(), (1, Some(1)));
+        assert_eq!(f.size_hint(), (0, Some(1)));
+        assert_eq!(Pin::new(&mut f).poll_next(&mut cx), Poll::Ready(Some(Some(2))));
+        assert_eq!(f.get_ref().size_hint(), (0, Some(0)));
+        assert_eq!(f.size_hint(), (0, Some(0)));
+        assert_eq!(Pin::new(&mut f).poll_next(&mut cx), Poll::Ready(None));
+        assert_eq!(polls.get(), 4);
+    }
+
 }
