@@ -34,8 +34,8 @@ public class Fanout<Item, out E>(
 
     override fun pollReady(context: TaskContext): Poll<SinkOutcome<E>> {
         val r1 = sink1.pollReady(context)
-        val r2 = sink2.pollReady(context)
         if (r1 is Poll.Ready && r1.value is SinkOutcome.Err) return r1
+        val r2 = sink2.pollReady(context)
         if (r2 is Poll.Ready && r2.value is SinkOutcome.Err) return r2
         return if (r1 is Poll.Ready && r2 is Poll.Ready) {
             Poll.ready(SinkOutcome.ready())
@@ -52,8 +52,8 @@ public class Fanout<Item, out E>(
 
     override fun pollFlush(context: TaskContext): Poll<SinkOutcome<E>> {
         val r1 = sink1.pollFlush(context)
-        val r2 = sink2.pollFlush(context)
         if (r1 is Poll.Ready && r1.value is SinkOutcome.Err) return r1
+        val r2 = sink2.pollFlush(context)
         if (r2 is Poll.Ready && r2.value is SinkOutcome.Err) return r2
         return if (r1 is Poll.Ready && r2 is Poll.Ready) {
             Poll.ready(SinkOutcome.ready())
@@ -64,8 +64,8 @@ public class Fanout<Item, out E>(
 
     override fun pollClose(context: TaskContext): Poll<SinkOutcome<E>> {
         val r1 = sink1.pollClose(context)
-        val r2 = sink2.pollClose(context)
         if (r1 is Poll.Ready && r1.value is SinkOutcome.Err) return r1
+        val r2 = sink2.pollClose(context)
         if (r2 is Poll.Ready && r2.value is SinkOutcome.Err) return r2
         return if (r1 is Poll.Ready && r2 is Poll.Ready) {
             Poll.ready(SinkOutcome.ready())

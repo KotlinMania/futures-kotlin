@@ -1,0 +1,188 @@
+{
+  "baseline": "7bd0e75",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "7bd0e75",
+    "a5dfcde",
+    "90730e5",
+    "c614f77",
+    "e2a8c62"
+  ],
+  "translation": {
+    "exit": 0,
+    "command": [
+      "../rust-kotlin/build/bin/macosArm64/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "--gradle-properties",
+      "gradle.properties",
+      "--source-root",
+      "tmp/futures-util/src",
+      "tmp/futures-util/src/sink/fanout.rs",
+      "build/rust-kotlin-fanout-order/FanoutReview.kt"
+    ],
+    "cliSha256": "98e13f77dc6f701188ae581fee5653b08599d7bf93bdc3d0e7860a48b6531a6d",
+    "sourceSha256": "66dcde056e0bbee4e0074d331838ed2743dc872ea1597f05d61970523dc34926"
+  },
+  "red": {
+    "suite": {
+      "name": "FanoutOrderParityTest[jvm]",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "6",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:15:12.094Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.016"
+    },
+    "failures": [
+      {
+        "case": "readyNullLeftError[jvm]",
+        "message": "java.lang.AssertionError: expected:<[left.ready]> but was:<[left.ready, right.ready]>"
+      },
+      {
+        "case": "readyLeftError[jvm]",
+        "message": "java.lang.AssertionError: expected:<[left.ready]> but was:<[left.ready, right.ready]>"
+      },
+      {
+        "case": "flushLeftError[jvm]",
+        "message": "java.lang.AssertionError: expected:<[left.flush]> but was:<[left.flush, right.flush]>"
+      },
+      {
+        "case": "closeNullLeftError[jvm]",
+        "message": "java.lang.AssertionError: expected:<[left.close]> but was:<[left.close, right.close]>"
+      },
+      {
+        "case": "closeLeftError[jvm]",
+        "message": "java.lang.AssertionError: expected:<[left.close]> but was:<[left.close, right.close]>"
+      },
+      {
+        "case": "flushNullLeftError[jvm]",
+        "message": "java.lang.AssertionError: expected:<[left.flush]> but was:<[left.flush, right.flush]>"
+      }
+    ]
+  },
+  "firstFullCheck": {
+    "jvmTest": {
+      "tests": 641,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 641,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 33,
+    "authoredFindings": [
+      {
+        "path": "src/commonTest/kotlin/io/github/kotlinmania/futures/FanoutOrderParityTest.kt",
+        "line": "8",
+        "column": "34",
+        "severity": "error",
+        "message": "Newline expected after opening parenthesis",
+        "source": "standard:class-signature"
+      },
+      {
+        "path": "src/commonTest/kotlin/io/github/kotlinmania/futures/FanoutOrderParityTest.kt",
+        "line": "8",
+        "column": "51",
+        "severity": "error",
+        "message": "Newline expected before closing parenthesis",
+        "source": "standard:class-signature"
+      }
+    ],
+    "detekt": 0
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 641,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 641,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 581,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "rust": {
+    "tests": 9,
+    "scenarios": 24,
+    "failures": 0,
+    "exit": 0
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*FanoutOrderParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/fanout-order-oracle/Cargo.toml --target-dir build/rust-kotlin-fanout-order/rust-target"
+  },
+  "exitCodes": {
+    "red": 1,
+    "firstFullCheck": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "integrity": "Only three production statement reorderings. Public declarations, startSend and existing SinkTest unchanged. Only new test edit since red is enum constructor formatting; all assertions and data unchanged.",
+  "limits": [
+    "Clone-bound/first outgoing payload clone remains unrepresented, startSend unchanged",
+    "Delegated accessor/ownership/Pin/Drop/Send/Sync limitations remain",
+    "Prior With identity-only error conversion and shared takeValue gaps retained",
+    "No downstream/Swift/other-platform/publication verification or failed-sink recovery claim"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/Fanout.kt": "132a9bedfe724219bc57ee3ef23ece20c916567ba69dada21028da78e10d8349",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/FanoutOrderParityTest.kt": "08de00e688868ba3a8c1de6f3a686a8e9f92188531be7e5d8cdec86f7e842d29",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/SinkTest.kt": "62e7bf6c31f1366788c36481c445b42a33b88d5b572de92d6ec1a47580ad904b",
+    "tmp/futures-util/src/sink/fanout.rs": "66dcde056e0bbee4e0074d331838ed2743dc872ea1597f05d61970523dc34926",
+    "verification/fanout-order-oracle/src/lib.rs": "5d72d4713077a481a1075e9ec0f9a0885412ecd34ad93f996cb8a200b70121fd",
+    "verification/fanout-order-oracle/Cargo.toml": "3a7f13e888e18db3386f926455d3f60d748008baa6e547c8de78e973d06be25a",
+    "verification/fanout-order-oracle/Cargo.lock": "e57f7c8769e2ef00f0b4d3fe7e033f0e1d49a70d90758c37511924b11368cd4a",
+    "build/rust-kotlin-fanout-order/FanoutReview.kt": "35393512f13c3fbeafcb77aa7cdbb817c9a245328e567d65e3694468fcada658",
+    "build/rust-kotlin-fanout-order/translation.log": "f089ebe046a664bcbacce14494e701c9cdee22e9af4244141a7feb2bc8890a3f",
+    "build/rust-kotlin-fanout-order/red-jvm.log": "66e2852ce4b70e0842f23eea80820c2e820357cad8ed8dab3762f77ce5ca0690",
+    "build/rust-kotlin-fanout-order/red-test-sha256.txt": "9aca97547ea27936087ba2e9165f0cbd65581b0c7059345823e14e56bc5a5c4b",
+    "build/rust-kotlin-fanout-order/BeforeEnumFormattingTest.kt.txt": "7cf78ead4d3f62db4c7fdd1cd97f3078d8992334daa10ea0b5ffac4b69d4ba62",
+    "build/rust-kotlin-fanout-order/first-final-check.log": "1dbe38c43ff53a3d0ad2082a845063eca100b19e65d8ebcf51a803be0e32bb4c",
+    "build/rust-kotlin-fanout-order/first-final-static-comparison.json": "ba6c136090ca9d2fc9a5b50e32ef978bc86780f377228705a6e65877d7d30c6d",
+    "build/rust-kotlin-fanout-order/final-check.log": "edacc3c1e9d7c335917edd1e503162d24f038ec821cba414a77aefc2ec8077d0",
+    "build/rust-kotlin-fanout-order/rust-oracle.log": "e4f39c82895209585436e4330badf5d4fa2167e1e58902136c03bed71354f802",
+    "build/rust-kotlin-fanout-order/verify_final.py": "59c18513d2fb7026e0228fa1a82ff3803582bff0f9cc5cec089b5463742ed4b1"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "FanoutOrderParityTest[jvm]",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:17:04.200Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.004"
+      },
+      "sha256": "5b709210af497663ad1d66d0d008adc3d87f731be6f55769d35e0f2d53de8deb"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.FanoutOrderParityTest",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:17:05.293Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      },
+      "sha256": "ac62ac6e3c1116fb4a2e14c464b626319d7899e1091e1d4f099c82d7b11d7ca3"
+    }
+  }
+}
