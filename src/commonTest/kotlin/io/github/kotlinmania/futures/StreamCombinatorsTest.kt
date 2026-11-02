@@ -251,7 +251,11 @@ class StreamCombinatorsTest {
     fun forEachStream() {
         val cx = TaskContext()
         val accumulated = mutableListOf<Int>()
-        val future = listOf(10, 20, 30).asStream().forEach { accumulated.add(it) }
+        val future =
+            listOf(10, 20, 30).asStream().forEach {
+                accumulated.add(it)
+                ready(Unit)
+            }
 
         val res = future.poll(cx)
         assertIs<Poll.Ready<Unit>>(res)

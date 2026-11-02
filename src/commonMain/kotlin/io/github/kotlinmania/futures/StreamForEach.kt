@@ -11,36 +11,55 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public class ForEach<T>(
     private val stream: Stream<T>,
-    private val action: (T) -> Unit,
+    private val action: (T) -> Future<Unit>,
 ) : FusedFuture<Unit> {
-    private var done: Boolean = false
+    private var pendingFuture: Future<Unit>? = null
 
     public companion object {
-        internal fun <T> new(stream: Stream<T>, action: (T) -> Unit): ForEach<T> = ForEach(stream, action)
+        internal fun <T> new(stream: Stream<T>, action: (T) -> Future<Unit>): ForEach<T> = ForEach(stream, action)
     }
 
-    override fun isTerminated(): Boolean = done
+    override fun isTerminated(): Boolean =
+        pendingFuture == null && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
 
     override fun poll(context: TaskContext): Poll<Unit> {
         while (true) {
-            when (val p = stream.pollNext(context)) {
-                is Poll.Ready -> {
-                    when (val y = p.value) {
-                        is Yield.Value -> action(y.value)
-                        Yield.End -> {
-                            done = true
-                            return Poll.Ready(Unit)
-                        }
+            val future = pendingFuture
+            if (future != null) {
+                when (future.poll(context)) {
+                    is Poll.Ready -> {
+                        pendingFuture = null
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
                     }
                 }
-                Poll.Pending -> return Poll.Pending
+            } else {
+                when (val polled = stream.pollNext(context)) {
+                    is Poll.Ready -> {
+                        when (val item = polled.value) {
+                            is Yield.Value -> {
+                                pendingFuture = action(item.value)
+                            }
+
+                            Yield.End -> {
+                                return Poll.Ready(Unit)
+                            }
+                        }
+                    }
+
+                    Poll.Pending -> {
+                        return Poll.Pending
+                    }
+                }
             }
         }
     }
 }
 
 /**
- * Runs the provided action on each element of the stream.
+ * Runs the provided asynchronous action on each element, waiting for its future before reading the next item.
  */
 @HiddenFromObjC
-public fun <T> Stream<T>.forEach(action: (T) -> Unit): ForEach<T> = ForEach.new(this, action)
+public fun <T> Stream<T>.forEach(action: (T) -> Future<Unit>): ForEach<T> = ForEach.new(this, action)
