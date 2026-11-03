@@ -12,28 +12,40 @@ import kotlin.native.HiddenFromObjC
 public class Concat<T>(
     private val stream: Stream<List<T>>,
 ) : FusedFuture<List<T>> {
-    private val accum = mutableListOf<T>()
-    private var done: Boolean = false
+    private var accum: MutableList<T>? = null
 
     public companion object {
         internal fun <T> new(stream: Stream<List<T>>): Concat<T> = Concat(stream)
     }
 
-    override fun isTerminated(): Boolean = done
+    override fun isTerminated(): Boolean =
+        accum == null && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
 
     override fun poll(context: TaskContext): Poll<List<T>> {
         while (true) {
-            when (val p = stream.pollNext(context)) {
+            when (val result = stream.pollNext(context)) {
                 is Poll.Ready -> {
-                    when (val y = p.value) {
-                        is Yield.Value -> accum.addAll(y.value)
+                    when (val item = result.value) {
+                        is Yield.Value -> {
+                            val current = accum
+                            if (current != null) {
+                                current.addAll(item.value)
+                            } else {
+                                accum = item.value.toMutableList()
+                            }
+                        }
+
                         Yield.End -> {
-                            done = true
-                            return Poll.Ready(accum.toList())
+                            val completed = accum ?: mutableListOf()
+                            accum = null
+                            return Poll.Ready(completed)
                         }
                     }
                 }
-                Poll.Pending -> return Poll.Pending
+
+                Poll.Pending -> {
+                    return Poll.Pending
+                }
             }
         }
     }
