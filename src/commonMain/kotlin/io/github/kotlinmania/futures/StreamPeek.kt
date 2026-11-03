@@ -46,10 +46,11 @@ public class Peekable<T>(
         }
     }
 
-    public fun peek(): Future<T?> =
-        object : Future<T?> {
-            override fun poll(context: TaskContext): Poll<T?> = pollPeek(context)
-        }
+    /**
+     * Produces a future which retrieves a reference to the next item
+     * in the stream, or `null` if the underlying stream terminates.
+     */
+    public fun peek(): Peek<T> = Peek(this)
 
     public fun nextIf(predicate: (T) -> Boolean): Future<T?> =
         object : FusedFuture<T?> {
@@ -107,6 +108,32 @@ public class Peekable<T>(
         val lower = (hint.lower.toLong() + peekLen).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         val upper = hint.upper?.let { if (it > Int.MAX_VALUE - peekLen) null else it + peekLen }
         return SizeHint(lower, upper)
+    }
+}
+
+/**
+ * Future for the [Peekable.peek] method.
+ */
+@HiddenFromObjC
+public class Peek<T> internal constructor(
+    inner: Peekable<T>,
+) : FusedFuture<T?> {
+    private var inner: Peekable<T>? = inner
+
+    override fun isTerminated(): Boolean = inner == null
+
+    override fun poll(context: TaskContext): Poll<T?> {
+        val current = checkNotNull(inner) { "Peek polled after completion" }
+        return when (current.pollPeek(context)) {
+            Poll.Pending -> {
+                Poll.Pending
+            }
+
+            is Poll.Ready -> {
+                inner = null
+                current.pollPeek(context)
+            }
+        }
     }
 }
 

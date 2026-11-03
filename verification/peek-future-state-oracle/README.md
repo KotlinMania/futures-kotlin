@@ -1,0 +1,27 @@
+# Peek future lifecycle parity
+
+## Exact source and consumer repair
+
+Upstream `tmp/futures-util/src/stream/stream/peek.rs` returns `Peek<'_, St>` from `Peekable::peek`. Peek stores `Option<Pin<&mut Peekable<St>>>`, implements FusedFuture by testing that option, waits for poll_peek readiness, takes its receiver, then calls poll_peek again to return the borrow. A later poll panics with `Peek polled after completion`. Pending and a producer panic before readiness do not take the receiver.
+
+Kotlin previously returned a reusable anonymous Future from peek(), with no termination state or FusedFuture implementation. The bounded manual consumer repair introduces the source-owned named `Peek<T>` in the same package/file, using the existing canonical FusedFuture/Poll types and nullable receiver slot. `Peekable.peek()` returns this concrete type. The poll keeps upstream's first readiness check, receiver removal, second pollPeek order; it does not replace this with a convenient one-call algorithm. Existing pollPeek, buffering, nextIf, stream polling and hint implementations are unchanged.
+
+A one-time bounded original-file CLI translation succeeded (34 items), written to build/rust-kotlin-peek-future-state/PeekReview.kt. Its emitted Peek declaration, factory, isTerminated and poll branches expose the omitted lifecycle. Exact source/binary/output hashes and invocation are in translator-attempt.json. This is structural comparison evidence; the scratch file was not compiled/adopted wholesale and the recorded binary is not attested as Iris's current build. No generator edits, investigations, rebuilds or source-guard bypass occurred.
+
+## Oracle and validation
+
+Run `cargo test --offline --manifest-path verification/peek-future-state-oracle/Cargo.toml --target-dir build/rust-kotlin-peek-future-state/rust-target` to execute actual upstream Peek and Peekable. Eight groups cover per-future FusedFuture state, Pending, cached values, EOF and inner Fuse, exact producer polls, nullable buffered items, one-shot panic, a concrete recoverable producer panic, and dropping a pending future before a new peek. All eight Rust groups passed before the consumer edit. Kotlin initially had eight tests, seven failing and the pending-abandonment control passing. Red source, XML and raw logs are retained. No original regression assertion or existing caller/test was relaxed; final regression bytes are checked against the red copy.
+
+Rust's nullable-item test intentionally asserts `Some(None)`, distinct from EOF `None`. Kotlin's existing `T?` return cannot distinguish those two results; its test checks null plus the retained `Yield.Value(null)` and producer count, then distinct stream End. This verifies lifecycle/buffering in the represented subset, not return-presence equivalence. The Rust test drops a pending future; Kotlin stops using its first future and starts another without deterministic cancellation/destruction. No claim of Rust borrow/Drop parity follows.
+
+Post-completion and post-panic observations concern this concrete implementation. They do not grant portable permission to repoll arbitrary completed futures or recover arbitrary panicking producers. A completed Peek panics, while a newly created Peek can inspect the still-buffered item; its termination state is distinct from Peekable's stream state. The existing inner StreamFuse stops source polling after EOF.
+
+Final-source full JVM/macOS ARM and static totals are in receipt.json and final-validation.json. Each source/report/log hash is recorded; Gradle report copies live in a step-specific folder. Global ktlint is not described as green if baseline findings remain.
+
+## Caller impact, ownership and remaining gaps
+
+A bounded read-only scan covered 1,511 existing source roots, including ignored/untracked Kotlin/Java/Swift, excluding generated build/tmp/target/caches. It included exact Peekable/peekable/Peek imports, aliases via original import names, wildcard Futures imports and same-package declarations, with inferred receivers traced to factory calls. The three existing exact local calls are StreamPeekableTest.kt:13,22,42, each polled once; assertions remain unchanged. NextIf/pollPeek users are separate. No external exact Futures caller/import or duplicate same-package Peek owner was found. External iterator/parser and Tokio Peekable results were distinguished by package, receiver and imports. Raw scan and classification are retained. No external owner was edited or broad downstream build run.
+
+The return descriptor changes from Future<T?> to Peek<T>; affected consumers must rebuild. Returning a subtype preserves the existing local Future polling usage, but this is not a general source/binary/downstream compatibility guarantee. No existing caller adaptation was necessary. Baseline 88afb37 was clean; no prior dirty-work checkpoint is mixed into this repair. Futures has 30 reverse-dependent libraries in the graph; adjacent ownership and all earlier checkpoints are preserved.
+
+Remaining gaps include nullable return presence, Rust reference/lifetime and exclusive borrowing, Pin/Unpin, deterministic Drop/GC, Debug formatting, PeekMut/mutable-reference APIs, other absent source APIs and traits, usize-sized hints and other platforms/downstream builds. Existing unrelated methods are not asserted complete. No new shared helper/Option type, algorithm substitute, broad redesign, remote CI/push/PR/merge/tag/publication/configuration change or agent contact occurred.
