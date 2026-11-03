@@ -10,12 +10,12 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class PendingStream<out T> : FusedStream<T> {
-    override fun isTerminated(): Boolean = false
+    override fun isTerminated(): Boolean = true
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> =
         Poll.pending()
 
-    override fun sizeHint(): SizeHint = SizeHint(0, null)
+    override fun sizeHint(): SizeHint = SizeHint(0, 0)
 }
 
 /**
