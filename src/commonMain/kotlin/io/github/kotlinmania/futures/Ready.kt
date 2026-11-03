@@ -29,7 +29,6 @@ public class Ready<T>(
     override fun isTerminated(): Boolean = !hasValue
 
     override fun poll(context: TaskContext): Poll<T> {
-        context.waker.hashCode()
         check(hasValue) { "Ready polled after completion" }
         hasValue = false
         return Poll.Ready(value)
