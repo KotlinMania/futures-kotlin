@@ -13,13 +13,13 @@ public class Count<T>(
     private val stream: Stream<T>,
 ) : FusedFuture<Int> {
     private var count: Int = 0
-    private var done: Boolean = false
 
     public companion object {
         internal fun <T> new(stream: Stream<T>): Count<T> = Count(stream)
     }
 
-    override fun isTerminated(): Boolean = done
+    override fun isTerminated(): Boolean =
+        (stream as? FusedStream<*>)?.isTerminated() ?: false
 
     override fun poll(context: TaskContext): Poll<Int> {
         while (true) {
@@ -28,7 +28,6 @@ public class Count<T>(
                     when (p.value) {
                         is Yield.Value -> count += 1
                         Yield.End -> {
-                            done = true
                             return Poll.Ready(count)
                         }
                     }
