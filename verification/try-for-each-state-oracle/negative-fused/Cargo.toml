@@ -1,0 +1,8 @@
+[package]
+name = "try-for-each-negative-fused"
+version = "0.0.0"
+edition = "2021"
+publish = false
+[workspace]
+[dependencies]
+futures-util = { path = "../../../tmp/futures-util", default-features = false, features = ["std"] }

@@ -1,0 +1,230 @@
+{
+  "baseline": "ceba470",
+  "recordedAtUTC": "2026-11-03T02:53:00.138851+00:00",
+  "preExistingDirtyWorkIncluded": false,
+  "priorWorkSeparate": {
+    "futures": [
+      "ceba470",
+      "e2a8c62"
+    ],
+    "http": "1d607a9",
+    "serde": "9ae88dd"
+  },
+  "graphDirectReverseDependents": 30,
+  "productionScope": "Only TryStreamForEach: retain pending callback future on typed error, clear only on Ok, remove unsupported done/isTerminated state and FusedFuture interface. Existing action/entry signatures, canonical Future/Try/Poll/Yield/Fuse owners and pins unchanged.",
+  "apiImpact": {
+    "classInterfaceBefore": "FusedFuture<Try<Unit,E>>",
+    "classInterfaceAfter": "Future<Try<Unit,E>>",
+    "rawIsTerminatedRemoved": true,
+    "consumerRebuildOrAdaptationRequiredIfRelyingOnRemovedContract": true,
+    "canonicalAdapter": "Future.fuse()",
+    "noCompatibilityShim": true,
+    "downstreamBinaryCompatibilityUnverified": true
+  },
+  "callerReview": {
+    "scope": "Read-only exact TryStreamForEach/tryForEach scan plus canonical wildcard imports, including alias/type references. Not a typechecked resolver or downstream build.",
+    "existingLocalCaller": "StreamTryStreamTest.kt tryFoldAndTryForEach: polls returned future, no raw isTerminated/FusedFuture reliance; assertions unchanged.",
+    "newTestTerminationCalls": "Only canonical Fuse wrapper uses isTerminated; raw-adaptor test checks absent FusedFuture subtype.",
+    "externalExactCallsFound": false,
+    "wildcardCandidateFilesWithRelevantCalls": 0,
+    "apiImpact": "TryStreamForEach now implements Future instead of unsupported FusedFuture; raw isTerminated removed. Source/binary consumers relying on that added contract require rebuilding/adapting with canonical fuse(); no compatibility adapter."
+  },
+  "existingAssertionsChanged": false,
+  "allOriginalNewCaseBodiesBytePreserved": true,
+  "helperStrengthening": {
+    "reason": "Trace strings alone could conflate absent Option/nullable payload with literal text null.",
+    "scope": "Add direct Error payload assertions to existing cases in actual Rust and Kotlin fixtures, preserving all prior assertions/outcomes/traces/counters. No production changes.",
+    "priorFinalReceiptsPreserved": true
+  },
+  "firstFinalReceiptsPreserved": true,
+  "red": {
+    "suite": {
+      "name": "TryForEachStateParityTest[jvm]",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "5",
+      "errors": "0",
+      "timestamp": "2026-11-03T02:39:15.773Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.039"
+    },
+    "failures": [
+      {
+        "case": "unwrappedAdaptorHasNoFusedPromise[jvm]",
+        "message": "java.lang.AssertionError: Expected value to be false."
+      },
+      {
+        "case": "failedCallbackRetained[jvm]",
+        "message": "java.lang.AssertionError: expected:<[err:fail, err:again]> but was:<[err:fail, ok]>"
+      },
+      {
+        "case": "failedFuturePanicOnRepeat[jvm]",
+        "message": "java.lang.AssertionError: expected:<[err:fail, panic:action panic]> but was:<[err:fail, ok]>"
+      },
+      {
+        "case": "nullableErrorAfterPending[jvm]",
+        "message": "java.lang.AssertionError: expected:<[pending, err:null, err:null]> but was:<[pending, err:null, ok]>"
+      },
+      {
+        "case": "errorPendingThenSuccess[jvm]",
+        "message": "java.lang.ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2"
+      }
+    ]
+  },
+  "rustOracle": {
+    "passedRuntimeGroups": 7,
+    "failed": 0,
+    "actualUpstreamTryForEachInvoked": true,
+    "negativeFusedProbe": {
+      "command": [
+        "cargo",
+        "check",
+        "--offline",
+        "--manifest-path",
+        "verification/try-for-each-state-oracle/negative-fused/Cargo.toml",
+        "--target-dir",
+        "build/rust-kotlin-try-for-each-state/negative-target"
+      ],
+      "exit": 101,
+      "errorCodes": [
+        "E0277"
+      ],
+      "scope": "Actual upstream TryForEach does not satisfy FusedFuture even with fused input/ready action; expected trait-bound failure."
+    },
+    "typedErrorPayloadsDirectlyAsserted": true,
+    "postReadyScope": "Concrete upstream implementation observations with deliberately repollable fixtures, not portable permission/retry semantics for arbitrary completed futures.",
+    "wakeScope": "Manual poll traces and independent producer/action counters; no fairness/wake-registration/cross-thread claim."
+  },
+  "translatorEvidence": {
+    "command": [
+      "/Volumes/stuff/Projects/kotlinmania/rust-kotlin/build/bin/nativeMacos/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "/Volumes/stuff/Projects/kotlinmania/futures-kotlin/tmp/futures-util/src/stream/try_stream/try_for_each.rs",
+      "/Volumes/stuff/Projects/kotlinmania/futures-kotlin/build/rust-kotlin-try-for-each-state/TryForEachReview.kt"
+    ],
+    "exit": 0,
+    "stdout": "/Volumes/stuff/Projects/kotlinmania/futures-kotlin/tmp/futures-util/src/stream/try_stream/try_for_each.rs -> /Volumes/stuff/Projects/kotlinmania/futures-kotlin/build/rust-kotlin-try-for-each-state/TryForEachReview.kt; 11 items translated\n",
+    "stderr": "",
+    "timedOut": false,
+    "sourceSha256": "3f3901d618333b740d470eb02fcbb645df92483493872298bb7bd0382646028a",
+    "cliSha256": "027d237f2844e0291cf2b9e06ab4bd73e828abccce02db65db992fb3478396c4",
+    "outputExists": true,
+    "guardBypassed": false,
+    "currentGeneratorBuildNotAttested": true,
+    "outputSha256": "0fce3973c2a4d5cdedcb9fe260091c5bbd48d231481590c1fbbfeaccf94ede22"
+  },
+  "generatedOutputScope": "Original-file recorded-binary emission inspected only; actual source/compiler determines error/trait behavior. No current-generator attestation or edits/investigation.",
+  "fixtureSetupCorrection": {
+    "failure": "Python NameError: rust was not defined",
+    "stage": "Before cargo/rustfmt/Kotlin execution; production untouched",
+    "partialRustSourceSaved": "build/rust-kotlin-try-for-each-state/first-partial-fixture.rs",
+    "translatorRerun": false,
+    "correction": "Resume from existing Rust helper prefix and finish case fixtures."
+  },
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 686,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "newSuite": {
+        "name": "TryForEachStateParityTest[jvm]",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T02:49:42.036Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      }
+    },
+    "macosArm64Test": {
+      "tests": 686,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "newSuite": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.TryForEachStateParityTest",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T02:49:42.801Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      }
+    },
+    "ktlintCommonMainSourceSetCheck": 580,
+    "ktlintCommonTestSourceSetCheck": 31,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintKotlinScriptCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 0,
+    "authoredDetekt": []
+  },
+  "staticBaseline": {
+    "baseline": "ceba470",
+    "priorReceipt": "verification/select-next-bound-oracle/receipt.json",
+    "ktlintBefore": 612,
+    "ktlintAfter": 611,
+    "detektAfter": 0,
+    "explanation": "One existing when-branch spacing finding disappears in the edited callback-result branch; no unrelated formatting or suppression. All remaining findings map to unchanged baseline lines.",
+    "priorLog": "build/rust-kotlin-select-next-bound/final-check.log",
+    "priorLogSha256": "4a68d983d3ec38ac432d0a1723690f573b0fa9b7b14b2d96f14d117b42feebee"
+  },
+  "limits": [
+    "Global ktlint still fails on 611 baseline findings; zero authored-line findings and clean Detekt. Not a fully green build.",
+    "Rust Drop/Pin/ownership/Send/Sync, physical destruction/GC, other targets and downstream source/binary compatibility unverified.",
+    "No source-level external exact caller found in bounded scan; this is not a typechecked global resolver or broad consumer build."
+  ],
+  "noRemoteOrConfigurationActions": true,
+  "hashes": {
+    "build/rust-kotlin-try-for-each-state/TryForEachReview.kt": "0fce3973c2a4d5cdedcb9fe260091c5bbd48d231481590c1fbbfeaccf94ede22",
+    "build/rust-kotlin-try-for-each-state/attribution.log": "62f89f300c30302691dd82769648f560bdbd3ba920fa6596b3ee735361a0b967",
+    "build/rust-kotlin-try-for-each-state/caller-direct.txt": "a8f883ab390929766ed75d900c5969bf83a18588da707d984a33929fb37336e1",
+    "build/rust-kotlin-try-for-each-state/caller-review.json": "02af6ffcd10020ab97d182792548fc28972f172e2c2d445ed02f5fa9360a6db6",
+    "build/rust-kotlin-try-for-each-state/caller-wildcards.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "build/rust-kotlin-try-for-each-state/cases.json": "5b8c4b7cc2129af748f87cae546a8f115fe7f66dea4b2d5e7a4bb707230a61af",
+    "build/rust-kotlin-try-for-each-state/final-check.log": "63cf2cc3fb59fd2259e271f794bb4164bf2db8743082fa327efccc82c9546501",
+    "build/rust-kotlin-try-for-each-state/final-validation.json": "4dfc02a9e597689a4ef76e97e57df7f00e33748e5fc9db343b349fa680e2111b",
+    "build/rust-kotlin-try-for-each-state/first-final-check.log": "47c14dd86a785b90c2e1c5ac849e2694f488b85bb9767b3db5ec6fedffb1a6bd",
+    "build/rust-kotlin-try-for-each-state/first-final-oracle.rs": "a258b3040307693532de697ae1b52d001163af99c930f79fcdb538e17ff3cbc9",
+    "build/rust-kotlin-try-for-each-state/first-final-test-source.kt": "e2da545003cac74cd3171abce8321b69552f924117771072eaeee267459d3c3a",
+    "build/rust-kotlin-try-for-each-state/first-final-validation.json": "94bec1e83f50badda60b4a9039114ab642342e4ae2422e892b6ecbbc5bfc64fa",
+    "build/rust-kotlin-try-for-each-state/first-jvmTest-suite.xml": "c3325d1e99ddb03e712a5a7224982dd96cabda77ab261869e8e70fa81f094283",
+    "build/rust-kotlin-try-for-each-state/first-macosArm64Test-suite.xml": "782a62754650a496123911fdd2f66ec9b98a9e8c939dfd957a53d595ec488103",
+    "build/rust-kotlin-try-for-each-state/first-oracle.log": "0ed6fd33f1207c3c53a227fdfc0e8552a3c79483cd8fb9b900c8ca2a798a7305",
+    "build/rust-kotlin-try-for-each-state/first-partial-fixture.rs": "74c587a7d3c0925406525775bb78c123af8dd32fc2b4f0a5401e5b61d103e9c4",
+    "build/rust-kotlin-try-for-each-state/fixture-generation-correction.json": "1c00b7abda6b37f3125d24e082c94bb28c1bcc8a4147d16d62e914c6b1a764ce",
+    "build/rust-kotlin-try-for-each-state/negative-fused.json": "3274f52a189bdd54bf863e9c56c58ff76ef8e3bfa1ffbd07b3e65ce85612933c",
+    "build/rust-kotlin-try-for-each-state/negative-fused.log": "01f2b2bedfd147f35458f3c458da647f51f92d0dfb3859ae49b817ee0d2c01c6",
+    "build/rust-kotlin-try-for-each-state/new-test-before-fix.sha256": "368e8abbd2a62b2c516e69bfb3707686a2d88dcc140d1b72e10785daeb880736",
+    "build/rust-kotlin-try-for-each-state/oracle.log": "3f3a41a7e1f9dcb10e6ea020e4560483cc89782a74e16e20a8f1ea4581c2130c",
+    "build/rust-kotlin-try-for-each-state/production-change.json": "b36c21b68956c952ff2dcb344e61e1e2c004e89459e462307e5170ca4c55cd02",
+    "build/rust-kotlin-try-for-each-state/red-jvm.log": "a51adddb9e1100ea8c3a394a5ecb497999ddac5fff15ec276c5750d79d24eac5",
+    "build/rust-kotlin-try-for-each-state/red-suite.xml": "45da6fe8645c5ada826fca53f3b4bc6d286d41661e27c3ab9a64b3936f977310",
+    "build/rust-kotlin-try-for-each-state/red-test-source.kt": "e2da545003cac74cd3171abce8321b69552f924117771072eaeee267459d3c3a",
+    "build/rust-kotlin-try-for-each-state/static-baseline.json": "10bbf0a199dbf53f503a996cf409e208671666bd2134e32fdecdd930a7d68d88",
+    "build/rust-kotlin-try-for-each-state/translator-attempt.json": "0b8acc7eb66dbbe6eb99cd567377dbd14159752ada1342942e148f7290de3804",
+    "build/rust-kotlin-try-for-each-state/typed-payload-strengthening.json": "cd2c1ffd067843da6236b608806bc2a350979157472a98672c38ca87048380ce",
+    "build/rust-kotlin-try-for-each-state/verify_final.py": "1c2e9076d9c292e0155a5d2f89956e9914469423e1284245183b15a51b895b25",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.futures.TryForEachStateParityTest.xml": "e4648e75eb485018df4639c4d7e54a18bc8e6f4d4b85a193df1cf19fb47eecba",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.futures.TryForEachStateParityTest.xml": "914b4ba5451bf22af748686b32eb5c28ebc7f73c1ac869e2904522307108d22c",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/Fuse.kt": "8d399693ac15a24cb5e97ed4f09d1913043740480ef0c9250c8c935440d5bedf",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/Future.kt": "4baff6629adffbfbdbf231b08e0d1d8f0463442277c24cae34cdbe6374cd6c86",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/TryStreamExt.kt": "2d34e5b456ff09af5fd1799fea767d8eaa640c4f4dab07e49e44ee881041bdc9",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/TryStreamForEach.kt": "b871e4515889b7513ce1e18b452204e3d978773d179171edc72c45f53b4e4505",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamTryStreamTest.kt": "1d71c21a1adf63ef6afeca9da688a27507c393675c2767d721a7555aff01a71e",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/TryForEachStateParityTest.kt": "a8509cb792b3629006a8b604a69d321e026a088b6c621a499f1921c2ce74b595",
+    "tmp/futures-util/src/stream/try_stream/try_for_each.rs": "3f3901d618333b740d470eb02fcbb645df92483493872298bb7bd0382646028a",
+    "verification/try-for-each-state-oracle/Cargo.lock": "9e2ec1f6bd85b5aab114f57bd06b2574293c5013f62ac06ba4971a27cc37e414",
+    "verification/try-for-each-state-oracle/Cargo.toml": "6d7cbb9ff5a7973f8e98e3be60a7d9fcde7214c18ba275b4592dd2fc8bb23c0e",
+    "verification/try-for-each-state-oracle/README.md": "cc90d40ea47a4d527e7c3997d4b91d59bb4d63992b1600b7e31e6b22c0528dc1",
+    "verification/try-for-each-state-oracle/negative-fused/Cargo.lock": "8381d04976e5d29c17ec497e9d1954b677352ea6c57eef1e203881c11089e00a",
+    "verification/try-for-each-state-oracle/negative-fused/Cargo.toml": "668895223f14d79d3fd65d3b891bd777a10d50279b0ee0c12ca7c4ae641c6517",
+    "verification/try-for-each-state-oracle/negative-fused/src/main.rs": "f7a1ef38244da8f91406179d52619a4a422c8ec53a581d9a22ea8c3c38303334",
+    "verification/try-for-each-state-oracle/src/lib.rs": "4bbe8b9e2b323b6ea9f596b53b6ba7b74340389ecbcc9e42f8964709519d0ce9"
+  }
+}
