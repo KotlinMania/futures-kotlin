@@ -1,0 +1,129 @@
+{
+  "baseline": "793c122",
+  "priorDirtyIncluded": false,
+  "rustRuntimeGroupsPassed": 7,
+  "rustExpectedTraitFailure": {
+    "command": [
+      "cargo",
+      "check",
+      "--offline",
+      "--manifest-path",
+      "verification/try-concat-state-oracle/negative-fused/Cargo.toml",
+      "--target-dir",
+      "build/rust-kotlin-try-concat-state/negative-target"
+    ],
+    "exit": 101,
+    "errorCodes": [
+      "E0277"
+    ],
+    "scope": "Actual upstream TryConcat lacks FusedFuture; expected trait-bound failure."
+  },
+  "redTests": {
+    "name": "TryConcatStateParityTest[jvm]",
+    "tests": "8",
+    "skipped": "0",
+    "failures": "6",
+    "errors": "0",
+    "timestamp": "2026-11-03T03:10:08.923Z",
+    "hostname": "EmberHarmony.local",
+    "time": "0.031"
+  },
+  "finalSourceValidation": {
+    "jvmTest": {
+      "tests": 694,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "newSuite": {
+        "name": "TryConcatStateParityTest[jvm]",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T03:13:16.242Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.024"
+      }
+    },
+    "macosArm64Test": {
+      "tests": 694,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "newSuite": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.TryConcatStateParityTest",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T03:13:17.358Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      }
+    },
+    "ktlintCommonMainSourceSetCheck": 580,
+    "ktlintCommonTestSourceSetCheck": 31,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintKotlinScriptCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 0,
+    "authoredDetekt": []
+  },
+  "formattingOnlyTestChangeVerified": true,
+  "unchangedCallerAndCanonicalFiles": [
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamTryStreamTest.kt",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/TryStreamExt.kt",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/Future.kt",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/Fuse.kt"
+  ],
+  "hashes": {
+    "build/reports/detekt/detekt.sarif": "fe01addef9636f4218101766dda48e8d089bf49a016d50e46b844294885b0dc6",
+    "build/reports/ktlint/ktlintCommonMainSourceSetCheck/ktlintCommonMainSourceSetCheck.xml": "e58805c8a038148a00f5e461dcf389af67a5d268f8e300cc775401891701b51e",
+    "build/reports/ktlint/ktlintCommonTestSourceSetCheck/ktlintCommonTestSourceSetCheck.xml": "7db2654eb6169466ad1e1d06708bcfb514a930569ad8a40b51361970389925a9",
+    "build/reports/ktlint/ktlintJsMainSourceSetCheck/ktlintJsMainSourceSetCheck.xml": "2eae3b5578573bd739a7b0cd7d344f02fe10242fb7182cd24ed8e9b72a51aff7",
+    "build/reports/ktlint/ktlintJvmMainSourceSetCheck/ktlintJvmMainSourceSetCheck.xml": "2eae3b5578573bd739a7b0cd7d344f02fe10242fb7182cd24ed8e9b72a51aff7",
+    "build/reports/ktlint/ktlintKotlinScriptCheck/ktlintKotlinScriptCheck.xml": "2eae3b5578573bd739a7b0cd7d344f02fe10242fb7182cd24ed8e9b72a51aff7",
+    "build/rust-kotlin-try-concat-state/TryConcatReview.kt": "3da7bbeef9558fe52428776ebdaac66df066ef3ef5bbf37d58f0f8b7a4cc45ff",
+    "build/rust-kotlin-try-concat-state/caller-review.txt": "daf05af53e5612c7d9fcf0198edbfd2f17b01cf2e427ee8108b1084cacbed082",
+    "build/rust-kotlin-try-concat-state/cases.json": "0c412df47ff164ca718f773605bd841f1086491b32eb432401e2a5568576800b",
+    "build/rust-kotlin-try-concat-state/final-check.log": "4f369ed9aca7e275e62989895a4dad6ef02f72046cd0e6031893468e91a3fbd8",
+    "build/rust-kotlin-try-concat-state/final-validation.json": "7b8091613637dc3aba16afd1a077797431d543602bbe1fba70c61224f829c78d",
+    "build/rust-kotlin-try-concat-state/negative-fused.json": "4099947a911f8145efe0c68b2c2542e871f8506b69fddb202a684d396b595473",
+    "build/rust-kotlin-try-concat-state/negative-fused.log": "29ff5bc76396cc6a48bf4d378dd0d074e3918af25d3952c00e77187b02501b73",
+    "build/rust-kotlin-try-concat-state/oracle.log": "59ddabe80ed5a386a1b034d0d2b8bf4e6eec5a2bb3e1b8d04018e5f56d1c6b24",
+    "build/rust-kotlin-try-concat-state/production-change.json": "bdc4a09e53c45c8c1250bbb1ed5b868202f96cb010a0bf3c4b24f01b8c4a68bb",
+    "build/rust-kotlin-try-concat-state/red-jvm.log": "e1717f92840de510bf790c163f538e871c6de1f1af0dddfc34c51f464f9a9431",
+    "build/rust-kotlin-try-concat-state/red-jvm.xml": "0cc5d78d74f177a6ef939047f2c1f262a3148fb02e58126b65c8f33a35d07cef",
+    "build/rust-kotlin-try-concat-state/red-production.kt": "e17a79f403478ad162f0d878fd8f21e01c1072512b3b274ffaa82084e9bc258b",
+    "build/rust-kotlin-try-concat-state/red-test.kt": "8b333280de73454df5902d6f4dfb779f77749e7c78ceea229a7cdcc8e7f08b7d",
+    "build/rust-kotlin-try-concat-state/translator-attempt.json": "4dcca4aa10354e9d4078a67989ff74bb4184ada6d6833aa8402b6bca3adb7e98",
+    "build/rust-kotlin-try-concat-state/verify_final.py": "c116e1050dbc5da5642dbc71965f8e55ef03724f26b876d240d409dfcc45bcff",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.futures.TryConcatStateParityTest.xml": "e5e1351aa6ba8196965c76fe7c34d6a774f61f88c92b97003f20f708ccff0c7f",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.futures.TryConcatStateParityTest.xml": "b71e904ba0290b3111ee600151f0e5acaf56abf6f5f95bebd7c3cff635606de4",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/Fuse.kt": "8d399693ac15a24cb5e97ed4f09d1913043740480ef0c9250c8c935440d5bedf",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/Future.kt": "4baff6629adffbfbdbf231b08e0d1d8f0463442277c24cae34cdbe6374cd6c86",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/TryStreamConcat.kt": "a09258c5e706e947f5e923cea6c02648580ec031b32d0f5ad6456999899f9f82",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/TryStreamExt.kt": "2d34e5b456ff09af5fd1799fea767d8eaa640c4f4dab07e49e44ee881041bdc9",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamTryStreamTest.kt": "1d71c21a1adf63ef6afeca9da688a27507c393675c2767d721a7555aff01a71e",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/TryConcatStateParityTest.kt": "df42b0316530e0effe14257a84256160f877f4c6f41fdd77635576b1caee7fa8",
+    "tmp/futures-util/src/stream/try_stream/try_concat.rs": "f2330ebeeab30273e9ac0e8600bfe2f405ce671f6386e688b3afb1d2fdd7c2c6",
+    "verification/try-concat-state-oracle/Cargo.lock": "512dd5001fed33c818a9b63b4e6904467853cb6fca0aef16446b7af48cf755a7",
+    "verification/try-concat-state-oracle/Cargo.toml": "82c043caa2a18f63e37a2de52a24da7695ad72702cf212dd9c8d5c2f48f6c234",
+    "verification/try-concat-state-oracle/README.md": "fbd2c67e9afa16b4d7c73a17cf175cdab09d29f1200f1174f6e0f7d17f2677c9",
+    "verification/try-concat-state-oracle/negative-fused/Cargo.lock": "1b60b012d62f45b4900b247219c21e43017883b575212da70f8eac1e1b12bfae",
+    "verification/try-concat-state-oracle/negative-fused/Cargo.toml": "1fbf347190a97887a269133225155bca975eb3cbbe7bd19110b3f87b70c31ccb",
+    "verification/try-concat-state-oracle/negative-fused/src/main.rs": "520bee9aebf48d24f25fa7157a426593e7d0f8ea9312b292ff66fd9755d80749",
+    "verification/try-concat-state-oracle/src/lib.rs": "8697506748490f766f8e304a11f6fd8ce9354b4e97991a977b8d5bde28a24282"
+  },
+  "limits": [
+    "List-only collection API; first collection copy rather than Rust move identity",
+    "Concrete scripted post-Ready/panic behavior is not a general Future repoll/recovery promise",
+    "Removed extra interface/method requires affected consumers to fuse/adapt and rebuild",
+    "Workspace source review is not downstream/binary compatibility verification",
+    "Ownership, trait bounds, allocation/Drop, usize and other platforms unverified",
+    "Recorded CLI binary only, current generator build not attested",
+    "Global ktlint remains failing with 611 baseline findings"
+  ]
+}
