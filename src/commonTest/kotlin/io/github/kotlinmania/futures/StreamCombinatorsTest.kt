@@ -109,7 +109,7 @@ class StreamCombinatorsTest {
         val stream =
             listOf("1", "two", "3", "four", "5")
                 .asStream()
-                .filterMap { it.toIntOrNull() }
+                .filterMap { ready(it.toIntOrNull()) }
 
         val foldFut = stream.fold(0) { acc, elem -> ready(acc + elem) }
         val sum = foldFut.poll(cx)
