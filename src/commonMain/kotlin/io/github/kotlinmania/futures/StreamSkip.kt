@@ -37,7 +37,6 @@ public class Skip<T>(
                     when (p.value) {
                         is Yield.Value -> remaining -= 1
                         Yield.End -> {
-                            remaining = 0
                             return Poll.Ready(Yield.End)
                         }
                     }
