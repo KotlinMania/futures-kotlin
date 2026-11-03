@@ -10,6 +10,8 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class Pending<T> : FusedFuture<T> {
+    public fun clone(): Pending<T> = pending()
+
     override fun isTerminated(): Boolean = true
 
     override fun poll(context: TaskContext): Poll<T> = Poll.Pending

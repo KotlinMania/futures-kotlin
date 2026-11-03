@@ -10,6 +10,8 @@ import kotlin.native.HiddenFromObjC
  */
 @HiddenFromObjC
 public class EmptyStream<out T> : FusedStream<T> {
+    public fun clone(): EmptyStream<T> = emptyStream()
+
     override fun isTerminated(): Boolean = true
 
     override fun pollNext(context: TaskContext): Poll<Yield<T>> =
