@@ -120,12 +120,11 @@ public class FuturesOrdered<T> :
         nextIncomingIndex++
         inFlightFutures.add(future)
         val wrapped =
-            object : Future<OrderWrapper<T>> {
-                override fun poll(context: TaskContext): Poll<OrderWrapper<T>> =
-                    when (val p = future.poll(context)) {
-                        is Poll.Ready -> Poll.ready(OrderWrapper(p.value, index))
-                        Poll.Pending -> Poll.pending()
-                    }
+            Future<OrderWrapper<T>> { context ->
+                when (val p = future.poll(context)) {
+                    is Poll.Ready -> Poll.ready(OrderWrapper(p.value, index))
+                    Poll.Pending -> Poll.pending()
+                }
             }
         inProgressQueue.push(wrapped)
     }
@@ -154,12 +153,11 @@ public class FuturesOrdered<T> :
         val index = nextOutgoingIndex
         inFlightFutures.add(0, future)
         val wrapped =
-            object : Future<OrderWrapper<T>> {
-                override fun poll(context: TaskContext): Poll<OrderWrapper<T>> =
-                    when (val p = future.poll(context)) {
-                        is Poll.Ready -> Poll.ready(OrderWrapper(p.value, index))
-                        Poll.Pending -> Poll.pending()
-                    }
+            Future<OrderWrapper<T>> { context ->
+                when (val p = future.poll(context)) {
+                    is Poll.Ready -> Poll.ready(OrderWrapper(p.value, index))
+                    Poll.Pending -> Poll.pending()
+                }
             }
         inProgressQueue.push(wrapped)
     }

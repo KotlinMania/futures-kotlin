@@ -18,20 +18,18 @@ public fun <T, R> Future<T>.map(transform: (T) -> R): Map<T, R> =
 public fun <T, R> Future<T>.then(transform: (T) -> Future<R>): Future<R> {
     val source = this
     var second: Future<R>? = null
-    return object : Future<R> {
-        override fun poll(context: TaskContext): Poll<R> {
-            val sec = second
-            if (sec != null) {
-                return sec.poll(context)
+    return Future { context ->
+        val sec = second
+        if (sec != null) {
+            return@Future sec.poll(context)
+        }
+        when (val p = source.poll(context)) {
+            is Poll.Ready -> {
+                val nextFut = transform(p.value)
+                second = nextFut
+                nextFut.poll(context)
             }
-            return when (val p = source.poll(context)) {
-                is Poll.Ready -> {
-                    val nextFut = transform(p.value)
-                    second = nextFut
-                    nextFut.poll(context)
-                }
-                is Poll.Pending -> Poll.Pending
-            }
+            is Poll.Pending -> Poll.Pending
         }
     }
 }
@@ -42,15 +40,14 @@ public fun <T, R> Future<T>.then(transform: (T) -> Future<R>): Future<R> {
 @HiddenFromObjC
 public fun <T> Future<T>.inspect(action: (T) -> Unit): Future<T> {
     val source = this
-    return object : Future<T> {
-        override fun poll(context: TaskContext): Poll<T> =
-            when (val p = source.poll(context)) {
-                is Poll.Ready -> {
-                    action(p.value)
-                    p
-                }
-                is Poll.Pending -> Poll.Pending
+    return Future { context ->
+        when (val p = source.poll(context)) {
+            is Poll.Ready -> {
+                action(p.value)
+                p
             }
+            is Poll.Pending -> Poll.Pending
+        }
     }
 }
 
@@ -170,16 +167,15 @@ public fun <T, E, R> Future<Try<T, E>>.orElse(transform: (E) -> Future<Try<T, R>
 @HiddenFromObjC
 public fun <T, E> Future<Try<T, E>>.unwrapOrElse(fallback: (E) -> T): Future<T> {
     val source = this
-    return object : Future<T> {
-        override fun poll(context: TaskContext): Poll<T> =
-            when (val p = source.poll(context)) {
-                is Poll.Ready ->
-                    when (val res = p.value) {
-                        is Try.Ok -> Poll.Ready(res.value)
-                        is Try.Err -> Poll.Ready(fallback(res.error))
-                    }
-                is Poll.Pending -> Poll.Pending
-            }
+    return Future { context ->
+        when (val p = source.poll(context)) {
+            is Poll.Ready ->
+                when (val res = p.value) {
+                    is Try.Ok -> Poll.Ready(res.value)
+                    is Try.Err -> Poll.Ready(fallback(res.error))
+                }
+            is Poll.Pending -> Poll.Pending
+        }
     }
 }
 

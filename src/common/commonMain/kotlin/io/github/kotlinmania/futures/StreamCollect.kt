@@ -12,7 +12,7 @@ import kotlin.native.HiddenFromObjC
 public class Collect<T>(
     private val stream: Stream<T>,
 ) : FusedFuture<List<T>> {
-    private var collection = mutableListOf<T>()
+    private val collection = mutableListOf<T>()
 
     public companion object {
         internal fun <T> new(stream: Stream<T>): Collect<T> = Collect(stream)
@@ -31,8 +31,8 @@ public class Collect<T>(
                         }
 
                         Yield.End -> {
-                            val completed = collection
-                            collection = mutableListOf()
+                            val completed = collection.toList()
+                            collection.clear()
                             return Poll.Ready(completed)
                         }
                     }

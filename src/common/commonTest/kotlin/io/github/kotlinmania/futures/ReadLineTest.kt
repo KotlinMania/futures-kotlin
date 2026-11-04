@@ -101,7 +101,7 @@ class ReadLineTest {
     fun readLineDrop() {
         val buf = Cursor("12\n\n".encodeToByteArray())
         val v = StringBuilder("abc")
-        val fut = buf.readLine(v)
+        buf.readLine(v)
         assertEquals("abc", v.toString())
     }
 

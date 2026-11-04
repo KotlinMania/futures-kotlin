@@ -62,7 +62,7 @@ class BiLockTest {
 
     @Test
     fun guardDerefAndToString() {
-        val (a, b) = BiLock.new("test")
+        val (a, _) = BiLock.new("test")
         val cx = TaskContext()
         val lockPoll = a.pollLock(cx)
         assertIs<Poll.Ready<BiLockGuard<String>>>(lockPoll)
@@ -146,7 +146,7 @@ class BiLockTest {
             if (poll is Poll.Ready) break
         }
 
-        for (i in 0 until n) {
+        repeat(n) {
             val lockB = b.pollLock(cx)
             assertIs<Poll.Ready<BiLockGuard<Int>>>(lockB)
             val guard = lockB.value

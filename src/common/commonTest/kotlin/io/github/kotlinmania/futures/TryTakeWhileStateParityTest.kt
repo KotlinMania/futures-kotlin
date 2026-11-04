@@ -99,10 +99,7 @@ class TryTakeWhileStateParityTest {
     @Test
     fun pollingFailureRetainsPendingNull() {
         val failure = IllegalStateException("future")
-        val action =
-            object : Future<Try<Boolean, String>> {
-                override fun poll(context: TaskContext): Poll<Try<Boolean, String>> = throw failure
-            }
+        val action = Future<Try<Boolean, String>> { throw failure }
         val input = Input(listOf(value(Try.Ok(null))))
         val stream = input.tryTakeWhile { action }
         assertSame(failure, assertFailsWith<IllegalStateException> { stream.pollNext(TaskContext()) })

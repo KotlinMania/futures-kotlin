@@ -81,7 +81,7 @@ class AbortableTest {
 
     @Test
     fun abortableWorks() {
-        val (_tx, aRx) =
+        val (_, aRx) =
             io.github.kotlinmania.futures.channel.oneshot
                 .channel<Unit>()
         val (abortableRx, abortHandle) = abortable(aRx)
@@ -98,7 +98,7 @@ class AbortableTest {
 
     @Test
     fun abortableAwakens() {
-        val (_tx, aRx) =
+        val (_, aRx) =
             io.github.kotlinmania.futures.channel.oneshot
                 .channel<Unit>()
         val (abortableRx, abortHandle) = abortable(aRx)
@@ -125,7 +125,7 @@ class AbortableTest {
         val (tx, aRx) =
             io.github.kotlinmania.futures.channel.oneshot
                 .channel<Unit>()
-        val (abortableRx, _abortHandle) = abortable(aRx)
+        val (abortableRx, _) = abortable(aRx)
 
         tx.send(Unit)
         assertFalse(abortableRx.isAborted())
@@ -137,7 +137,7 @@ class AbortableTest {
 
     @Test
     fun abortableStreamWorks() {
-        val (_tx, aRx) =
+        val (_, aRx) =
             io.github.kotlinmania.futures.channel.mpsc
                 .channel<Unit>(1)
         val (abortableRx, abortHandle) = abortable(aRx)
@@ -150,7 +150,7 @@ class AbortableTest {
 
     @Test
     fun abortableStreamAwakens() {
-        val (_tx, aRx) =
+        val (_, aRx) =
             io.github.kotlinmania.futures.channel.mpsc
                 .channel<Unit>(1)
         val (abortableRx, abortHandle) = abortable(aRx)
@@ -173,7 +173,7 @@ class AbortableTest {
         val (tx, aRx) =
             io.github.kotlinmania.futures.channel.mpsc
                 .channel<Unit>(1)
-        val (abortableRx, _abortHandle) = abortable(aRx)
+        val (abortableRx, _) = abortable(aRx)
 
         tx.startSend(Unit)
         assertFalse(abortableRx.isAborted())

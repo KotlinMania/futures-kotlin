@@ -12,11 +12,9 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public fun <T> pollImmediate(future: Future<T>): Future<Poll<T>> {
     var polled = false
-    return object : Future<Poll<T>> {
-        override fun poll(context: TaskContext): Poll<Poll<T>> {
-            if (polled) error("pollImmediate future polled after completion")
-            polled = true
-            return Poll.Ready(future.poll(context))
-        }
+    return Future { context ->
+        if (polled) error("pollImmediate future polled after completion")
+        polled = true
+        Poll.Ready(future.poll(context))
     }
 }

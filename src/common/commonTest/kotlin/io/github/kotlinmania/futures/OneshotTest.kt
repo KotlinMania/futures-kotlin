@@ -138,7 +138,7 @@ class OneshotTest {
     @Test
     fun cancelLots() {
         val n = 200
-        for (i in 0 until n) {
+        repeat(n) {
             val (otx, rx) = oneshot<Int>()
             rx.close()
             val cx = TaskContext()
@@ -149,7 +149,7 @@ class OneshotTest {
     @Test
     fun cancelSends() {
         val n = 200
-        for (i in 0 until n) {
+        repeat(n) {
             val (otx, rx) = oneshot<Int>()
             rx.close()
             val sendRes = otx.send(42)

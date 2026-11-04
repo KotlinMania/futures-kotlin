@@ -92,7 +92,7 @@ class ReadyQueueTest {
             val n = (i % 5) + 1
             val senders = mutableListOf<io.github.kotlinmania.futures.channel.oneshot.Sender<Int>>()
 
-            for (num in 0 until n) {
+            repeat(n) {
                 val (tx, rx) = oneshot<Int>()
                 queue.push(rx)
                 senders.add(tx)

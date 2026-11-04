@@ -11,7 +11,7 @@ class StreamRepeatTest {
         val st = streamRepeat(9)
         val cx = TaskContext()
 
-        for (i in 0 until 5) {
+        repeat(5) {
             val p = st.pollNext(cx)
             assertTrue(p is Poll.Ready)
             assertEquals(Yield.value(9), p.value)

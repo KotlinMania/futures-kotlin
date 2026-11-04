@@ -214,7 +214,7 @@ class FuturesOrderedTest {
 
     @Test
     fun queueNeverUnblocked() {
-        val (_aTx, aRx) = oneshot<Any>()
+        val (_, aRx) = oneshot<Any>()
         val (bTx, bRx) = oneshot<Any>()
         val (cTx, cRx) = oneshot<Any>()
 
@@ -229,7 +229,7 @@ class FuturesOrderedTest {
         val stream = listOf(aRx, selected).collectFuturesOrdered()
         val cx = TaskContext()
 
-        for (i in 0 until 10) {
+        repeat(10) {
             assertIs<Poll.Pending>(stream.pollNext(cx))
         }
 

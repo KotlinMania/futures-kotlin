@@ -68,16 +68,12 @@ public class Chunks<T>(
                         is Yield.Value -> {
                             items.add(y.value)
                             if (items.size >= capacity) {
-                                val chunk = items.toList()
-                                items.clear()
-                                return Poll.Ready(Yield.Value(chunk))
+                                return Poll.Ready(Yield.Value(take()))
                             }
                         }
                         Yield.End -> {
                             return if (items.isNotEmpty()) {
-                                val chunk = items.toList()
-                                items.clear()
-                                Poll.Ready(Yield.Value(chunk))
+                                Poll.Ready(Yield.Value(take()))
                             } else {
                                 Poll.Ready(Yield.End)
                             }

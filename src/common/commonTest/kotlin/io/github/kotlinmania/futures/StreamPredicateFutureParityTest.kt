@@ -148,10 +148,7 @@ class StreamPredicateFutureParityTest {
     @Test
     fun returnedPredicateFutureFailureIsNotDiscardedByAny() {
         val failure = IllegalStateException("predicate future")
-        val action =
-            object : Future<Boolean> {
-                override fun poll(context: TaskContext): Poll<Boolean> = throw failure
-            }
+        val action = Future<Boolean> { throw failure }
         val future = streamIter(listOf(1)).any { action }
         assertSame(failure, assertFailsWith<IllegalStateException> { future.poll(TaskContext()) })
         assertFalse(future.isTerminated())

@@ -148,7 +148,7 @@ class FuturesUnorderedTest {
 
     @Test
     fun finishedFuture() {
-        val (_aTx, aRx) = oneshot<Int>()
+        val (_, aRx) = oneshot<Int>()
         val (bTx, bRx) = oneshot<Int>()
         val (cTx, cRx) = oneshot<Int>()
 
@@ -163,7 +163,7 @@ class FuturesUnorderedTest {
         val stream = listOf(aRx, selected).collectFuturesUnordered()
         val cx = TaskContext()
 
-        for (i in 0 until 10) {
+        repeat(10) {
             assertTrue(stream.pollNext(cx) is Poll.Pending)
         }
 
@@ -201,8 +201,8 @@ class FuturesUnorderedTest {
     @Test
     fun clearInLoop() {
         val futures = FuturesUnordered<Unit>()
-        for (i in 0 until 50) {
-            for (j in 0 until 10) {
+        repeat(50) {
+            repeat(10) {
                 futures.push(ready(Unit))
             }
             val cx = TaskContext()

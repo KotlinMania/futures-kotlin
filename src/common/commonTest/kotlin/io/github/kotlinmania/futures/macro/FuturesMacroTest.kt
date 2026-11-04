@@ -1,4 +1,3 @@
-// port-lint: tests futures-macro/src/lib.rs
 package io.github.kotlinmania.futures.macro
 
 import io.github.kotlinmania.procmacro2.TokenStream

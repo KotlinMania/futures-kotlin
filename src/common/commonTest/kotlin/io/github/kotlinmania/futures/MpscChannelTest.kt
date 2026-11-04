@@ -19,7 +19,7 @@ class MpscChannelTest {
         }
 
         val list = mutableListOf<Int>()
-        for (i in 0 until amt) {
+        repeat(amt) {
             val poll = rx.pollNext(context)
             assertTrue(poll is Poll.Ready)
             val y = poll.value

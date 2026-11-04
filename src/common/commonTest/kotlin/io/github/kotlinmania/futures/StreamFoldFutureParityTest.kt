@@ -98,10 +98,7 @@ class StreamFoldFutureParityTest {
     @Test
     fun returnedFutureFailurePropagatesWithThePendingFutureStillStored() {
         val failure = IllegalStateException("operation future")
-        val action =
-            object : Future<Int> {
-                override fun poll(context: TaskContext): Poll<Int> = throw failure
-            }
+        val action = Future<Int> { throw failure }
         val fold = streamIter(listOf(1)).fold<Int, Int>(3) { _, _ -> action }
         assertSame(failure, assertFailsWith<IllegalStateException> { fold.poll(TaskContext()) })
         assertFalse(fold.isTerminated())

@@ -19,31 +19,29 @@ public fun <A, B> select(
     var aOpt: Future<A>? = futureA
     var bOpt: Future<B>? = futureB
 
-    return object : Future<Either<Pair<A, Future<B>>, Pair<B, Future<A>>>> {
-        override fun poll(context: TaskContext): Poll<Either<Pair<A, Future<B>>, Pair<B, Future<A>>>> {
-            val a = aOpt ?: error("cannot poll select twice")
-            val b = bOpt ?: error("cannot poll select twice")
+    return Future { context ->
+        val a = aOpt ?: error("cannot poll select twice")
+        val b = bOpt ?: error("cannot poll select twice")
 
-            when (val resA = a.poll(context)) {
-                is Poll.Ready -> {
-                    aOpt = null
-                    bOpt = null
-                    return Poll.Ready(Either.Left(Pair(resA.value, b)))
-                }
-                is Poll.Pending -> {}
+        when (val resA = a.poll(context)) {
+            is Poll.Ready -> {
+                aOpt = null
+                bOpt = null
+                return@Future Poll.Ready(Either.Left(Pair(resA.value, b)))
             }
-
-            when (val resB = b.poll(context)) {
-                is Poll.Ready -> {
-                    aOpt = null
-                    bOpt = null
-                    return Poll.Ready(Either.Right(Pair(resB.value, a)))
-                }
-                is Poll.Pending -> {}
-            }
-
-            return Poll.Pending
+            is Poll.Pending -> {}
         }
+
+        when (val resB = b.poll(context)) {
+            is Poll.Ready -> {
+                aOpt = null
+                bOpt = null
+                return@Future Poll.Ready(Either.Right(Pair(resB.value, a)))
+            }
+            is Poll.Pending -> {}
+        }
+
+        Poll.Pending
     }
 }
 
@@ -58,30 +56,28 @@ public fun <A, B> selectValues(
     var aOpt: Future<A>? = futureA
     var bOpt: Future<B>? = futureB
 
-    return object : Future<Either<A, B>> {
-        override fun poll(context: TaskContext): Poll<Either<A, B>> {
-            val a = aOpt ?: error("cannot poll selectValues twice")
-            val b = bOpt ?: error("cannot poll selectValues twice")
+    return Future { context ->
+        val a = aOpt ?: error("cannot poll selectValues twice")
+        val b = bOpt ?: error("cannot poll selectValues twice")
 
-            when (val resA = a.poll(context)) {
-                is Poll.Ready -> {
-                    aOpt = null
-                    bOpt = null
-                    return Poll.Ready(Either.Left(resA.value))
-                }
-                is Poll.Pending -> {}
+        when (val resA = a.poll(context)) {
+            is Poll.Ready -> {
+                aOpt = null
+                bOpt = null
+                return@Future Poll.Ready(Either.Left(resA.value))
             }
-
-            when (val resB = b.poll(context)) {
-                is Poll.Ready -> {
-                    aOpt = null
-                    bOpt = null
-                    return Poll.Ready(Either.Right(resB.value))
-                }
-                is Poll.Pending -> {}
-            }
-
-            return Poll.Pending
+            is Poll.Pending -> {}
         }
+
+        when (val resB = b.poll(context)) {
+            is Poll.Ready -> {
+                aOpt = null
+                bOpt = null
+                return@Future Poll.Ready(Either.Right(resB.value))
+            }
+            is Poll.Pending -> {}
+        }
+
+        Poll.Pending
     }
 }

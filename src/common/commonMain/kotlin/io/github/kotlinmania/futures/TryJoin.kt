@@ -307,50 +307,46 @@ public fun <A, B, C, D, E5, Err> tryJoin5(
  */
 @HiddenFromObjC
 public fun <T, E> tryJoinAll(futures: List<Future<Try<T, E>>>): Future<Try<List<T>, E>> {
-    val results = arrayOfNulls<Any?>(futures.size)
-    val done = BooleanArray(futures.size)
+    val results = MutableList<Try.Ok<T>?>(futures.size) { null }
     var completedCount = 0
-    var error: E? = null
-    var errored = false
+    var failed: Try.Err<E>? = null
 
-    return object : Future<Try<List<T>, E>> {
-        @Suppress("UNCHECKED_CAST")
-        override fun poll(context: TaskContext): Poll<Try<List<T>, E>> {
-            if (errored) {
-                return Poll.Ready(Try.Err(error as E))
-            }
+    return Future { context ->
+        val priorErr = failed
+        if (priorErr != null) {
+            return@Future Poll.Ready(priorErr)
+        }
 
-            for (i in futures.indices) {
-                if (!done[i]) {
-                    when (val p = futures[i].poll(context)) {
-                        is Poll.Ready -> {
-                            when (val v = p.value) {
-                                is Try.Ok -> {
-                                    results[i] = v.value
-                                    done[i] = true
-                                    completedCount++
-                                }
-                                is Try.Err -> {
-                                    error = v.error
-                                    errored = true
-                                    return Poll.Ready(Try.Err(v.error))
-                                }
+        for (i in futures.indices) {
+            if (results[i] == null) {
+                when (val p = futures[i].poll(context)) {
+                    is Poll.Ready -> {
+                        when (val v = p.value) {
+                            is Try.Ok -> {
+                                results[i] = v
+                                completedCount++
+                            }
+                            is Try.Err -> {
+                                failed = v
+                                return@Future Poll.Ready(v)
                             }
                         }
-                        is Poll.Pending -> {}
                     }
+                    is Poll.Pending -> {}
                 }
             }
+        }
 
-            return if (completedCount == futures.size) {
-                val list = ArrayList<T>(futures.size)
-                for (item in results) {
-                    list.add(item as T)
+        if (completedCount == futures.size) {
+            val list = ArrayList<T>(futures.size)
+            for (item in results) {
+                if (item != null) {
+                    list.add(item.value)
                 }
-                Poll.Ready(Try.Ok(list))
-            } else {
-                Poll.Pending
             }
+            Poll.Ready(Try.Ok(list))
+        } else {
+            Poll.Pending
         }
     }
 }

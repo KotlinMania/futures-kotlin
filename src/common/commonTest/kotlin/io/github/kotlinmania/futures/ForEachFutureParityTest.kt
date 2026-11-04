@@ -73,10 +73,7 @@ class ForEachFutureParityTest {
     @Test
     fun returnedFutureFailureIsPropagatedRatherThanDiscarded() {
         val failure = IllegalStateException("action future")
-        val action =
-            object : Future<Unit> {
-                override fun poll(context: TaskContext): Poll<Unit> = throw failure
-            }
+        val action = Future<Unit> { throw failure }
         val future = streamIter(listOf(1)).forEach { action }
         assertSame(failure, assertFailsWith<IllegalStateException> { future.poll(TaskContext()) })
     }

@@ -8,11 +8,11 @@ import io.github.kotlinmania.quote.formatIdent
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.syn.CommaParse
 import io.github.kotlinmania.syn.Expr
-import io.github.kotlinmania.syn.ParseMacroSynResult
+import io.github.kotlinmania.syn.ParseMacro2SynResult
 import io.github.kotlinmania.syn.ParseStream
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.parseExpr
-import io.github.kotlinmania.syn.parseMacroInput
+import io.github.kotlinmania.syn.parseMacroInput2
 
 internal class Join(
     val futExprs: MutableList<Expr> = mutableListOf(),
@@ -60,9 +60,9 @@ internal fun bindFutures(futExprs: List<Expr>, span: Span): Pair<List<TokenStrea
  */
 internal fun join(input: TokenStream): TokenStream {
     val parsed =
-        when (val result = parseMacroInput(input) { Join.parse(it) }) {
-            is ParseMacroSynResult.Success -> result.value
-            is ParseMacroSynResult.CompileError -> return result.tokens
+        when (val result = parseMacroInput2(input) { Join.parse(it) }) {
+            is ParseMacro2SynResult.Success -> result.value
+            is ParseMacro2SynResult.CompileError -> return result.tokens
         }
 
     val span = Span.callSite()
@@ -115,9 +115,9 @@ internal fun join(input: TokenStream): TokenStream {
  */
 internal fun tryJoin(input: TokenStream): TokenStream {
     val parsed =
-        when (val result = parseMacroInput(input) { Join.parse(it) }) {
-            is ParseMacroSynResult.Success -> result.value
-            is ParseMacroSynResult.CompileError -> return result.tokens
+        when (val result = parseMacroInput2(input) { Join.parse(it) }) {
+            is ParseMacro2SynResult.Success -> result.value
+            is ParseMacro2SynResult.CompileError -> return result.tokens
         }
 
     val span = Span.callSite()

@@ -126,10 +126,7 @@ class StreamFilterFutureParityTest {
     @Test
     fun predicateFutureFailureRetainsItsPendingItemAndFuture() {
         val failure = IllegalStateException("predicate future")
-        val action =
-            object : Future<Boolean> {
-                override fun poll(context: TaskContext): Poll<Boolean> = throw failure
-            }
+        val action = Future<Boolean> { throw failure }
         val input = Input(listOf(Poll.Ready(Yield.Value(null))))
         val stream = input.filter { action }
         assertSame(failure, assertFailsWith<IllegalStateException> { stream.pollNext(TaskContext()) })

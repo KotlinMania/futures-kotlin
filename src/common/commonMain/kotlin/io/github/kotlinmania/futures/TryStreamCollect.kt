@@ -12,7 +12,7 @@ import kotlin.native.HiddenFromObjC
 public class TryCollect<T, E>(
     private val stream: TryStream<T, E>,
 ) : FusedFuture<Try<List<T>, E>> {
-    private var items = mutableListOf<T>()
+    private val items = mutableListOf<T>()
 
     public companion object {
         internal fun <T, E> new(stream: TryStream<T, E>): TryCollect<T, E> = TryCollect(stream)
@@ -39,8 +39,8 @@ public class TryCollect<T, E>(
                         }
 
                         Yield.End -> {
-                            val completed = items
-                            items = mutableListOf()
+                            val completed = items.toList()
+                            items.clear()
                             return Poll.Ready(Try.Ok(completed))
                         }
                     }

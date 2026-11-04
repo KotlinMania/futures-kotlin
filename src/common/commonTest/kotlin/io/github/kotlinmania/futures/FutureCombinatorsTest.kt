@@ -1,4 +1,3 @@
-// port-lint: tests future/mod.rs
 package io.github.kotlinmania.futures
 
 import kotlin.test.Test

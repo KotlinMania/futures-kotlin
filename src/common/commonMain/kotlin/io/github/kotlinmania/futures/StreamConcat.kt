@@ -12,14 +12,15 @@ import kotlin.native.HiddenFromObjC
 public class Concat<T>(
     private val stream: Stream<List<T>>,
 ) : FusedFuture<List<T>> {
-    private var accum: MutableList<T>? = null
+    private val accum = mutableListOf<T>()
+    private var hasAccum = false
 
     public companion object {
         internal fun <T> new(stream: Stream<List<T>>): Concat<T> = Concat(stream)
     }
 
     override fun isTerminated(): Boolean =
-        accum == null && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
+        !hasAccum && ((stream as? FusedStream<*>)?.isTerminated() ?: false)
 
     override fun poll(context: TaskContext): Poll<List<T>> {
         while (true) {
@@ -27,17 +28,14 @@ public class Concat<T>(
                 is Poll.Ready -> {
                     when (val item = result.value) {
                         is Yield.Value -> {
-                            val current = accum
-                            if (current != null) {
-                                current.addAll(item.value)
-                            } else {
-                                accum = item.value.toMutableList()
-                            }
+                            hasAccum = true
+                            accum.addAll(item.value)
                         }
 
                         Yield.End -> {
-                            val completed = accum ?: mutableListOf()
-                            accum = null
+                            val completed = accum.toList()
+                            accum.clear()
+                            hasAccum = false
                             return Poll.Ready(completed)
                         }
                     }

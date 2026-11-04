@@ -6,13 +6,13 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.quote.quoteSpanned
 import io.github.kotlinmania.syn.Item
-import io.github.kotlinmania.syn.ParseMacroSynResult
+import io.github.kotlinmania.syn.ParseMacro2SynResult
 import io.github.kotlinmania.syn.Stmt
 import io.github.kotlinmania.syn.SynError
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.parseExpr
-import io.github.kotlinmania.syn.parseMacroInput
+import io.github.kotlinmania.syn.parseMacroInput2
 
 internal fun test(args: TokenStream, item: TokenStream): TokenStream {
     if (!args.isEmpty()) {
@@ -22,16 +22,16 @@ internal fun test(args: TokenStream, item: TokenStream): TokenStream {
     val input =
         when (
             val parsed =
-                parseMacroInput(item) { stream ->
-                    val parsedItem = Item.parse(stream).getOrElse { return@parseMacroInput SynResult.failure(it) }
+                parseMacroInput2(item) { stream ->
+                    val parsedItem = Item.parse(stream).getOrElse { return@parseMacroInput2 SynResult.failure(it) }
                     val itemFn =
                         parsedItem as? Item.Fn
-                            ?: return@parseMacroInput SynResult.failure(stream.error("expected function"))
+                            ?: return@parseMacroInput2 SynResult.failure(stream.error("expected function"))
                     SynResult.success(itemFn)
                 }
         ) {
-            is ParseMacroSynResult.Success -> parsed.value
-            is ParseMacroSynResult.CompileError -> return parsed.tokens
+            is ParseMacro2SynResult.Success -> parsed.value
+            is ParseMacro2SynResult.CompileError -> return parsed.tokens
         }
 
     val asyncness = input.sig.asyncness
@@ -40,9 +40,7 @@ internal fun test(args: TokenStream, item: TokenStream): TokenStream {
         return SynError.newSpanned(input.sig.fnToken, "Only async functions are supported").toCompileError()
     }
 
-    val body =
-        input.block
-            ?: return SynError.newSpanned(input.sig.fnToken, "expected function body").toCompileError()
+    val body = input.block
 
     val (lastStmtStartSpan, lastStmtEndSpan) =
         run {

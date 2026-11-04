@@ -1,4 +1,3 @@
-// port-lint: tests stream/mod.rs
 package io.github.kotlinmania.futures
 
 import io.github.kotlinmania.futures.channel.mpsc.unbounded

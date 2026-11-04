@@ -136,7 +136,6 @@ class MpscTest {
         val tx2 = tx1.clone()
         val tx3 = tx1.clone()
         val tx4 = tx1.clone()
-        val cx = TaskContext()
 
         tx1.disconnect()
         tx2.disconnect()

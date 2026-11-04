@@ -62,14 +62,13 @@ class TryFoldStateParityTest {
         var wake: Waker? = null
         var actionPolls = 0
         val action =
-            object : Future<Try<Int?, String?>> {
-                override fun poll(context: TaskContext): Poll<Try<Int?, String?>> {
-                    actionPolls += 1
-                    if (!released) {
-                        wake = context.waker
-                        return Poll.Pending
-                    }
-                    return Poll.Ready(Try.Ok(7))
+            Future<Try<Int?, String?>> { context ->
+                actionPolls += 1
+                if (!released) {
+                    wake = context.waker
+                    Poll.Pending
+                } else {
+                    Poll.Ready(Try.Ok(7))
                 }
             }
         var calls = 0
@@ -127,10 +126,7 @@ class TryFoldStateParityTest {
     @Test
     fun operationFutureFailureKeepsPendingFutureState() {
         val failure = IllegalStateException("operation future")
-        val action =
-            object : Future<Try<Int?, String?>> {
-                override fun poll(context: TaskContext): Poll<Try<Int?, String?>> = throw failure
-            }
+        val action = Future<Try<Int?, String?>> { throw failure }
         val fold = streamIter(listOf<Try<Int, String?>>(Try.Ok(1))).asTryStream().tryFold<Int, String?, Int?>(3) { _, _ -> action }
         assertSame(failure, assertFailsWith<IllegalStateException> { fold.poll(TaskContext()) })
         assertFalse(fold.isTerminated())

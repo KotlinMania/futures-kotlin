@@ -12,7 +12,7 @@ import kotlin.native.HiddenFromObjC
 public class TryConcat<T, E>(
     private val stream: TryStream<List<T>, E>,
 ) : Future<Try<List<T>, E>> {
-    private var accum = mutableListOf<T>()
+    private val accum = mutableListOf<T>()
 
     public companion object {
         internal fun <T, E> new(stream: TryStream<List<T>, E>): TryConcat<T, E> = TryConcat(stream)
@@ -32,8 +32,8 @@ public class TryConcat<T, E>(
                             }
                         }
                         Yield.End -> {
-                            val completed = accum
-                            accum = mutableListOf()
+                            val completed = accum.toList()
+                            accum.clear()
                             return Poll.Ready(Try.Ok(completed))
                         }
                     }

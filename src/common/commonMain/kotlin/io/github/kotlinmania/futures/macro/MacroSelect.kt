@@ -14,7 +14,7 @@ import io.github.kotlinmania.syn.Expr
 import io.github.kotlinmania.syn.FatArrowParse
 import io.github.kotlinmania.syn.IdentParse
 import io.github.kotlinmania.syn.Item
-import io.github.kotlinmania.syn.ParseMacroSynResult
+import io.github.kotlinmania.syn.ParseMacro2SynResult
 import io.github.kotlinmania.syn.ParseStream
 import io.github.kotlinmania.syn.Pat
 import io.github.kotlinmania.syn.Path
@@ -22,7 +22,7 @@ import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.customKeyword
 import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.parseExpr
-import io.github.kotlinmania.syn.parseMacroInput
+import io.github.kotlinmania.syn.parseMacroInput2
 import io.github.kotlinmania.syn.parseWithEarlierBoundaryRule
 
 private val completeKeyword = customKeyword("complete")
@@ -151,9 +151,9 @@ internal fun selectBiased(input: TokenStream): TokenStream = selectInner(input, 
 
 internal fun selectInner(input: TokenStream, random: Boolean): TokenStream {
     val parsed =
-        when (val result = parseMacroInput(input) { Select.parse(it) }) {
-            is ParseMacroSynResult.Success -> result.value
-            is ParseMacroSynResult.CompileError -> return result.tokens
+        when (val result = parseMacroInput2(input) { Select.parse(it) }) {
+            is ParseMacro2SynResult.Success -> result.value
+            is ParseMacro2SynResult.CompileError -> return result.tokens
         }
 
     val span = Span.callSite()

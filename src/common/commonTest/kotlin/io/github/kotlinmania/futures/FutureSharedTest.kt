@@ -51,14 +51,14 @@ class FutureSharedTest {
 
     @Test
     fun testPtrEq() {
-        val (_tx, rx) = channel<Int>()
+        val (_, rx) = channel<Int>()
         val shared1 = rx.shared()
         val shared2 = shared1.clone()
 
         assertTrue(shared1.ptrEq(shared2))
         assertTrue(shared2.ptrEq(shared1))
 
-        val (_tx2, rx2) = channel<Int>()
+        val (_, rx2) = channel<Int>()
         val shared3 = rx2.shared()
         assertFalse(shared1.ptrEq(shared3))
     }
@@ -69,7 +69,7 @@ class FutureSharedTest {
         val f1 = rx.shared()
         val f2 = f1.clone()
 
-        for (i in 0 until 2) {
+        repeat(2) {
             assertNull(f1.peek())
             assertNull(f2.peek())
         }
@@ -77,7 +77,7 @@ class FutureSharedTest {
         tx.send(42)
 
         // Peek remains null until polled
-        for (i in 0 until 2) {
+        repeat(2) {
             assertNull(f1.peek())
             assertNull(f2.peek())
         }
@@ -85,7 +85,7 @@ class FutureSharedTest {
         val cx = TaskContext()
         f1.poll(cx)
 
-        for (i in 0 until 2) {
+        repeat(2) {
             assertEquals(Try.ok(42), f2.peek())
         }
     }

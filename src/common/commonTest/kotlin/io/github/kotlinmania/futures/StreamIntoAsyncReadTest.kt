@@ -46,7 +46,7 @@ class StreamIntoAsyncReadTest {
     @Test
     fun testIntoAsyncRead() {
         val chunks = mutableListOf<Try<ByteArray, IoError>>()
-        for (i in 1..3) {
+        repeat(3) {
             chunks.add(Try.ok(ByteArray(0)))
             chunks.add(Try.ok(byteArrayOf(1, 2, 3, 4, 5)))
         }
@@ -79,7 +79,7 @@ class StreamIntoAsyncReadTest {
     @Test
     fun testIntoAsyncBufRead() {
         val chunks = mutableListOf<Try<ByteArray, IoError>>()
-        for (i in 1..2) {
+        repeat(2) {
             chunks.add(Try.ok(ByteArray(0)))
             chunks.add(Try.ok(byteArrayOf(1, 2, 3, 4, 5)))
         }

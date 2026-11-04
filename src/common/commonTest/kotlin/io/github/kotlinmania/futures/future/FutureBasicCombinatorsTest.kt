@@ -47,12 +47,12 @@ class FutureBasicCombinatorsTest {
         val list = mutableListOf<Int>()
 
         val fut =
-            ready(Try.ok(1))
+            ready<Try<Int, Int>>(Try.ok(1))
                 .andThen { x ->
                     list.add(x)
                     list.add(2)
                     ready(Try.ok(3))
-                }.orElse { x ->
+                }.orElse<Int, Int, Int> { x ->
                     list.add(x)
                     list.add(-1)
                     ready(Try.ok(-1))
@@ -64,7 +64,7 @@ class FutureBasicCombinatorsTest {
                     list.add(x)
                     list.add(-1)
                     -1
-                }.map { x ->
+                }.map<Try<Int, Int>, Try<Int, Int>> { x ->
                     list.add((x as Try.Ok).value)
                     list.add(6)
                     Try.err(7)
@@ -72,7 +72,7 @@ class FutureBasicCombinatorsTest {
                     list.add(x)
                     list.add(-1)
                     ready(Try.err(-1))
-                }.orElse { x ->
+                }.orElse<Int, Int, Int> { x ->
                     list.add(x)
                     list.add(8)
                     ready(Try.err(9))

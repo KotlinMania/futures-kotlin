@@ -43,15 +43,14 @@ class OptionFutureDelegationParityTest {
         val expectedContext = TaskContext()
         var calls = 0
         val inner =
-            object : Future<Int> {
-                override fun poll(context: TaskContext): Poll<Int> {
-                    assertSame(expectedContext, context)
-                    calls += 1
-                    if (calls == 1) {
-                        context.wakeByRef()
-                        return Poll.Pending
-                    }
-                    return Poll.Ready(12)
+            Future<Int> { context ->
+                assertSame(expectedContext, context)
+                calls += 1
+                if (calls == 1) {
+                    context.wakeByRef()
+                    Poll.Pending
+                } else {
+                    Poll.Ready(12)
                 }
             }
         val future = inner.intoOptionFuture()
