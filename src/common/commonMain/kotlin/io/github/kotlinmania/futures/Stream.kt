@@ -27,7 +27,6 @@ public typealias LocalBoxStream<T> = Stream<T>
  * even after a value has been produced, yielding [Yield.End] once the stream has
  * been fully exhausted.
  */
-@HiddenFromObjC
 public interface Stream<out T> {
     /**
      * Attempt to pull out the next value of this stream, registering the
