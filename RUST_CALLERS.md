@@ -16,24 +16,24 @@ For every Rust crate this repo owns (under `tmp/`), this file lists every **cros
 
 | package | module | inbound use sites | distinct caller crates | distinct caller repos | codex sites |
 |---|---|---:|---:|---:|---:|
-| `futures` | `futures` | 327 | 35 | 17 | 113 |
+| `futures` | `futures` | 449 | 42 | 21 | 113 |
 | `futures-channel` | `futures_channel` | 9 | 3 | 3 | 0 |
-| `futures-core` | `futures_core` | 39 | 9 | 9 | 0 |
+| `futures-core` | `futures_core` | 59 | 12 | 12 | 0 |
 | `futures-executor` | `futures_executor` | 0 | 0 | 0 | 0 |
-| `futures-io` | `futures_io` | 3 | 2 | 2 | 0 |
+| `futures-io` | `futures_io` | 4 | 3 | 3 | 0 |
 | `futures-macro` | `futures_macro` | 0 | 0 | 0 | 0 |
 | `futures-sink` | `futures_sink` | 11 | 2 | 2 | 0 |
 | `futures-task` | `futures_task` | 0 | 0 | 0 | 0 |
 | `futures-test` | `futures_test` | 10 | 3 | 3 | 0 |
-| `futures-util` | `futures_util` | 145 | 18 | 12 | 0 |
+| `futures-util` | `futures_util` | 195 | 26 | 19 | 0 |
 
 ## `futures`
 
-### Inbound symbols (54 distinct, 327 total `use` sites)
+### Inbound symbols (58 distinct, 449 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `futures`.
 
-#### `futures::StreamExt` — 60 site(s) (37 codex, 23 other, 22 caller crates)
+#### `futures::StreamExt` — 98 site(s) (37 codex, 61 other, 28 caller crates)
 
 - ✅ `codex-kotlin/codex-api` `src/endpoint/realtime_websocket/methods.rs:23` — `use futures::StreamExt`
 - ✅ `codex-kotlin/codex-api` `src/endpoint/responses_websocket.rs:15` — `use futures::StreamExt`
@@ -47,9 +47,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-app-server-transport` `src/transport/remote_control/tests.rs:35` — `use futures::StreamExt`
 - ✅ `codex-kotlin/codex-app-server-transport` `src/transport/remote_control/websocket.rs:32` — `use futures::StreamExt`
 - ✅ `codex-kotlin/codex-app-server-transport` `src/transport/remote_control/websocket.rs:1230` — `use futures::StreamExt`
-- _… and 48 more site(s)._
+- _… and 86 more site(s)._
 
-#### `futures::future::BoxFuture` — 29 site(s) (20 codex, 9 other, 8 caller crates)
+#### `futures::future::BoxFuture` — 44 site(s) (20 codex, 24 other, 9 caller crates)
 
 - ✅ `codex-kotlin/codex-config` `src/cloud_requirements.rs:2` — `use futures::future::BoxFuture`
 - ✅ `codex-kotlin/codex-core` `src/goals.rs:29` — `use futures::future::BoxFuture`
@@ -63,9 +63,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-core` `src/tools/sandboxing.rs:32` — `use futures::future::BoxFuture`
 - ✅ `codex-kotlin/codex-core` `tests/common/test_codex.rs:43` — `use futures::future::BoxFuture`
 - ✅ `codex-kotlin/codex-exec-server` `src/client.rs:12` — `use futures::future::BoxFuture`
-- _… and 17 more site(s)._
+- _… and 32 more site(s)._
 
-#### `futures::SinkExt` — 18 site(s) (16 codex, 2 other, 8 caller crates)
+#### `futures::SinkExt` — 20 site(s) (16 codex, 4 other, 10 caller crates)
 
 - ✅ `codex-kotlin/codex-api` `src/endpoint/realtime_websocket/methods.rs:22` — `use futures::SinkExt`
 - ✅ `codex-kotlin/codex-api` `src/endpoint/responses_websocket.rs:14` — `use futures::SinkExt`
@@ -79,9 +79,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-app-server-transport` `src/transport/unix_socket_tests.rs:11` — `use futures::SinkExt`
 - ✅ `codex-kotlin/codex-app-server-transport` `src/transport/websocket.rs:29` — `use futures::SinkExt`
 - ✅ `codex-kotlin/codex-core` `tests/common/responses.rs:13` — `use futures::SinkExt`
-- _… and 6 more site(s)._
+- _… and 8 more site(s)._
 
-#### `futures::FutureExt` — 19 site(s) (10 codex, 9 other, 10 caller crates)
+#### `futures::FutureExt` — 33 site(s) (10 codex, 23 other, 12 caller crates)
 
 - ✅ `codex-kotlin/codex-core` `src/tools/handlers/multi_agents/wait.rs:4` — `use futures::FutureExt`
 - ✅ `codex-kotlin/codex-exec-server` `src/client.rs:11` — `use futures::FutureExt`
@@ -95,9 +95,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-rmcp-client` `tests/streamable_http_test_support.rs:28` — `use futures::FutureExt as _`
 - `libwebrtc-kotlin/livekit-runtime` `src/async_std.rs:1` — `use futures::FutureExt`
 - `libwebrtc-kotlin/livekit-runtime` `src/dispatcher.rs:1` — `use futures::FutureExt`
-- _… and 7 more site(s)._
+- _… and 21 more site(s)._
 
-#### `futures::future::FutureExt` — 23 site(s) (3 codex, 20 other, 7 caller crates)
+#### `futures::future::FutureExt` — 24 site(s) (3 codex, 21 other, 8 caller crates)
 
 - ✅ `codex-kotlin/codex-config` `src/cloud_requirements.rs:3` — `use futures::future::FutureExt`
 - ✅ `codex-kotlin/codex-mcp` `src/elicitation.rs:27` — `use futures::future::FutureExt`
@@ -105,13 +105,13 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `async-trait-kotlin/async-trait` `tests/test.rs:1362` — `use futures::future::FutureExt`
 - `crossterm-kotlin/crossterm` `examples/event-stream-async-std.rs:6` — `use futures::future::FutureExt`
 - `crossterm-kotlin/crossterm` `examples/event-stream-tokio.rs:6` — `use futures::future::FutureExt`
+- `parquet-kotlin/parquet` `src/arrow/async_reader/mod.rs:32` — `use futures::future::FutureExt`
 - `rmcp-kotlin/rmcp` `src/handler/server/prompt.rs:8` — `use futures::future::FutureExt`
 - `rmcp-kotlin/rmcp` `src/handler/server/tool.rs:6` — `use futures::future::FutureExt`
 - `tokio-kotlin/tokio` `src/process/mod.rs:1724` — `use futures::future::FutureExt`
 - `tokio-kotlin/tokio` `src/process/unix/reap.rs:137` — `use futures::future::FutureExt`
 - `tokio-kotlin/tokio` `src/runtime/tests/loom_multi_thread/shutdown.rs:8` — `use futures::future::FutureExt`
-- `tokio-kotlin/tokio` `src/runtime/tests/task_combinations.rs:11` — `use futures::future::FutureExt`
-- _… and 11 more site(s)._
+- _… and 12 more site(s)._
 
 #### `futures::prelude::*` — 6 site(s) (3 codex, 3 other, 3 caller crates)
 
@@ -154,10 +154,13 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-core` `src/tools/handlers/multi_agents/wait.rs:6` — `use futures::stream::FuturesUnordered`
 - `tokio-kotlin/tokio` `tests/signal_realtime.rs:12` — `use futures::stream::FuturesUnordered`
 
-#### `futures::Stream` — 18 site(s) (2 codex, 16 other, 8 caller crates)
+#### `futures::Stream` — 21 site(s) (2 codex, 19 other, 9 caller crates)
 
 - ✅ `codex-kotlin/codex-api` `src/common.rs:10` — `use futures::Stream`
 - ✅ `codex-kotlin/codex-core` `src/client_common.rs:8` — `use futures::Stream`
+- `hf-hub-kotlin/hf-hub` `src/buckets/mod.rs:23` — `use futures::Stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/mod.rs:42` — `use futures::Stream`
+- `hf-hub-kotlin/hf-hub` `src/users.rs:13` — `use futures::Stream`
 - `libwebrtc-kotlin/livekit-runtime` `src/async_std.rs:22` — `pub_use futures::Stream`
 - `libwebrtc-kotlin/livekit-runtime` `src/dispatcher.rs:20` — `pub_use futures::Stream`
 - `rmcp-kotlin/rmcp` `src/handler/client/progress.rs:2` — `use futures::Stream`
@@ -165,10 +168,7 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `rmcp-kotlin/rmcp` `src/transport/common/client_side_sse.rs:7` — `use futures::Stream`
 - `rmcp-kotlin/rmcp` `src/transport/sink_stream.rs:2` — `use futures::Stream`
 - `rmcp-kotlin/rmcp` `src/transport/streamable_http_client.rs:2` — `use futures::Stream`
-- `rmcp-kotlin/rmcp` `src/transport/streamable_http_server/session.rs:1` — `use futures::Stream`
-- `rmcp-kotlin/rmcp` `src/transport/streamable_http_server/session/local.rs:7` — `use futures::Stream`
-- `rmcp-kotlin/rmcp` `src/transport/streamable_http_server/session/never.rs:1` — `use futures::Stream`
-- _… and 6 more site(s)._
+- _… and 9 more site(s)._
 
 #### `futures::Future` — 7 site(s) (2 codex, 5 other, 5 caller crates)
 
@@ -180,27 +180,41 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `rmcp-kotlin/rmcp` `src/task_manager.rs:2` — `use futures::Future`
 - `sqlx-kotlin/sqlx` `tests/postgres/postgres.rs:607` — `use futures::Future`
 
-#### `futures::stream` — 4 site(s) (2 codex, 2 other, 4 caller crates)
-
-- ✅ `codex-kotlin/codex-api` `src/sse/responses.rs:598` — `use futures::stream`
-- ✅ `codex-kotlin/codex-rmcp-client` `src/http_client_adapter.rs:21` — `use futures::stream`
-- `tokio-kotlin/tokio` `tests/sync_rwlock.rs:179` — `use futures::stream`
-- `tokio-stream-kotlin/tokio-stream` `tests/stream_timeout.rs:6` — `use futures::stream`
-
-#### `futures::TryFutureExt` — 2 site(s) (2 codex, 0 other, 1 caller crates)
+#### `futures::TryFutureExt` — 7 site(s) (2 codex, 5 other, 2 caller crates)
 
 - ✅ `codex-kotlin/codex-core` `src/compact_remote.rs:30` — `use futures::TryFutureExt`
 - ✅ `codex-kotlin/codex-core` `src/compact_remote_v2.rs:33` — `use futures::TryFutureExt`
+- `parquet-kotlin/parquet` `benches/arrow_reader_clickbench.rs:41` — `use futures::TryFutureExt`
+- `parquet-kotlin/parquet` `examples/object_store.rs:21` — `use futures::TryFutureExt`
+- `parquet-kotlin/parquet` `src/arrow/async_reader/spawn.rs:24` — `use futures::TryFutureExt`
+- `parquet-kotlin/parquet` `src/arrow/async_reader/store.rs:25` — `use futures::TryFutureExt`
+- `parquet-kotlin/parquet` `tests/encryption/encryption_async.rs:429` — `use futures::TryFutureExt`
 
-#### `futures::TryStreamExt` — 7 site(s) (1 codex, 6 other, 2 caller crates)
+#### `futures::stream` — 7 site(s) (2 codex, 5 other, 6 caller crates)
+
+- ✅ `codex-kotlin/codex-api` `src/sse/responses.rs:598` — `use futures::stream`
+- ✅ `codex-kotlin/codex-rmcp-client` `src/http_client_adapter.rs:21` — `use futures::stream`
+- `crossbeam-kotlin/benchmarks` `futures-channel.rs:3` — `use futures::stream`
+- `hf-hub-kotlin/hf-hub` `src/pagination.rs:4` — `use futures::stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/diff.rs:14` — `use futures::stream`
+- `tokio-kotlin/tokio` `tests/sync_rwlock.rs:179` — `use futures::stream`
+- `tokio-stream-kotlin/tokio-stream` `tests/stream_timeout.rs:6` — `use futures::stream`
+
+#### `futures::TryStreamExt` — 29 site(s) (1 codex, 28 other, 6 caller crates)
 
 - ✅ `codex-kotlin/codex-api` `src/sse/responses.rs:14` — `use futures::TryStreamExt`
-- `sqlx-kotlin/sqlx` `tests/mssql/mssql.rs:1` — `use futures::TryStreamExt`
-- `sqlx-kotlin/sqlx` `tests/mysql/mysql.rs:2` — `use futures::TryStreamExt`
-- `sqlx-kotlin/sqlx` `tests/postgres/derives.rs:1` — `use futures::TryStreamExt`
-- `sqlx-kotlin/sqlx` `tests/postgres/macros.rs:4` — `use futures::TryStreamExt`
-- `sqlx-kotlin/sqlx` `tests/postgres/postgres.rs:1` — `use futures::TryStreamExt`
-- `sqlx-kotlin/sqlx` `tests/sqlite/sqlite.rs:1` — `use futures::TryStreamExt`
+- `hf-hub-kotlin/examples` `buckets.rs:1` — `use futures::TryStreamExt`
+- `hf-hub-kotlin/hf-hub` `src/repository/commits.rs:15` — `use futures::TryStreamExt`
+- `hf-hub-kotlin/hf-hub` `src/repository/download.rs:23` — `use futures::TryStreamExt`
+- `hf-hub-kotlin/integration-tests` `tests/bucket_download_stream_test.rs:16` — `use futures::TryStreamExt`
+- `hf-hub-kotlin/integration-tests` `tests/bucket_sync_test.rs:12` — `use futures::TryStreamExt`
+- `hf-hub-kotlin/integration-tests` `tests/bucket_xet_transfer_test.rs:16` — `use futures::TryStreamExt`
+- `parquet-kotlin/parquet` `benches/arrow_reader_predicate_fusion.rs:55` — `use futures::TryStreamExt`
+- `parquet-kotlin/parquet` `examples/external_metadata.rs:20` — `use futures::TryStreamExt`
+- `parquet-kotlin/parquet` `examples/object_store.rs:21` — `use futures::TryStreamExt`
+- `parquet-kotlin/parquet` `examples/opendal.rs:32` — `use futures::TryStreamExt`
+- `parquet-kotlin/parquet` `src/arrow/async_reader/mod.rs:1014` — `use futures::TryStreamExt`
+- _… and 17 more site(s)._
 
 #### `futures::stream::FuturesOrdered` — 1 site(s) (1 codex, 0 other, 1 caller crates)
 
@@ -214,8 +228,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - ✅ `codex-kotlin/codex-app-server-transport` `src/transport/remote_control/websocket.rs:34` — `use futures::stream::SplitStream`
 
-#### `futures::future` — 12 site(s) (0 codex, 12 other, 2 caller crates)
+#### `futures::future` — 13 site(s) (0 codex, 13 other, 3 caller crates)
 
+- `crossbeam-kotlin/benchmarks` `futures-channel.rs:3` — `use futures::future`
 - `sqlx-kotlin/sqlx` `tests/postgres/postgres.rs:607` — `use futures::future`
 - `tokio-kotlin/tokio` `src/signal/registry.rs:171` — `use futures::future`
 - `tokio-kotlin/tokio` `tests/io_buf_writer.rs:10` — `use futures::future`
@@ -227,7 +242,20 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `tokio-kotlin/tokio` `tests/rt_panic.rs:5` — `use futures::future`
 - `tokio-kotlin/tokio` `tests/task_local_set.rs:305` — `use futures::future`
 - `tokio-kotlin/tokio` `tests/task_panic.rs:4` — `use futures::future`
-- `tokio-kotlin/tokio` `tests/time_panic.rs:4` — `use futures::future`
+- _… and 1 more site(s)._
+
+#### `futures::stream::StreamExt` — 10 site(s) (0 codex, 10 other, 4 caller crates)
+
+- `eventsource-stream-kotlin/eventsource-stream` `examples/request.rs:2` — `use futures::stream::StreamExt`
+- `eventsource-stream-kotlin/eventsource-stream` `tests/eventsource-stream.rs:2` — `use futures::stream::StreamExt`
+- `hf-hub-kotlin/hf-hub` `src/repository/commits.rs:16` — `use futures::stream::StreamExt`
+- `hf-hub-kotlin/hf-hub` `src/repository/diff.rs:14` — `use futures::stream::StreamExt`
+- `hf-hub-kotlin/hf-hub` `src/repository/download.rs:24` — `use futures::stream::StreamExt`
+- `hf-hub-kotlin/hf-hub` `src/repository/listing.rs:281` — `use futures::stream::StreamExt as _`
+- `hf-hub-kotlin/hf-hub` `src/repository/upload.rs:23` — `use futures::stream::StreamExt`
+- `sqlx-kotlin/sqlx` `tests/any/any.rs:49` — `use futures::stream::StreamExt`
+- `tokio-kotlin/tokio` `tests/signal_realtime.rs:12` — `use futures::stream::StreamExt`
+- `tokio-kotlin/tokio` `tests/sync_rwlock.rs:179` — `use futures::stream::StreamExt`
 
 #### `futures::future::pending` — 8 site(s) (0 codex, 8 other, 2 caller crates)
 
@@ -271,6 +299,16 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `age-kotlin/age` `src/protocol.rs:18` — `use futures::io::AsyncWrite`
 - `age-kotlin/age` `src/protocol.rs:347` — `use futures::io::AsyncWrite`
 
+#### `futures::stream::Stream` — 7 site(s) (0 codex, 7 other, 2 caller crates)
+
+- `hf-hub-kotlin/hf-hub` `src/pagination.rs:4` — `use futures::stream::Stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/commits.rs:16` — `use futures::stream::Stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/diff.rs:14` — `use futures::stream::Stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/download.rs:24` — `use futures::stream::Stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/files.rs:22` — `use futures::stream::Stream`
+- `hf-hub-kotlin/hf-hub` `src/repository/listing.rs:12` — `use futures::stream::Stream`
+- `parquet-kotlin/parquet` `src/arrow/async_reader/mod.rs:33` — `use futures::stream::Stream`
+
 #### `futures::task::ArcWake` — 6 site(s) (0 codex, 6 other, 1 caller crates)
 
 - `tokio-kotlin/tokio` `src/sync/tests/notify.rs:53` — `use futures::task::ArcWake`
@@ -287,14 +325,6 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `age-kotlin/age` `src/protocol.rs:347` — `use futures::pin_mut`
 - `tokio-util-kotlin/tokio-util` `tests/io_simplex.rs:1` — `use futures::pin_mut`
 - `tokio-util-kotlin/tokio-util` `tests/length_delimited.rs:11` — `use futures::pin_mut`
-
-#### `futures::stream::StreamExt` — 5 site(s) (0 codex, 5 other, 3 caller crates)
-
-- `eventsource-stream-kotlin/eventsource-stream` `examples/request.rs:2` — `use futures::stream::StreamExt`
-- `eventsource-stream-kotlin/eventsource-stream` `tests/eventsource-stream.rs:2` — `use futures::stream::StreamExt`
-- `sqlx-kotlin/sqlx` `tests/any/any.rs:49` — `use futures::stream::StreamExt`
-- `tokio-kotlin/tokio` `tests/signal_realtime.rs:12` — `use futures::stream::StreamExt`
-- `tokio-kotlin/tokio` `tests/sync_rwlock.rs:179` — `use futures::stream::StreamExt`
 
 #### `futures::task::Context` — 4 site(s) (0 codex, 4 other, 2 caller crates)
 
@@ -323,6 +353,12 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `rmcp-kotlin/rmcp` `src/transport/sink_stream.rs:2` — `use futures::Sink`
 - `tokio-util-kotlin/tokio-util` `tests/length_delimited.rs:11` — `use futures::Sink`
 
+#### `futures::executor::block_on` — 3 site(s) (0 codex, 3 other, 3 caller crates)
+
+- `crossbeam-kotlin/benchmarks` `futures-channel.rs:2` — `use futures::executor::block_on`
+- `tokio-kotlin/tokio` `tests/no_rt.rs:6` — `use futures::executor::block_on`
+- `tokio-util-kotlin/tokio-util` `tests/io_simplex.rs:47` — `use futures::executor::block_on`
+
 #### `futures::future::try_join` — 3 site(s) (0 codex, 3 other, 2 caller crates)
 
 - `tokio-kotlin/tokio` `tests/uds_socket.rs:4` — `use futures::future::try_join`
@@ -335,15 +371,20 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `age-kotlin/age` `src/primitives/armor.rs:14` — `use futures::io::AsyncBufRead`
 - `age-kotlin/age` `src/protocol.rs:18` — `use futures::io::AsyncBufRead`
 
-#### `futures::executor::block_on` — 2 site(s) (0 codex, 2 other, 2 caller crates)
+#### `futures::channel::mpsc` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
-- `tokio-kotlin/tokio` `tests/no_rt.rs:6` — `use futures::executor::block_on`
-- `tokio-util-kotlin/tokio-util` `tests/io_simplex.rs:47` — `use futures::executor::block_on`
+- `crossbeam-kotlin/benchmarks` `futures-channel.rs:1` — `use futures::channel::mpsc`
+- `hf-hub-kotlin/hf-hub` `src/repository/download.rs:1259` — `use futures::channel::mpsc`
 
 #### `futures::future::Future` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
 - `rmcp-kotlin/rmcp` `src/transport/child_process.rs:2` — `use futures::future::Future`
 - `tokio-kotlin/tokio` `tests/fs_uring_read.rs:10` — `use futures::future::Future`
+
+#### `futures::future::poll_fn` — 2 site(s) (0 codex, 2 other, 2 caller crates)
+
+- `pyo3-kotlin/pyo3` `tests/test_coroutine.rs:4` — `use futures::future::poll_fn`
+- `tokio-kotlin/tokio` `tests/uds_stream.rs:16` — `use futures::future::poll_fn`
 
 #### `futures::io::AsyncReadExt` — 2 site(s) (0 codex, 2 other, 1 caller crates)
 
@@ -401,9 +442,13 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `libwebrtc-kotlin/livekit-runtime` `src/dispatcher.rs:1` — `use futures::channel::mpsc::UnboundedReceiver`
 
-#### `futures::future::poll_fn` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+#### `futures::channel::oneshot` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
-- `tokio-kotlin/tokio` `tests/uds_stream.rs:16` — `use futures::future::poll_fn`
+- `pyo3-kotlin/pyo3` `tests/test_coroutine.rs:4` — `use futures::channel::oneshot`
+
+#### `futures::executor::ThreadPool` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `crossbeam-kotlin/benchmarks` `futures-channel.rs:2` — `use futures::executor::ThreadPool`
 
 #### `futures::future::ready` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
@@ -462,14 +507,15 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 ## `futures-core`
 
-### Inbound symbols (8 distinct, 39 total `use` sites)
+### Inbound symbols (11 distinct, 59 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `futures-core`.
 
-#### `futures_core::Stream` — 18 site(s) (0 codex, 18 other, 6 caller crates)
+#### `futures_core::Stream` — 32 site(s) (0 codex, 32 other, 9 caller crates)
 
 - `async-stream-kotlin/async-stream` `src/async_stream.rs:2` — `use futures_core::Stream`
 - `async-stream-kotlin/async-stream` `src/next.rs:1` — `use futures_core::Stream`
+- `ogg-kotlin/ogg` `src/reading.rs:1062` — `use futures_core::Stream`
 - `opentelemetry-kotlin/opentelemetry` `src/context/future_ext.rs:2` — `use futures_core::Stream`
 - `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:16` — `use futures_core::Stream`
 - `reqwest-kotlin/reqwest` `src/wasm/response.rs:132` — `use futures_core::Stream`
@@ -479,8 +525,7 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `tokio-stream-kotlin/tokio-stream` `src/wrappers/broadcast.rs:4` — `use futures_core::Stream`
 - `tokio-stream-kotlin/tokio-stream` `src/wrappers/watch.rs:3` — `use futures_core::Stream`
 - `tokio-test-kotlin/tokio-test` `src/io.rs:25` — `use futures_core::Stream`
-- `tokio-test-kotlin/tokio-test` `src/stream_mock.rs:41` — `use futures_core::Stream`
-- _… and 6 more site(s)._
+- _… and 20 more site(s)._
 
 #### `futures_core::stream::Stream` — 12 site(s) (0 codex, 12 other, 5 caller crates)
 
@@ -497,10 +542,21 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `tokio-util-kotlin/tokio-util` `src/io/stream_reader.rs:2` — `use futures_core::stream::Stream`
 - `tokio-util-kotlin/tokio-util` `tests/framed_stream.rs:1` — `use futures_core::stream::Stream`
 
-#### `futures_core::ready` — 2 site(s) (0 codex, 2 other, 2 caller crates)
+#### `futures_core::ready` — 3 site(s) (0 codex, 3 other, 3 caller crates)
 
 - `async-channel-kotlin/async-channel` `src/lib.rs:64` — `use futures_core::ready`
+- `ogg-kotlin/ogg` `src/reading.rs:1062` — `use futures_core::ready`
 - `tokio-util-kotlin/tokio-util` `src/io/simplex.rs:7` — `use futures_core::ready`
+
+#### `futures_core::TryStream` — 2 site(s) (0 codex, 2 other, 1 caller crates)
+
+- `tower-kotlin/tower` `examples/tower-balance.rs:1` — `use futures_core::TryStream`
+- `tower-kotlin/tower` `src/discover/mod.rs:42` — `use futures_core::TryStream`
+
+#### `futures_core::future::BoxFuture` — 2 site(s) (0 codex, 2 other, 1 caller crates)
+
+- `tower-http-kotlin/tower-http` `src/auth/async_require_authorization.rs:315` — `use futures_core::future::BoxFuture`
+- `tower-http-kotlin/tower-http` `src/services/fs/serve_dir/future.rs:9` — `use futures_core::future::BoxFuture`
 
 #### `futures_core::task::Context` — 2 site(s) (0 codex, 2 other, 1 caller crates)
 
@@ -520,6 +576,10 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `async-stream-kotlin/async-stream` `src/async_stream.rs:2` — `use futures_core::FusedStream`
 
+#### `futures_core::TryFuture` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tower-kotlin/tower` `src/util/and_then.rs:1` — `use futures_core::TryFuture`
+
 #### `futures_core::stream::FusedStream` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `async-stream-kotlin/async-stream` `tests/stream.rs:2` — `use futures_core::stream::FusedStream`
@@ -530,13 +590,14 @@ _No cross-repo callers in the workspace._
 
 ## `futures-io`
 
-### Inbound symbols (3 distinct, 3 total `use` sites)
+### Inbound symbols (3 distinct, 4 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `futures-io`.
 
-#### `futures_io::AsyncRead` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+#### `futures_io::AsyncRead` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
 - `async-io-kotlin/async-io` `src/lib.rs:81` — `use futures_io::AsyncRead`
+- `ogg-kotlin/ogg` `src/reading.rs:1063` — `use futures_io::AsyncRead as FuturesAsyncRead`
 
 #### `futures_io::AsyncWrite` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
@@ -601,25 +662,82 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 ## `futures-util`
 
-### Inbound symbols (37 distinct, 145 total `use` sites)
+### Inbound symbols (48 distinct, 195 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `futures-util`.
 
-#### `futures_util::StreamExt` — 33 site(s) (0 codex, 33 other, 11 caller crates)
+#### `futures_util::StreamExt` — 38 site(s) (0 codex, 38 other, 16 caller crates)
 
 - `async-stream-kotlin/async-stream` `tests/ui/unsoundness_issue_106.rs:2` — `use futures_util::StreamExt`
 - `async-stream-kotlin/async-stream` `tests/ui/unsoundness_issue_107.rs:2` — `use futures_util::StreamExt`
+- `axum-server-kotlin/axum-server` `src/server.rs:396` — `use futures_util::StreamExt`
+- `hf-hub-kotlin/hf-hub-wasm-smoke` `src/lib.rs:21` — `use futures_util::StreamExt`
+- `hf-hub-kotlin/hf-hub-wasm-tests` `tests/integration.rs:12` — `use futures_util::StreamExt`
+- `kaudio-kotlin/kaudio` `src/ogg_opus.rs:174` — `use futures_util::StreamExt`
 - `libwebrtc-kotlin/livekit` `src/room/data_stream/incoming.rs:20` — `use futures_util::StreamExt`
 - `libwebrtc-kotlin/livekit` `tests/audio_test.rs:16` — `use futures_util::StreamExt`
 - `libwebrtc-kotlin/livekit` `tests/peer_connection_signaling_test.rs:47` — `use futures_util::StreamExt`
 - `libwebrtc-kotlin/livekit` `tests/video_test.rs:16` — `use futures_util::StreamExt`
 - `libwebrtc-kotlin/livekit-api` `src/signal_client/signal_stream.rs:1` — `use futures_util::StreamExt`
 - `libwebrtc-kotlin/livekit-ffi` `src/server/audio_stream.rs:17` — `use futures_util::StreamExt`
-- `libwebrtc-kotlin/livekit-ffi` `src/server/data_stream.rs:1` — `use futures_util::StreamExt`
-- `libwebrtc-kotlin/livekit-ffi` `src/server/video_stream.rs:1` — `use futures_util::StreamExt`
-- `libwebrtc-kotlin/local_audio` `src/main.rs:14` — `use futures_util::StreamExt`
-- `opentelemetry-otlp-kotlin/opentelemetry-otlp` `tests/smoke.rs:1` — `use futures_util::StreamExt`
-- _… and 21 more site(s)._
+- _… and 26 more site(s)._
+
+#### `futures_util::future` — 12 site(s) (0 codex, 12 other, 4 caller crates)
+
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::future`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::future`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::future`
+- `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:18` — `use futures_util::future`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/client.rs:14` — `use futures_util::future`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/echo-server.rs:15` — `use futures_util::future`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server-custom-accept.rs:43` — `use futures_util::future`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server.rs:29` — `use futures_util::future`
+- `tower-kotlin/tower` `src/balance/p2c/service.rs:6` — `use futures_util::future`
+- `tower-kotlin/tower` `src/util/and_then.rs:2` — `use futures_util::future`
+- `tower-kotlin/tower` `src/util/map_err.rs:1` — `use futures_util::future`
+- `tower-kotlin/tower` `src/util/then.rs:1` — `use futures_util::future`
+
+#### `futures_util::pin_mut` — 12 site(s) (0 codex, 12 other, 4 caller crates)
+
+- `async-stream-kotlin/async-stream` `examples/tcp_accept.rs:2` — `use futures_util::pin_mut`
+- `async-stream-kotlin/async-stream` `tests/spans_preserved.rs:2` — `use futures_util::pin_mut`
+- `async-stream-kotlin/async-stream` `tests/stream.rs:4` — `use futures_util::pin_mut`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::pin_mut`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::pin_mut`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::pin_mut`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/client.rs:14` — `use futures_util::pin_mut`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server-custom-accept.rs:43` — `use futures_util::pin_mut`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server.rs:29` — `use futures_util::pin_mut`
+- `tower-kotlin/tower` `src/balance/p2c/test.rs:3` — `use futures_util::pin_mut`
+- `tower-kotlin/tower` `tests/builder.rs:3` — `use futures_util::pin_mut`
+- `tower-kotlin/tower` `tests/util/call_all.rs:3` — `use futures_util::pin_mut`
+
+#### `futures_util::FutureExt` — 11 site(s) (0 codex, 11 other, 5 caller crates)
+
+- `aws-config-kotlin/aws-config` `src/ecs.rs:504` — `use futures_util::FutureExt`
+- `aws-config-kotlin/aws-config` `src/environment/credentials.rs:118` — `use futures_util::FutureExt`
+- `aws-config-kotlin/aws-config` `src/environment/region.rs:47` — `use futures_util::FutureExt`
+- `aws-config-kotlin/aws-config` `src/meta/region.rs:164` — `use futures_util::FutureExt`
+- `aws-config-kotlin/aws-config` `src/profile/region.rs:163` — `use futures_util::FutureExt`
+- `axum-kotlin/axum` `src/serve/mod.rs:13` — `use futures_util::FutureExt`
+- `serial-test-kotlin/serial_test` `src/parallel_code_lock.rs:5` — `use futures_util::FutureExt`
+- `serial-test-kotlin/serial_test` `src/parallel_file_lock.rs:4` — `use futures_util::FutureExt`
+- `tower-http-kotlin/tower-http` `src/services/fs/serve_dir/mod.rs:8` — `use futures_util::FutureExt`
+- `tower-kotlin/tower` `src/util/map_result.rs:1` — `use futures_util::FutureExt`
+- `tower-kotlin/tower` `src/util/then.rs:1` — `use futures_util::FutureExt`
+
+#### `futures_util::stream` — 10 site(s) (0 codex, 10 other, 5 caller crates)
+
+- `axum-kotlin/axum` `src/response/sse.rs:641` — `use futures_util::stream`
+- `axum-server-kotlin/axum-server` `src/server.rs:396` — `use futures_util::stream`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::stream`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::stream`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/sampler/jaeger_remote/sampler.rs:6` — `use futures_util::stream`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::stream`
+- `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:18` — `use futures_util::stream`
+- `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:605` — `use futures_util::stream`
+- `reqwest-kotlin/reqwest` `src/wasm/response.rs:14` — `use futures_util::stream`
+- `tower-kotlin/tower` `examples/tower-balance.rs:4` — `use futures_util::stream`
 
 #### `futures_util::SinkExt` — 9 site(s) (0 codex, 9 other, 4 caller crates)
 
@@ -633,52 +751,19 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `tokio-tungstenite-kotlin/tokio-tungstenite` `tests/proxy_integration.rs:4` — `use futures_util::SinkExt`
 - `tokio-util-kotlin/tokio-util` `tests/io_sink_writer.rs:4` — `use futures_util::SinkExt`
 
-#### `futures_util::pin_mut` — 9 site(s) (0 codex, 9 other, 3 caller crates)
+#### `futures_util::future::BoxFuture` — 9 site(s) (0 codex, 9 other, 4 caller crates)
 
-- `async-stream-kotlin/async-stream` `examples/tcp_accept.rs:2` — `use futures_util::pin_mut`
-- `async-stream-kotlin/async-stream` `tests/spans_preserved.rs:2` — `use futures_util::pin_mut`
-- `async-stream-kotlin/async-stream` `tests/stream.rs:4` — `use futures_util::pin_mut`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::pin_mut`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::pin_mut`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::pin_mut`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/client.rs:14` — `use futures_util::pin_mut`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server-custom-accept.rs:43` — `use futures_util::pin_mut`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server.rs:29` — `use futures_util::pin_mut`
+- `axum-kotlin/axum` `src/middleware/from_extractor.rs:5` — `use futures_util::future::BoxFuture`
+- `axum-kotlin/axum` `src/middleware/from_fn.rs:2` — `use futures_util::future::BoxFuture`
+- `axum-kotlin/axum` `src/middleware/map_request.rs:5` — `use futures_util::future::BoxFuture`
+- `axum-kotlin/axum` `src/middleware/map_response.rs:3` — `use futures_util::future::BoxFuture`
+- `axum-kotlin/axum` `src/test_helpers/test_client.rs:3` — `use futures_util::future::BoxFuture`
+- `axum-server-kotlin/axum-server` `examples/rustls_session.rs:10` — `use futures_util::future::BoxFuture`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::future::BoxFuture`
+- `tower-kotlin/tower` `src/util/boxed_clone.rs:2` — `use futures_util::future::BoxFuture`
+- `tower-kotlin/tower` `src/util/boxed_clone_sync.rs:2` — `use futures_util::future::BoxFuture`
 
-#### `futures_util::FutureExt` — 8 site(s) (0 codex, 8 other, 3 caller crates)
-
-- `aws-config-kotlin/aws-config` `src/ecs.rs:504` — `use futures_util::FutureExt`
-- `aws-config-kotlin/aws-config` `src/environment/credentials.rs:118` — `use futures_util::FutureExt`
-- `aws-config-kotlin/aws-config` `src/environment/region.rs:47` — `use futures_util::FutureExt`
-- `aws-config-kotlin/aws-config` `src/meta/region.rs:164` — `use futures_util::FutureExt`
-- `aws-config-kotlin/aws-config` `src/profile/region.rs:163` — `use futures_util::FutureExt`
-- `axum-kotlin/axum` `src/serve/mod.rs:13` — `use futures_util::FutureExt`
-- `serial-test-kotlin/serial_test` `src/parallel_code_lock.rs:5` — `use futures_util::FutureExt`
-- `serial-test-kotlin/serial_test` `src/parallel_file_lock.rs:4` — `use futures_util::FutureExt`
-
-#### `futures_util::future` — 8 site(s) (0 codex, 8 other, 3 caller crates)
-
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::future`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::future`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::future`
-- `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:18` — `use futures_util::future`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/client.rs:14` — `use futures_util::future`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/echo-server.rs:15` — `use futures_util::future`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server-custom-accept.rs:43` — `use futures_util::future`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server.rs:29` — `use futures_util::future`
-
-#### `futures_util::stream` — 8 site(s) (0 codex, 8 other, 3 caller crates)
-
-- `axum-kotlin/axum` `src/response/sse.rs:641` — `use futures_util::stream`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::stream`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::stream`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/sampler/jaeger_remote/sampler.rs:6` — `use futures_util::stream`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::stream`
-- `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:18` — `use futures_util::stream`
-- `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:605` — `use futures_util::stream`
-- `reqwest-kotlin/reqwest` `src/wasm/response.rs:14` — `use futures_util::stream`
-
-#### `futures_util::stream::StreamExt` — 8 site(s) (0 codex, 8 other, 3 caller crates)
+#### `futures_util::stream::StreamExt` — 9 site(s) (0 codex, 9 other, 4 caller crates)
 
 - `async-stream-kotlin/async-stream` `examples/tcp_accept.rs:3` — `use futures_util::stream::StreamExt`
 - `async-stream-kotlin/async-stream` `tests/for_await.rs:2` — `use futures_util::stream::StreamExt`
@@ -688,11 +773,13 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `axum-kotlin/axum` `src/extract/ws.rs:97` — `use futures_util::stream::StreamExt`
 - `axum-kotlin/axum` `src/routing/tests/mod.rs:20` — `use futures_util::stream::StreamExt`
 - `reqwest-kotlin/reqwest` `src/wasm/response.rs:14` — `use futures_util::stream::StreamExt`
+- `tower-kotlin/tower` `examples/tower-balance.rs:4` — `use futures_util::stream::StreamExt`
 
-#### `futures_util::TryStreamExt` — 7 site(s) (0 codex, 7 other, 5 caller crates)
+#### `futures_util::TryStreamExt` — 8 site(s) (0 codex, 8 other, 6 caller crates)
 
 - `libwebrtc-kotlin/basic_text_stream` `src/main.rs:1` — `use futures_util::TryStreamExt`
 - `libwebrtc-kotlin/encrypted_text_stream` `src/main.rs:1` — `use futures_util::TryStreamExt`
+- `ogg-kotlin/ogg` `tests/async_read.rs:19` — `use futures_util::TryStreamExt`
 - `reqwest-kotlin/reqwest` `src/async_impl/body.rs:101` — `use futures_util::TryStreamExt`
 - `reqwest-kotlin/reqwest` `src/async_impl/multipart.rs:606` — `use futures_util::TryStreamExt`
 - `reqwest-kotlin/reqwest` `src/blocking/response.rs:9` — `use futures_util::TryStreamExt`
@@ -708,14 +795,22 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `sse-stream-kotlin/sse-stream` `src/stream.rs:10` — `use futures_util::Stream`
 - `sse-stream-kotlin/sse-stream` `tests/sse_server_side/axum.rs:6` — `use futures_util::Stream`
 
-#### `futures_util::future::BoxFuture` — 6 site(s) (0 codex, 6 other, 2 caller crates)
+#### `futures_util::future::Either` — 6 site(s) (0 codex, 6 other, 3 caller crates)
 
-- `axum-kotlin/axum` `src/middleware/from_extractor.rs:5` — `use futures_util::future::BoxFuture`
-- `axum-kotlin/axum` `src/middleware/from_fn.rs:2` — `use futures_util::future::BoxFuture`
-- `axum-kotlin/axum` `src/middleware/map_request.rs:5` — `use futures_util::future::BoxFuture`
-- `axum-kotlin/axum` `src/middleware/map_response.rs:3` — `use futures_util::future::BoxFuture`
-- `axum-kotlin/axum` `src/test_helpers/test_client.rs:3` — `use futures_util::future::BoxFuture`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::future::BoxFuture`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::future::Either`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::future::Either`
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::future::Either`
+- `tower-http-kotlin/tower-http` `src/follow_redirect/mod.rs:103` — `use futures_util::future::Either`
+- `tower-kotlin/tower` `src/filter/mod.rs:37` — `use futures_util::future::Either`
+- `tower-kotlin/tower` `src/hedge/mod.rs:7` — `use futures_util::future::Either`
+
+#### `futures_util::TryFutureExt` — 5 site(s) (0 codex, 5 other, 1 caller crates)
+
+- `tower-kotlin/tower` `src/filter/mod.rs:37` — `use futures_util::TryFutureExt`
+- `tower-kotlin/tower` `src/filter/predicate.rs:50` — `use futures_util::TryFutureExt`
+- `tower-kotlin/tower` `src/util/and_then.rs:2` — `use futures_util::TryFutureExt`
+- `tower-kotlin/tower` `src/util/map_err.rs:1` — `use futures_util::TryFutureExt`
+- `tower-kotlin/tower` `src/util/map_response.rs:1` — `use futures_util::TryFutureExt`
 
 #### `futures_util::stream::Stream` — 5 site(s) (0 codex, 5 other, 3 caller crates)
 
@@ -725,6 +820,20 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/runtime.rs:1` — `use futures_util::stream::Stream`
 - `tokio-tungstenite-kotlin/tokio-tungstenite` `src/lib.rs:29` — `use futures_util::stream::Stream`
 
+#### `futures_util::future::FutureExt` — 4 site(s) (0 codex, 4 other, 2 caller crates)
+
+- `axum-kotlin/axum` `src/handler/mod.rs:326` — `use futures_util::future::FutureExt`
+- `axum-kotlin/axum` `src/handler/service.rs:168` — `use futures_util::future::FutureExt`
+- `tower-http-kotlin/tower-http` `src/catch_panic.rs:88` — `use futures_util::future::FutureExt`
+- `tower-http-kotlin/tower-http` `src/services/fs/serve_dir/future.rs:10` — `use futures_util::future::FutureExt`
+
+#### `futures_util::future::TryFutureExt` — 4 site(s) (0 codex, 4 other, 3 caller crates)
+
+- `tokio-rustls-kotlin/tokio-rustls` `tests/test.rs:12` — `use futures_util::future::TryFutureExt`
+- `tower-http-kotlin/tower-http` `src/services/fs/serve_dir/future.rs:10` — `use futures_util::future::TryFutureExt`
+- `tower-kotlin/tower` `src/balance/p2c/service.rs:6` — `use futures_util::future::TryFutureExt`
+- `tower-kotlin/tower` `src/spawn_ready/service.rs:3` — `use futures_util::future::TryFutureExt`
+
 #### `futures_util::stream::FusedStream` — 4 site(s) (0 codex, 4 other, 3 caller crates)
 
 - `axum-kotlin/axum` `src/extract/ws.rs:97` — `use futures_util::stream::FusedStream`
@@ -732,11 +841,11 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::stream::FusedStream`
 - `tokio-tungstenite-kotlin/tokio-tungstenite` `src/lib.rs:29` — `use futures_util::stream::FusedStream`
 
-#### `futures_util::future::Either` — 3 site(s) (0 codex, 3 other, 1 caller crates)
+#### `futures_util::future::Map` — 3 site(s) (0 codex, 3 other, 2 caller crates)
 
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/logs/log_processor_with_async_runtime.rs:22` — `use futures_util::future::Either`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/metrics/periodic_reader_with_async_runtime.rs:8` — `use futures_util::future::Either`
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::future::Either`
+- `axum-kotlin/axum` `src/handler/future.rs:5` — `use futures_util::future::Map`
+- `axum-kotlin/axum` `src/handler/mod.rs:326` — `use futures_util::future::Map`
+- `tower-kotlin/tower` `src/util/map_result.rs:1` — `use futures_util::future::Map`
 
 #### `futures_util::sink::Sink` — 3 site(s) (0 codex, 3 other, 3 caller crates)
 
@@ -744,30 +853,32 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `libwebrtc-kotlin/livekit-protocol` `src/observer.rs:16` — `use futures_util::sink::Sink`
 - `tokio-tungstenite-kotlin/tokio-tungstenite` `src/lib.rs:29` — `use futures_util::sink::Sink`
 
+#### `futures_util::stream::FuturesUnordered` — 3 site(s) (0 codex, 3 other, 2 caller crates)
+
+- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::stream::FuturesUnordered`
+- `tower-kotlin/tower` `src/ready_cache/cache.rs:5` — `use futures_util::stream::FuturesUnordered`
+- `tower-kotlin/tower` `src/util/call_all/unordered.rs:8` — `use futures_util::stream::FuturesUnordered`
+
+#### `futures_util::stream::TryStreamExt` — 3 site(s) (0 codex, 3 other, 2 caller crates)
+
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server-custom-accept.rs:43` — `use futures_util::stream::TryStreamExt`
+- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server.rs:29` — `use futures_util::stream::TryStreamExt`
+- `tower-kotlin/tower` `examples/tower-balance.rs:4` — `use futures_util::stream::TryStreamExt`
+
 #### `futures_util::Future` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
 - `libwebrtc-kotlin/livekit-protocol` `src/debouncer.rs:16` — `use futures_util::Future`
 - `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:459` — `use futures_util::Future`
 
-#### `futures_util::future::FutureExt` — 2 site(s) (0 codex, 2 other, 1 caller crates)
+#### `futures_util::future::try_join_all` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
-- `axum-kotlin/axum` `src/handler/mod.rs:326` — `use futures_util::future::FutureExt`
-- `axum-kotlin/axum` `src/handler/service.rs:168` — `use futures_util::future::FutureExt`
-
-#### `futures_util::future::Map` — 2 site(s) (0 codex, 2 other, 1 caller crates)
-
-- `axum-kotlin/axum` `src/handler/future.rs:5` — `use futures_util::future::Map`
-- `axum-kotlin/axum` `src/handler/mod.rs:326` — `use futures_util::future::Map`
+- `axum-server-kotlin/axum-server` `examples/multiple_addresses.rs:2` — `use futures_util::future::try_join_all`
+- `libwebrtc-kotlin/livekit` `tests/common/e2e/mod.rs:17` — `use futures_util::future::try_join_all`
 
 #### `futures_util::sink::SinkExt` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
 - `axum-kotlin/axum` `src/extract/ws.rs:97` — `use futures_util::sink::SinkExt`
 - `tokio-tungstenite-kotlin/tokio-tungstenite` `src/lib.rs:29` — `use futures_util::sink::SinkExt`
-
-#### `futures_util::stream::TryStreamExt` — 2 site(s) (0 codex, 2 other, 1 caller crates)
-
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server-custom-accept.rs:43` — `use futures_util::stream::TryStreamExt`
-- `tokio-tungstenite-kotlin/tokio-tungstenite` `examples/server.rs:29` — `use futures_util::stream::TryStreamExt`
 
 #### `futures_util::AsyncReadExt` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
@@ -781,6 +892,10 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `tokio-util-kotlin/tokio-util` `tests/compat.rs:6` — `use futures_util::AsyncWriteExt`
 
+#### `futures_util::TryStream` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tower-http-kotlin/tower-http` `src/test_helpers.rs:7` — `use futures_util::TryStream`
+
 #### `futures_util::future::AbortHandle` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `tokio-util-kotlin/tokio-util` `src/task/spawn_pinned.rs:1` — `use futures_util::future::AbortHandle`
@@ -789,9 +904,21 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `tokio-util-kotlin/tokio-util` `src/task/spawn_pinned.rs:1` — `use futures_util::future::Abortable`
 
-#### `futures_util::future::try_join_all` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+#### `futures_util::future::CatchUnwind` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
-- `libwebrtc-kotlin/livekit` `tests/common/e2e/mod.rs:17` — `use futures_util::future::try_join_all`
+- `tower-http-kotlin/tower-http` `src/catch_panic.rs:88` — `use futures_util::future::CatchUnwind`
+
+#### `futures_util::future::MapOk` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tower-kotlin/tower` `src/util/map_response.rs:1` — `use futures_util::future::MapOk`
+
+#### `futures_util::future::pin_mut` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tower-kotlin/tower` `tests/filter/async_filter.rs:4` — `use futures_util::future::pin_mut`
+
+#### `futures_util::future::poll_fn` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tokio-rustls-kotlin/tokio-rustls` `src/common/test_stream.rs:7` — `use futures_util::future::poll_fn`
 
 #### `futures_util::io::AsyncReadExt` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
@@ -801,9 +928,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::select`
 
-#### `futures_util::stream::FuturesUnordered` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+#### `futures_util::stream::FuturesOrdered` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
-- `opentelemetry-sdk-kotlin/opentelemetry_sdk` `src/trace/span_processor_with_async_runtime.rs:9` — `use futures_util::stream::FuturesUnordered`
+- `tower-kotlin/tower` `src/util/call_all/ordered.rs:8` — `use futures_util::stream::FuturesOrdered`
 
 #### `futures_util::stream::MapOk` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
@@ -821,6 +948,10 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `axum-kotlin/axum` `src/response/sse.rs:37` — `use futures_util::stream::TryStream`
 
+#### `futures_util::stream::iter` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tower-http-kotlin/tower-http` `src/trace/mod.rs:860` — `use futures_util::stream::iter`
+
 #### `futures_util::stream::repeat_with` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `sse-stream-kotlin/sse-stream` `tests/sse_server_side/axum.rs:6` — `use futures_util::stream::repeat_with`
@@ -833,6 +964,10 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `tokio-tungstenite-kotlin/tokio-tungstenite` `src/compat.rs:7` — `use futures_util::task`
 
+#### `futures_util::task::AtomicWaker` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tower-kotlin/tower` `src/ready_cache/cache.rs:5` — `use futures_util::task::AtomicWaker`
+
 #### `futures_util::task::Context` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `libwebrtc-kotlin/livekit-protocol` `src/observer.rs:16` — `use futures_util::task::Context`
@@ -840,3 +975,7 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 #### `futures_util::task::Poll` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `libwebrtc-kotlin/livekit-protocol` `src/observer.rs:16` — `use futures_util::task::Poll`
+
+#### `futures_util::task::noop_waker_ref` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `tokio-rustls-kotlin/tokio-rustls` `src/common/test_stream.rs:9` — `use futures_util::task::noop_waker_ref`

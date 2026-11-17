@@ -1,0 +1,132 @@
+{
+  "baseline": "09c4126",
+  "priorWorkCheckpoint": "e2a8c62 (separate, not authored in this step)",
+  "red": {
+    "suite": {
+      "name": "FeedStateParityTest[jvm]",
+      "tests": "10",
+      "skipped": "0",
+      "failures": "9",
+      "errors": "0",
+      "timestamp": "2026-11-02T20:48:56.029Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.036"
+    },
+    "failures": [
+      {
+        "case": "sendNullWaitsForFlush[jvm]",
+        "message": "java.lang.AssertionError: expected:<[ready, send:null, flush]> but was:<[flush]>"
+      },
+      {
+        "case": "readinessErrorRetainsItem[jvm]",
+        "message": "java.lang.AssertionError: expected:<Ready(value=Err(error=ready))> but was:<Ready(value=Ok(value=kotlin.Unit))>"
+      },
+      {
+        "case": "readinessPanicRetainsItem[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <Ready(value=Ok(value=kotlin.Unit))>."
+      },
+      {
+        "case": "nullablePendingTwice[jvm]",
+        "message": "java.lang.AssertionError: expected same:<Pending> was not:<Ready(value=Ok(value=kotlin.Unit))>"
+      },
+      {
+        "case": "nullableReady[jvm]",
+        "message": "java.lang.AssertionError: expected:<[ready, send:null]> but was:<[]>"
+      },
+      {
+        "case": "nullableErrorIsNotSuccess[jvm]",
+        "message": "java.lang.AssertionError: expected:<Ready(value=Err(error=null))> but was:<Ready(value=Ok(value=kotlin.Unit))>"
+      },
+      {
+        "case": "sendErrorRepollDefersToReadiness[jvm]",
+        "message": "java.lang.AssertionError: expected same:<Pending> was not:<Ready(value=Ok(value=kotlin.Unit))>"
+      },
+      {
+        "case": "sendErrorConsumesItem[jvm]",
+        "message": "java.lang.AssertionError: expected:<Ready(value=Err(error=send))> but was:<Ready(value=Ok(value=kotlin.Unit))>"
+      },
+      {
+        "case": "completedFeedDefersToReadiness[jvm]",
+        "message": "java.lang.AssertionError: expected same:<Pending> was not:<Ready(value=Ok(value=kotlin.Unit))>"
+      }
+    ]
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 600,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "macosArm64Test": {
+      "tests": 600,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ktlintCommonMain": 596,
+    "ktlintCommonTest": 31,
+    "authoredFindings": [],
+    "detekt": 0
+  },
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/Feed.kt": "4de60153b79a994f8dce4d0fa3694143162c91c413f914b9c760dc47e8442a7e",
+    "src/commonMain/kotlin/io/github/kotlinmania/futures/sink/Send.kt": "5a8640e44a17787cd442c435491ee7e328bee2970d0a4e2ffc0da8eca38cea27",
+    "src/commonTest/kotlin/io/github/kotlinmania/futures/FeedStateParityTest.kt": "6606ce12efc31486fefd2663172d7f395c6a89dc71c888e387cbdea0948fede3",
+    "tmp/futures-util/src/sink/feed.rs": "64b9d296d37aedde37e1421c459ebcd9a7e8814db905996996167850124f3b3f",
+    "verification/feed-state-oracle/src/lib.rs": "411f21527f5fa3ff8208339226db25bdee2c4214f36571fa35407d525b6801b3",
+    "verification/feed-state-oracle/Cargo.toml": "5934b68761b8e372fc8e0a84a10f96e80cd04ae8624fd14d07e8bc9ef26849ed",
+    "verification/feed-state-oracle/Cargo.lock": "1381810e0a1811e337a2505ce40ce3cf17e1e62488b16c6a463668876db71ada",
+    "build/rust-kotlin-feed/FeedReview.kt": "5294c68a3b2a40b49ceb362972ceac869dc54b3c1ff8aed016ba86ef5dbdecbd",
+    "build/rust-kotlin-feed/translation.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/rust-kotlin-feed/red-jvm.log": "f69c2d7b9a02b3a661532f39833585496971ed8f25acd88efc481445bb9e757d",
+    "build/rust-kotlin-feed/final-check.log": "19c720a6b4a1a1fe82ef5ff2d791da601dbc614b9e944c800174e85940456eaa",
+    "build/rust-kotlin-feed/rust-oracle.log": "9bef78fa64d428693b0d0eda29ada52cd75b17d384784b05890f7f992a78f1ec",
+    "build/rust-kotlin-feed/verify_final.py": "5aa162a778163826432c402068fa4cb8fa68aaf6259fb0517f34fcb6ed00384a"
+  },
+  "testSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "FeedStateParityTest[jvm]",
+        "tests": "10",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T20:49:34.601Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.027"
+      },
+      "sha256": "144efff79ed5afe7b1cd8765f78096ae9042e22ca2decb3e8c333ed978b4d945"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.futures.FeedStateParityTest",
+        "tests": "10",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T20:49:35.613Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      "sha256": "d34c65dd24e9d3ac7587a4cc48913fb6f962d290dafef5dbbbd3a1f3addb7237"
+    }
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*FeedStateParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/feed-state-oracle/Cargo.toml --target-dir build/rust-kotlin-feed/rust-target"
+  },
+  "exits": {
+    "red": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "limits": [
+    "Kotlin borrow/pin/Drop/Send/Sync equivalence not established",
+    "Repoll and panic cases observe implementation, not a failed-sink recovery or general Future reuse guarantee",
+    "Downstream, Swift and other platforms unverified",
+    "No generator repair or publication"
+  ],
+  "callerImpact": "No public declaration changed; Send.kt is byte-identical and nullable send integration is covered. No downstream compatibility claim."
+}

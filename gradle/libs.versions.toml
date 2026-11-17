@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 coroutines = "1.11.0"
 serialization = "1.11.0"
 datetime = "0.8.0"
@@ -10,19 +10,20 @@ ktlint = "14.2.0"
 ktlintEngine = "1.8.0"
 kotlinxBenchmark = "0.5.0"
 
-procMacro = "0.1.4"
-procMacro2 = "0.1.6"
-quote = "0.2.5"
-syn = "0.3.11"
+androidxTestRunner = "1.7.0"
+procMacro2 = "0.1.8"
+quote = "0.3.1"
+syn = "0.5.0"
 
 [plugins]
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidKmp" }
+android-kmp = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidKmp" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-android-kmp = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidKmp" }
-detekt = { id = "dev.detekt", version.ref = "detekt" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmark" }
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -31,21 +32,17 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
-proc-macro-kotlin = { module = "io.github.kotlinmania:proc-macro-kotlin", version.ref = "procMacro" }
+
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 proc-macro2-kotlin = { module = "io.github.kotlinmania:proc-macro2-kotlin", version.ref = "procMacro2" }
 quote-kotlin = { module = "io.github.kotlinmania:quote-kotlin", version.ref = "quote" }
 syn-kotlin = { module = "io.github.kotlinmania:syn-kotlin", version.ref = "syn" }
 
 [bundles]
 futures-commonMain = [
-  "kotlinx-coroutines-core",
-  "kotlinx-serialization-core",
-  "kotlinx-serialization-json",
-  "kotlinx-datetime",
-  "collections-immutable",
-  "proc-macro-kotlin",
-  "proc-macro2-kotlin",
   "quote-kotlin",
   "syn-kotlin",
 ]
-
+futures-commonMainApi = [
+  "proc-macro2-kotlin",
+]

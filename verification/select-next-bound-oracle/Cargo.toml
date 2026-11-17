@@ -1,0 +1,13 @@
+[package]
+name = "futures-select-next-bound-oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+futures-util = { path = "../../tmp/futures-util", default-features = false, features = ["std"] }
+
+[[bin]]
+name = "reject-non-fused"
+path = "rejected/non_fused.rs"
+test = false

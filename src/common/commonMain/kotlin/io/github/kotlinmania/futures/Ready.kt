@@ -1,0 +1,59 @@
+// port-lint: source future/ready.rs
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
+package io.github.kotlinmania.futures
+
+import kotlin.native.HiddenFromObjC
+
+/**
+ * Future for the [ready] function.
+ */
+@HiddenFromObjC
+public class Ready<T>(
+    private var value: T,
+    private var hasValue: Boolean = true,
+) : FusedFuture<T> {
+    public interface Output
+
+    /**
+     * Unwraps the value from this immediately ready future.
+     */
+    public fun intoInner(): T {
+        check(hasValue) { "Ready value already taken" }
+        hasValue = false
+        return value
+    }
+
+    override fun toString(): String = if (hasValue) "Ready(Some($value))" else "Ready(None)"
+
+    override fun isTerminated(): Boolean = !hasValue
+
+    override fun poll(context: TaskContext): Poll<T> {
+        check(hasValue) { "Ready polled after completion" }
+        hasValue = false
+        return Poll.Ready(value)
+    }
+
+    public companion object {
+        /** Create a new [Ready] future wrapping [value]. */
+        public fun <T> new(value: T): Ready<T> = Ready(value)
+    }
+}
+
+/**
+ * Creates a future that is immediately ready with a value.
+ */
+@HiddenFromObjC
+public fun <T> ready(value: T): Ready<T> = Ready(value)
+
+/**
+ * Create a future that is immediately ready with a success value.
+ */
+@HiddenFromObjC
+public fun <T, E> ok(value: T): Ready<Try<T, E>> = Ready(Try.Ok(value))
+
+/**
+ * Create a future that is immediately ready with an error value.
+ */
+@HiddenFromObjC
+public fun <T, E> err(error: E): Ready<Try<T, E>> = Ready(Try.Err(error))

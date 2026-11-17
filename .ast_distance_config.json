@@ -6,7 +6,7 @@
     "lang": "rust"
   },
   "target": {
-    "path": "src/commonMain/kotlin/io/github/kotlinmania/futures",
+    "path": "src/common/commonMain/kotlin/io/github/kotlinmania/futures",
     "lang": "kotlin"
   },
   "checks": {

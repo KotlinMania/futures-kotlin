@@ -1,0 +1,31 @@
+# Asynchronous FilterMap source parity
+
+## Confirmed omission and exact repair
+
+`tmp/futures-util/src/stream/stream/filter_map.rs` defines an asynchronous callback: `FnMut1<St::Item, Output = Fut>` with `Fut: Future<Output = Option<T>>`. FilterMap retains a pending future, polls it before pulling another source item, clears it only on Ready, emits Some, and continues on None. Its fused termination additionally requires no pending future, and its upper size hint adds one for that future using checked addition.
+
+Kotlin's synchronous `(T) -> R?` callback omitted this state machine. Calling it with a Future compiled by inferring the Future itself as R, then yielded future objects instead of awaiting them. The bounded manual repair corrects constructor/factory/extension callbacks to `(T) -> Future<R?>`, introduces the upstream pending slot/order, updates termination and upper hints, and retains all source comments relevant to those branches. It uses existing canonical Future/Poll/Yield/SizeHint types and ordinary loops; no substitute asynchronous machinery, coroutine migration or duplicate Option/helper type was introduced.
+
+A single bounded original-file CLI translation succeeded (15 items) into build/rust-kotlin-filter-map-async/FilterMapReview.kt. The emitted pending future, polling and termination/hint logic expose the omitted capability. Exact command, original source/binary/output hashes and exit status are retained in translator-attempt.json. Scratch output was compared, not compiled/adopted wholesale. This is recorded-binary evidence, not an attestation of Iris's current build, and no generator edit/investigation/rebuild or guard bypass occurred.
+
+## Actual oracle and regressions
+
+Run `cargo test --offline --manifest-path verification/filter-map-async-oracle/Cargo.toml --target-dir build/rust-kotlin-filter-map-async/rust-target` to execute the actual local upstream FilterMap. Nine test groups record complete typed outcomes, independent source/callback poll counts, callback input order, hints and fused state after each poll. They cover awaiting without reading ahead, ready None skipping in the same poll, Pending followed by None and another pending callback, a pending source, nullable inputs, a pending callback after an already-terminated source, unknown upper bounds, an empty source, and a concretely recoverable callback panic. No arbitrary completed future is repolled.
+
+The scripted producer counts remaining queued value events in known hints and reports `(0, None/null)` in unknown-hint profiles. Its FusedStream state reports exhaustion of the script, allowing the last callback's Pending state to be tested even when the source is already known terminated. Call counters and input records are independent of expected outputs. Oracle callbacks are real Future implementations; they do not reimplement FilterMap.
+
+All nine Rust groups passed before production changes. Kotlin's nine tests initially had eight failures and an empty-source control pass. The test deliberately erases only the adapter result type so the old generic API compiles: a yielded Future object remains an observable wrong result, never cast to an expected value. Existing/new assertions and expectations were not weakened or regenerated after seeing Kotlin behavior. Red source/XML/logs are retained; final regression bytes are checked unchanged. Final full JVM/macOS ARM and static results, source hashes and step-specific report copies are in receipt.json/build evidence.
+
+## API caller review and prior ownership
+
+A read-only exact-API scan covered 1,511 existing Kotlin/Java/Swift source roots, including ignored/untracked source, excluding generated build/tmp/target/caches. It includes direct class/factory names, imports/aliases, wildcard Futures imports and same-package users; inferred receivers were traced. The only existing exact local caller was StreamCombinatorsTest.kt:112. Its callback now wraps `it.toIntOrNull()` in canonical `ready(...)`; the remaining file, including the sum expectation of 9 and assertIs/assertEquals checks, is byte-for-byte unchanged. No synchronous overload was kept to perpetuate the mistranslated contract.
+
+External matches are distinct gazebo/klang cell APIs, tracing filter maps, Tokio's explicitly imported own synchronous FilterMap, and rust_lang iterator/Vec/Result chains with no Futures imports. No external exact Futures caller/import or concurrent same-package owner was found; none was edited and no broad downstream build was performed. Raw scan/invocation and classification are retained. Synchronous consumers must adapt callbacks and rebuild. JVM Function1 erasure may leave the same erased descriptor despite incompatible callback result semantics; that does not establish binary compatibility.
+
+The Futures checkout was clean at ae14b90. No prior dirty work is included. Earlier named Peek/Skip checkpoints, pins and adjacent concurrent owners are unchanged. Futures has 30 reverse-dependent libraries; the confirmed missing async API was chosen over smaller metadata/clone repairs after bounded HTTP coverage inspection. HTTP was read-only.
+
+## Explicit remaining limits
+
+The existing nullable optional-output encoding cannot express `Some(null)` distinctly from None when R is nullable. These cases use nullable inputs and non-null emitted integers with nullable None decisions; they do not claim full output-presence parity. Conditional FusedStream/Sink bounds, generic concrete stream identity, Pin/Unpin, exclusive borrowing and ownership/Drop/GC are not restored by this bounded patch. Hints use Int rather than full usize; overflow beyond Int returns unknown according to the existing SizeHint contract, while full pointer-width/platform behavior remains unverified. Debug formatting and other missing accessors/traits are outside this repair.
+
+The callback panic case observes the concrete scripted Future, not permission to recover arbitrary panicking producers. Other platforms and downstream consumers are unbuilt. Runtime passes do not imply clean global static gates: any baseline ktlint findings remain explicit. All remote CI/push/PR/merge/tag/publication/configuration holds and agent-contact restrictions were respected.
