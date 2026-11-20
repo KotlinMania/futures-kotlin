@@ -66,6 +66,15 @@ import Futures
         )
         #expect(err.kind == .InvalidInput)
     }
+
+    @Test func testAsyncAwaitPendingOnce() {
+        let pendingFuture = asyncawait.pendingOnce()
+        #expect(!pendingFuture.isReady)
+        let ctx = TaskContext()
+        #expect(pendingFuture.poll(context: ctx).isPending())
+        #expect(pendingFuture.isReady)
+        #expect(pendingFuture.poll(context: ctx).isReady())
+    }
 }
 #elseif canImport(XCTest)
 import XCTest
@@ -123,6 +132,15 @@ final class FuturesExportTests: XCTestCase {
             message: "invalid seek to a negative or overflowing position"
         )
         XCTAssertEqual(err.kind, .InvalidInput)
+    }
+
+    func testAsyncAwaitPendingOnce() {
+        let pendingFuture = asyncawait.pendingOnce()
+        XCTAssertFalse(pendingFuture.isReady)
+        let ctx = TaskContext()
+        XCTAssertTrue(pendingFuture.poll(context: ctx).isPending())
+        XCTAssertTrue(pendingFuture.isReady)
+        XCTAssertTrue(pendingFuture.poll(context: ctx).isReady())
     }
 }
 #endif
