@@ -73,6 +73,7 @@ jobs:
           setupAndroidSdk
           testAndroidHostTest
           verifyAndroidDeviceTestResults
+          validateAndroidNativeX64Runtime
           --no-configuration-cache
       - name: Upload test reports (Android - linuxX64)
         if: success() || failure()
@@ -83,6 +84,7 @@ jobs:
             build/reports/tests/
             build/test-results/
             build/outputs/androidTest-results/
+            build/reports/local-native-tests/
           retention-days: 7
           if-no-files-found: warn
 
